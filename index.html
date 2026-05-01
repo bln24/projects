@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLN24 Projects</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+:root { --ink:#f4f1e8; --muted:#9a9488; --paper:#11100d; --amber:#f4b73f; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#11100d; color:#f4f1e8; font-family:Inter,sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+.wrap { text-align:center; }
+.wordmark { font-size:48px; font-weight:900; letter-spacing:-3px; }
+.wordmark span { color:#f4b73f; }
+.sub { color:#9a9488; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.3em; margin-top:8px; }
+.projects { margin-top:48px; display:flex; flex-direction:column; gap:12px; }
+.project-link { border:1px solid rgba(244,241,232,.1); border-radius:8px; padding:16px 24px; text-decoration:none; color:#f4f1e8; display:flex; align-items:center; gap:12px; background:rgba(244,241,232,.04); transition:border-color .2s; }
+.project-link:hover { border-color:rgba(244,183,63,.4); }
+.project-tag { background:rgba(244,183,63,.13); color:#f4b73f; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; padding:3px 8px; border-radius:4px; }
+.project-name { font-weight:700; font-size:15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">BLN<span>24</span></div>
+  <div class="sub">Project Portals</div>
+  <div class="projects">
+    <a href="/aws" class="project-link">
+      <span class="project-tag">Active</span>
+      <span class="project-name">AWS × CAIO Elevate</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>
