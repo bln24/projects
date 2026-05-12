@@ -32,36 +32,20 @@
     };
   </script>
 
-  <!-- MSAL: try primary CDN, then fallback -->
-  <!-- alcdn.msauth.net/3.10.0 returns 404; load directly from unpkg -->
-  <script src="https://unpkg.com/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"
-          onload="window.__initMsal&&window.__initMsal()"></script>
-
+  <!-- MSAL: unpkg (alcdn.msauth.net 3.10.0 returns 404) -->
+  <script src="https://unpkg.com/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
   <script>
-    window.__initMsal = function() {
-      if (typeof msal === "undefined") {
-        console.error("MSAL failed to load from both CDNs.");
-        window.msalLoadError = true;
-        return;
-      }
-      try {
-        window.msalInstance = new msal.PublicClientApplication({
-          auth: {
-            clientId: window.BLN24_CONFIG.clientId,
-            authority: "https://login.microsoftonline.com/" + window.BLN24_CONFIG.tenantId,
-            redirectUri: window.BLN24_CONFIG.redirectUri,
-            postLogoutRedirectUri: window.BLN24_CONFIG.redirectUri
-          },
-          cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
-        });
-        window.msalReady = window.msalInstance.initialize();
-      } catch (e) {
-        console.error("MSAL init failed:", e);
-        window.msalLoadError = e.message;
-      }
-    };
-    /* In case the onload fired before this script ran. */
-    if (typeof msal !== "undefined" && !window.msalInstance) window.__initMsal();
+    /* MSAL is a blocking script — msal is guaranteed defined here. */
+    window.msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId: window.BLN24_CONFIG.clientId,
+        authority: "https://login.microsoftonline.com/" + window.BLN24_CONFIG.tenantId,
+        redirectUri: window.BLN24_CONFIG.redirectUri,
+        postLogoutRedirectUri: window.BLN24_CONFIG.redirectUri
+      },
+      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
+    });
+    window.msalReady = window.msalInstance.initialize();
   </script>
 </head>
 <body class="grain">
