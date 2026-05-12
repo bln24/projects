@@ -1,0 +1,200 @@
+/* ============================================================
+   Decisions Log — workspace right rail tab
+   ============================================================ */
+
+.dec-list {
+  display: flex; flex-direction: column;
+  gap: 14px;
+  padding: 4px 2px 24px;
+}
+
+.dec-state {
+  padding: 32px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dec-state-err { color: #d6786a; }
+
+.dec-head {
+  padding: 4px 4px 6px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+}
+.dec-eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.dec-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.dec-sub code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--paper-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.dec-item {
+  position: relative;
+  padding: 12px 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  display: flex; flex-direction: column;
+  gap: 8px;
+  transition: border-color .14s;
+  flex-shrink: 0;
+}
+.dec-item:hover { border-color: var(--ink-2); }
+.dec-item.is-open { border-color: var(--accent); }
+
+.dec-item-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.dec-item-id-block {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.dec-item-id {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.dec-item-title {
+  font-family: var(--display);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.dec-item-meta {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.dec-moves {
+  display: inline-flex; gap: 3px;
+}
+.dec-move-chip {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 5px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  color: var(--ink-2);
+}
+.dec-rev {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.dec-rev.rev-y { background: rgba(155, 209, 122, 0.18); color: #5a8b3e; }
+.dec-rev.rev-p { background: rgba(244, 183, 63, 0.18); color: #8a6a1f; }
+.dec-rev.rev-n { background: rgba(214, 120, 106, 0.18); color: #9b3a2c; }
+
+.dec-item-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+}
+.dec-deciders {
+  color: var(--muted);
+  padding-bottom: 2px;
+  border-bottom: 1px dashed var(--rule);
+}
+.dec-decider {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px;
+  color: var(--ink);
+}
+.dec-decider strong { font-family: var(--display); font-weight: 600; }
+.dec-glyph {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+}
+.dec-when {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.dec-why {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.dec-detail {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule);
+  animation: dec-expand .22s cubic-bezier(.2,.7,.2,1);
+}
+@keyframes dec-expand {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.dec-block { display: flex; flex-direction: column; gap: 3px; }
+.dec-block-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.dec-block p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.dec-expand-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  cursor: pointer;
+}
+.dec-expand-toggle:hover { text-decoration: underline; }
+
+.avatar.avatar-sm {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}

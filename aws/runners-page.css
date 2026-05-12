@@ -1,0 +1,221 @@
+/* ============================================================
+   Runners Page — RUNNERS.md surfaced as a clean technical doc
+   ============================================================ */
+
+.runners-page {
+  min-height: calc(100vh - 64px);
+  background: var(--paper);
+  padding: 56px 24px 96px;
+}
+
+.runners-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.runners-head {
+  display: flex; flex-direction: column; gap: 14px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
+}
+.runners-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.runners-title {
+  font-family: var(--display);
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--ink);
+}
+.runners-sub {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 56ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+.runners-meta {
+  display: flex; flex-wrap: wrap; gap: 18px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.runners-meta-item code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--paper-2);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.runners-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.runners-state-err { color: #d6786a; }
+
+/* ===== Markdown rendering ===== */
+.rdoc {
+  display: flex; flex-direction: column; gap: 18px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.rdoc-h {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 18px 0 0;
+  text-wrap: pretty;
+}
+.rdoc-h2 { font-size: 30px; line-height: 1.15; margin-top: 32px; padding-top: 6px; }
+.rdoc-h3 { font-size: 21px; line-height: 1.25; margin-top: 20px; }
+.rdoc-h4 { font-size: 16px; line-height: 1.3; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-family: var(--mono); font-weight: 600; }
+
+.rdoc-p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.rdoc-quote {
+  margin: 0;
+  padding: 12px 18px;
+  background: var(--paper-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.rdoc-quote strong { color: var(--ink); }
+
+.rdoc-list {
+  margin: 0; padding: 0 0 0 22px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.rdoc-list li { line-height: 1.6; }
+.rdoc-list li::marker { color: var(--muted); }
+
+.rdoc-hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 12px 0;
+}
+
+.rdoc-inline-code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--paper-2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+.rdoc-code {
+  margin: 0;
+  padding: 16px 18px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.rdoc-code code {
+  font-family: inherit;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.rdoc-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.rdoc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.rdoc-table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.rdoc-table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--rule);
+  vertical-align: top;
+  line-height: 1.55;
+}
+.rdoc-table tr:first-child td { border-top: none; }
+.rdoc-table td:first-child { font-family: var(--display); font-weight: 600; color: var(--ink); }
+
+.runners-foot {
+  margin-top: 24px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+}
+.runners-foot-callout {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 16px 20px;
+}
+.runners-foot-eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.runners-foot-callout p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.runners-foot-callout code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--paper);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+@media (max-width: 720px) {
+  .runners-page { padding: 32px 18px 64px; }
+  .runners-title { font-size: 44px; }
+  .runners-sub { font-size: 15px; }
+  .rdoc-h2 { font-size: 24px; }
+  .rdoc-h3 { font-size: 18px; }
+}

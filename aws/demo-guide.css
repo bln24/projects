@@ -1,0 +1,111 @@
+/* Demo guide — floating presenter helper */
+
+.demo-guide {
+  position: fixed;
+  left: 24px; bottom: 24px;
+  width: 380px;
+  z-index: 70;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.25);
+  font-family: inherit;
+  animation: demoGuideRise 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+[data-theme="light"] .demo-guide {
+  box-shadow: 0 24px 64px rgba(40,32,18,0.14), 0 2px 6px rgba(40,32,18,0.06);
+}
+@keyframes demoGuideRise { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.demo-guide.is-collapsed { width: auto; }
+
+.demo-guide-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.demo-guide.is-collapsed .demo-guide-head { border-bottom: none; }
+.demo-guide-id { display: flex; align-items: center; gap: 10px; }
+.demo-guide-glyph {
+  width: 26px; height: 26px;
+  background: var(--accent); color: #0c0b08;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  border-radius: 2px;
+}
+.demo-guide-title {
+  font-size: 12px; color: var(--ink); font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.demo-guide-step { font-size: 10px; margin-top: 1px; letter-spacing: 0.12em; text-transform: uppercase; }
+.demo-guide-actions { display: flex; gap: 2px; }
+
+.demo-guide-body {
+  padding: 14px 14px 10px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.demo-guide-beat-h {
+  font-family: var(--font-display, "Instrument Serif"), serif;
+  font-size: 22px; line-height: 1.1;
+  color: var(--ink); letter-spacing: -0.01em;
+  margin-bottom: 6px; font-weight: 400;
+}
+.demo-guide-beat-prompt {
+  font-size: 13px; line-height: 1.45;
+  color: var(--ink); margin: 0 0 10px;
+}
+.demo-guide-beat-cue {
+  display: flex; flex-direction: column; gap: 3px;
+  border-left: 2px solid var(--accent);
+  padding: 4px 0 4px 10px;
+}
+.demo-guide-beat-cue .lbl {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+}
+.demo-guide-beat-cue .val {
+  font-family: var(--font-display, "Instrument Serif"), serif;
+  font-style: italic; font-size: 13px; color: var(--ink); line-height: 1.4;
+}
+
+.demo-guide-rail {
+  display: flex; gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.demo-guide-tick {
+  flex: 1;
+  background: var(--paper-elev);
+  border: 1px solid var(--line);
+  padding: 6px 0;
+  cursor: pointer;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  transition: all 140ms;
+  border-radius: 2px;
+}
+.demo-guide-tick:hover { color: var(--ink); border-color: var(--accent); }
+.demo-guide-tick.passed { color: var(--ink); border-color: var(--line); background: var(--paper); }
+.demo-guide-tick.passed::after {
+  content: ""; display: block; width: 4px; height: 4px;
+  background: var(--accent); border-radius: 99px; margin: 3px auto 0;
+}
+.demo-guide-tick.active {
+  color: #0c0b08;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(244, 183, 63, 0.2);
+}
+
+.demo-guide-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  gap: 8px;
+}
+.demo-guide-foot .muted { flex: 1; text-align: center; }
+
+@media (max-width: 720px) {
+  .demo-guide { left: 12px; right: 12px; width: auto; bottom: 12px; }
+}
