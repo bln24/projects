@@ -1,1112 +1,226 @@
-<!-- DECK BUILD 20260501 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DECK · CAIO Elevate Build Room</title>
-<style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
-:root{
-  color-scheme:dark;
-  --ink:#f4f1e8;
-  --muted:#9a9488;
-  --quiet:#6f6a61;
-  --paper:#11100d;
-  --panel:#171511;
-  --panel-2:#1f1c17;
-  --line:rgba(244,241,232,.1);
-  --line-strong:rgba(244,241,232,.18);
-  --amber:#f4b73f;
-  --amber-soft:rgba(244,183,63,.13);
-  --green:#58d68d;
-  --green-soft:rgba(88,214,141,.13);
-  --blue:#72b7ff;
-  --blue-soft:rgba(114,183,255,.13);
-  --red:#ff6b6b;
-  --red-soft:rgba(255,107,107,.13);
-  --violet:#b79cff;
-  --violet-soft:rgba(183,156,255,.13);
-  --shadow:0 24px 80px rgba(0,0,0,.42);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  min-height:100vh;
-  background:
-    linear-gradient(rgba(244,241,232,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(244,241,232,.028) 1px,transparent 1px),
-    radial-gradient(1100px 620px at 52% -20%,rgba(244,183,63,.1),transparent 58%),
-    #080806;
-  background-size:48px 48px,48px 48px,auto,auto;
-  color:var(--ink);
-  font-family:Inter,system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased;
-}
-body:before{
-  content:"";position:fixed;inset:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
-  mix-blend-mode:soft-light;opacity:.34;
-}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects by T24 — AWS</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="workspace.css">
+  <link rel="stylesheet" href="create.css">
+  <link rel="stylesheet" href="narrative.css">
+  <link rel="stylesheet" href="deck.css">
+  <link rel="stylesheet" href="open-questions.css">
+  <link rel="stylesheet" href="decisions-log.css">
+  <link rel="stylesheet" href="runners-page.css">
+  <link rel="stylesheet" href="settings-page.css">
+  <link rel="stylesheet" href="publish-variants.css">
+  <link rel="stylesheet" href="demo-guide.css">
 
-/* AUTH */
-#auth{
-  position:fixed;inset:0;z-index:20;
-  display:flex;align-items:center;justify-content:center;padding:32px;
-  background:
-    linear-gradient(90deg,rgba(244,183,63,.04) 1px,transparent 1px),
-    linear-gradient(rgba(244,241,232,.032) 1px,transparent 1px),
-    linear-gradient(135deg,rgba(244,183,63,.12),transparent 26%),
-    #050504;
-  background-size:72px 72px,72px 72px,auto,auto;
-}
-.auth-card{
-  position:relative;z-index:1;
-  width:min(420px,100%);
-  border:1px solid var(--line-strong);
-  border-radius:12px;
-  background:rgba(17,16,13,.9);
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(24px);
-  padding:36px;
-}
-.auth-card:before{
-  content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
-  background:linear-gradient(180deg,rgba(244,183,63,.12),transparent 40%);
-}
-.auth-card>*{position:relative;z-index:1}
-.auth-wordmark{font-size:42px;font-weight:900;letter-spacing:-3px;line-height:1}
-.auth-wordmark span{color:var(--amber)}
-.auth-sub{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3em;margin-top:6px}
-.auth-divider{height:1px;background:var(--line);margin:24px 0}
-.field{margin-bottom:14px}
-.label{display:block;margin-bottom:6px;color:var(--quiet);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
-.input,.select{
-  width:100%;border:1px solid var(--line);border-radius:8px;
-  background:rgba(244,241,232,.055);color:var(--ink);
-  padding:10px 12px;font-size:14px;outline:none;transition:border-color .2s;
-}
-.input:focus,.select:focus{border-color:var(--amber)}
-.select option{background:#1f1c17}
-.btn{
-  width:100%;padding:11px;border:none;border-radius:8px;
-  background:var(--amber);color:#0a0900;
-  font-size:13px;font-weight:800;letter-spacing:.04em;
-  transition:opacity .2s;
-}
-.btn:hover{opacity:.88}
-.auth-error{margin-top:12px;color:var(--red);font-size:12px;text-align:center;display:none}
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 
-/* APP */
-#app{display:none;flex-direction:column;min-height:100vh}
+  <script>
+    /* === BLN24 / OpenClaw integration config ===
+       Tenant + client IDs from Microsoft Entra app registration.
+       Workspace URL serves the play folder read-only via Cloudflare Tunnel.
+       Agents URL is the OpenClaw chat the team deeplinks into. */
+    window.BLN24_CONFIG = {
+      tenantId: "bce59a38-0a4f-42df-8ff2-8d40797d61f1",
+      clientId: "6eaa2169-cf1c-42a1-9086-a44db8081f67",
+      redirectUri: "https://projects.bln24.com/aws/",
+      scopes: ["openid", "profile", "email", "User.Read"],
+      workspaceUrl: "https://workspace.bln24.com",
+      agentsUrl: "https://agents.bln24.com"
+    };
 
-/* TOPBAR */
-.topbar{
-  position:sticky;top:0;z-index:10;
-  background:rgba(17,15,13,.92);backdrop-filter:blur(18px);
-  border-bottom:1px solid var(--line);
-  padding:0 24px;
-  display:flex;align-items:center;gap:16px;height:56px;
-}
-.topbar-brand{font-size:18px;font-weight:900;letter-spacing:-1px;flex-shrink:0}
-.topbar-brand span{color:var(--amber)}
-.topbar-role{
-  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
-  padding:3px 8px;border-radius:4px;
-  background:var(--amber-soft);color:var(--amber);flex-shrink:0;
-}
-.topbar-spacer{flex:1}
-.view-toggle{display:flex;gap:4px;background:var(--panel-2);border-radius:8px;padding:3px}
-.view-btn{
-  padding:5px 12px;border:none;border-radius:6px;
-  background:transparent;color:var(--muted);
-  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  transition:all .15s;
-}
-.view-btn.active{background:var(--panel);color:var(--ink)}
-.logout-btn{
-  padding:5px 10px;border:1px solid var(--line);border-radius:6px;
-  background:transparent;color:var(--muted);font-size:11px;font-weight:700;
-  transition:all .15s;
-}
-.logout-btn:hover{color:var(--ink);border-color:var(--line-strong)}
-
-/* STATS BAR */
-.statsbar{
-  background:var(--panel);border-bottom:1px solid var(--line);
-  padding:12px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;
-}
-.stat{display:flex;flex-direction:column;gap:2px}
-.stat-val{font-size:20px;font-weight:900;letter-spacing:-1px;line-height:1}
-.stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--quiet)}
-.stat-divider{width:1px;height:32px;background:var(--line);flex-shrink:0}
-.progress-wrap{flex:1;min-width:120px}
-.progress-bar{height:4px;border-radius:999px;background:rgba(244,241,232,.08);overflow:hidden;margin-top:4px}
-.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--amber),var(--green));transition:width .4s}
-
-/* FILTER BAR */
-.filterbar{
-  padding:10px 24px;border-bottom:1px solid var(--line);
-  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-}
-.filter-select{
-  border:1px solid var(--line);border-radius:6px;
-  background:rgba(244,241,232,.04);color:var(--ink);
-  padding:5px 10px;font-size:12px;font-weight:600;outline:none;
-  transition:border-color .2s;
-}
-.filter-select:focus{border-color:var(--amber)}
-.filter-select option{background:#1f1c17}
-.filter-count{color:var(--muted);font-size:11px;margin-left:4px}
-.filter-clear{
-  padding:5px 10px;border:1px solid var(--line);border-radius:6px;
-  background:transparent;color:var(--muted);font-size:11px;font-weight:700;
-  transition:all .15s;
-}
-.filter-clear:hover{color:var(--ink)}
-
-/* STORYBOARD VIEW */
-#storyboard-view{padding:24px;flex:1}
-.section-header{
-  display:flex;align-items:center;gap:12px;margin:28px 0 14px;
-}
-.section-header:first-child{margin-top:0}
-.section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--muted)}
-.section-line{flex:1;height:1px;background:var(--line)}
-.section-count{font-size:10px;font-weight:700;color:var(--quiet)}
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-
-.slide-card{
-  border:1px solid var(--line);border-radius:10px;
-  background:var(--panel);padding:16px;
-  cursor:pointer;transition:border-color .2s,transform .1s;
-  position:relative;overflow:hidden;
-}
-.slide-card:hover{border-color:var(--line-strong);transform:translateY(-1px)}
-.slide-card:before{
-  content:"";position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--stage-color,transparent);
-}
-.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
-.card-num{font-size:11px;font-weight:800;color:var(--quiet);letter-spacing:.04em;flex-shrink:0}
-.stage-badge{
-  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
-  padding:3px 7px;border-radius:4px;flex-shrink:0;
-}
-.card-title{font-size:14px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
-.card-intent{font-size:12px;color:var(--muted);line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-footer{display:flex;align-items:center;gap:8px;margin-top:12px}
-.owner-chip{
-  font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
-  background:rgba(244,241,232,.07);color:var(--muted);
-}
-.comment-count{
-  font-size:10px;color:var(--quiet);margin-left:auto;
-  display:flex;align-items:center;gap:4px;
-}
-
-/* KANBAN VIEW */
-#kanban-view{padding:24px;flex:1;display:none}
-.kanban-board{display:flex;gap:14px;overflow-x:auto;height:calc(100vh - 180px)}
-.kanban-col{
-  flex-shrink:0;width:240px;
-  border:1px solid var(--line);border-radius:10px;
-  background:var(--panel);overflow:hidden;
-  display:flex;flex-direction:column;
-}
-.kanban-col-header{
-  padding:12px 14px;border-bottom:1px solid var(--line);
-  border-top:3px solid var(--col-color,var(--line));
-  display:flex;align-items:center;justify-content:space-between;
-}
-.kanban-col-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
-.kanban-col-count{
-  font-size:10px;font-weight:700;
-  padding:2px 7px;border-radius:999px;
-  background:rgba(244,241,232,.08);color:var(--muted);
-}
-.kanban-cards{flex:1;overflow-y:auto;padding:10px}
-.kanban-card{
-  border:1px solid var(--line);border-radius:8px;
-  background:var(--panel-2);padding:10px 12px;
-  margin-bottom:8px;cursor:pointer;
-  transition:border-color .15s;
-}
-.kanban-card:hover{border-color:var(--line-strong)}
-.kanban-card-num{font-size:9px;font-weight:800;color:var(--quiet);letter-spacing:.04em;margin-bottom:4px}
-.kanban-card-title{font-size:12px;font-weight:700;line-height:1.3}
-.kanban-card-owner{font-size:10px;color:var(--muted);margin-top:6px}
-
-/* MODAL */
-#modal-overlay{
-  position:fixed;inset:0;z-index:50;
-  background:rgba(5,5,4,.8);backdrop-filter:blur(6px);
-  display:none;align-items:flex-start;justify-content:center;
-  padding:32px 16px;overflow-y:auto;
-}
-#modal-overlay.open{display:flex}
-.modal{
-  position:relative;width:min(900px,100%);margin:auto;
-  border:1px solid var(--line-strong);border-radius:14px;
-  background:var(--panel);box-shadow:var(--shadow);
-  overflow:hidden;
-}
-.modal-header{
-  padding:20px 24px;border-bottom:1px solid var(--line);
-  display:flex;align-items:flex-start;gap:16px;
-}
-.modal-num{font-size:13px;font-weight:800;color:var(--quiet)}
-.modal-title{font-size:20px;font-weight:800;letter-spacing:-.5px;flex:1}
-.modal-close{
-  width:32px;height:32px;border:1px solid var(--line);border-radius:8px;
-  background:transparent;color:var(--muted);font-size:18px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:all .15s;
-}
-.modal-close:hover{color:var(--ink);border-color:var(--line-strong)}
-.modal-body{display:grid;grid-template-columns:1fr 280px}
-.modal-main{padding:24px;border-right:1px solid var(--line)}
-.modal-sidebar{padding:20px}
-.modal-section-title{
-  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
-  color:var(--quiet);margin-bottom:10px;
-}
-.modal-textarea{
-  width:100%;min-height:130px;border:1px solid var(--line);border-radius:8px;
-  background:rgba(244,241,232,.04);color:var(--ink);
-  padding:12px;font-size:13px;line-height:1.6;resize:vertical;outline:none;
-  transition:border-color .2s;margin-bottom:18px;
-}
-.modal-textarea:focus{border-color:var(--amber)}
-.modal-textarea[readonly]{background:rgba(244,241,232,.02);color:var(--muted);cursor:default}
-.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.action-btn{
-  padding:7px 14px;border-radius:7px;border:1px solid transparent;
-  font-size:12px;font-weight:700;transition:all .15s;
-}
-.action-btn.approve{background:var(--green-soft);color:var(--green);border-color:rgba(88,214,141,.25)}
-.action-btn.approve:hover{background:rgba(88,214,141,.22)}
-.action-btn.revise{background:var(--red-soft);color:var(--red);border-color:rgba(255,107,107,.25)}
-.action-btn.revise:hover{background:rgba(255,107,107,.22)}
-.action-btn.submit{background:var(--amber-soft);color:var(--amber);border-color:rgba(244,183,63,.25)}
-.action-btn.submit:hover{background:rgba(244,183,63,.22)}
-.action-btn.qa-pass{background:var(--blue-soft);color:var(--blue);border-color:rgba(114,183,255,.25)}
-.action-btn.qa-pass:hover{background:rgba(114,183,255,.22)}
-.action-btn.qa-flag{background:var(--violet-soft);color:var(--violet);border-color:rgba(183,156,255,.25)}
-.action-btn.qa-flag:hover{background:rgba(183,156,255,.22)}
-.action-btn.design-send{background:var(--blue-soft);color:var(--blue);border-color:rgba(114,183,255,.25)}
-.save-btn{
-  padding:7px 14px;border-radius:7px;border:1px solid rgba(244,183,63,.3);
-  background:var(--amber-soft);color:var(--amber);
-  font-size:12px;font-weight:700;transition:all .15s;
-}
-.save-btn:hover{background:rgba(244,183,63,.22)}
-
-/* Comments */
-.comments-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:200px;overflow-y:auto}
-.comment{border-left:2px solid var(--line);padding:6px 10px}
-.comment-meta{font-size:10px;color:var(--quiet);margin-bottom:3px}
-.comment-meta strong{color:var(--muted)}
-.comment-text{font-size:12px;line-height:1.5}
-.comment-form{display:flex;gap:8px;margin-top:8px}
-.comment-input{
-  flex:1;border:1px solid var(--line);border-radius:7px;
-  background:rgba(244,241,232,.04);color:var(--ink);
-  padding:7px 10px;font-size:12px;outline:none;
-  transition:border-color .2s;
-}
-.comment-input:focus{border-color:var(--amber)}
-.comment-submit{
-  padding:7px 12px;border:none;border-radius:7px;
-  background:var(--amber);color:#0a0900;font-size:11px;font-weight:800;
-  transition:opacity .15s;
-}
-.comment-submit:hover{opacity:.85}
-
-/* History */
-.history-list{display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto}
-.history-item{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:flex-start}
-.history-dot{width:6px;height:6px;border-radius:50%;background:var(--line-strong);flex-shrink:0;margin-top:4px}
-.history-dot.green{background:var(--green)}
-.history-dot.amber{background:var(--amber)}
-.history-dot.blue{background:var(--blue)}
-.history-dot.red{background:var(--red)}
-
-/* Sidebar info */
-.sidebar-field{margin-bottom:16px}
-.sidebar-badge-wrap{margin-top:6px}
-
-/* Stage colors */
-.stage-draft{--stage-color:#6f6a61;background:rgba(111,106,97,.15);color:#a0998e}
-.stage-content{--stage-color:#f4b73f;background:var(--amber-soft);color:var(--amber)}
-.stage-design{--stage-color:#72b7ff;background:var(--blue-soft);color:var(--blue)}
-.stage-qa{--stage-color:#b79cff;background:var(--violet-soft);color:var(--violet)}
-.stage-approved{--stage-color:#58d68d;background:var(--green-soft);color:var(--green)}
-.stage-revision{--stage-color:#ff6b6b;background:var(--red-soft);color:var(--red)}
-
-/* Kanban col colors */
-.kcol-draft{--col-color:#6f6a61}
-.kcol-content{--col-color:#f4b73f}
-.kcol-design{--col-color:#72b7ff}
-.kcol-qa{--col-color:#b79cff}
-.kcol-approved{--col-color:#58d68d}
-.kcol-revision{--col-color:#ff6b6b}
-
-@media(max-width:640px){
-  .modal-body{grid-template-columns:1fr}
-  .modal-sidebar{border-top:1px solid var(--line)}
-  .kanban-board{height:auto;flex-wrap:nowrap}
-  .statsbar{gap:12px}
-  .stat-val{font-size:16px}
-}
-</style>
+    /* Initialise MSAL once, expose globally. */
+    window.msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId: window.BLN24_CONFIG.clientId,
+        authority: "https://login.microsoftonline.com/" + window.BLN24_CONFIG.tenantId,
+        redirectUri: window.BLN24_CONFIG.redirectUri,
+        postLogoutRedirectUri: window.BLN24_CONFIG.redirectUri
+      },
+      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
+    });
+    window.msalReady = window.msalInstance.initialize();
+  </script>
 </head>
-<body>
+<body class="grain">
+  <div id="root"></div>
 
-<!-- AUTH -->
-<div id="auth">
-  <div class="auth-card">
-    <div class="auth-wordmark">DECK<span>·</span></div>
-    <div class="auth-sub">CAIO Elevate Build Room</div>
-    <div class="auth-divider"></div>
-    <div class="field">
-      <label class="label" for="role-select">Your Role</label>
-      <select class="select" id="role-select">
-        <option value="">Select role...</option>
-        <option value="ceo">CEO — Brian</option>
-        <option value="strategist">Strategist — Stephen</option>
-        <option value="narrative">Narrative — Angie</option>
-        <option value="designer">Designer — Deb</option>
-        <option value="qa">QA — Calvin</option>
-        <option value="viewer">Viewer (AWS)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="label" for="passcode-input">Passcode</label>
-      <input class="input" id="passcode-input" type="password" placeholder="Enter passcode" autocomplete="off">
-    </div>
-    <button class="btn" onclick="doLogin()">Enter Build Room</button>
-    <div class="auth-error" id="auth-error">Wrong passcode. Try again.</div>
-  </div>
-</div>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="icons.jsx"></script>
+  <script type="text/babel" src="shared.jsx"></script>
+  <script type="text/babel" src="workspace-data.jsx"></script>
+  <script type="text/babel" src="login.jsx"></script>
+  <script type="text/babel" src="dashboard.jsx"></script>
+  <script type="text/babel" src="create.jsx"></script>
+  <script type="text/babel" src="narrative-content.jsx"></script>
+  <script type="text/babel" src="narrative-views.jsx"></script>
+  <script type="text/babel" src="deck-content.jsx"></script>
+  <script type="text/babel" src="decisions-log.jsx"></script>
+  <script type="text/babel" src="runners-page.jsx"></script>
+  <script type="text/babel" src="templates-page.jsx"></script>
+  <script type="text/babel" src="settings-page.jsx"></script>
+  <script type="text/babel" src="shortcuts.jsx"></script>
+  <script type="text/babel" src="workspace.jsx"></script>
+  <script type="text/babel" src="extras.jsx"></script>
+  <script type="text/babel" src="open-questions.jsx"></script>
+  <script type="text/babel" src="demo-guide.jsx"></script>
 
-<!-- APP -->
-<div id="app">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-brand">DECK<span>·</span></div>
-    <div class="topbar-role" id="role-label">CEO</div>
-    <div class="topbar-spacer"></div>
-    <div class="view-toggle">
-      <button class="view-btn active" id="btn-storyboard" onclick="setView('storyboard')">Storyboard</button>
-      <button class="view-btn" id="btn-kanban" onclick="setView('kanban')">Board</button>
-    </div>
-    <button class="logout-btn" onclick="logout()">Sign Out</button>
-  </div>
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "theme": "light",
+      "accent": "amber",
+      "density": "comfortable",
+      "displayFont": "Instrument Serif",
+      "showAwsTag": true,
+      "grain": true,
+      "aiMode": "dock",
+      "demoMode": false
+    }/*EDITMODE-END*/;
 
-  <!-- STATS BAR -->
-  <div class="statsbar">
-    <div class="stat">
-      <div class="stat-val" id="stat-total">0</div>
-      <div class="stat-lbl">Total Slides</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-val" style="color:var(--green)" id="stat-approved">0</div>
-      <div class="stat-lbl">Approved</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-val" style="color:var(--amber)" id="stat-content">0</div>
-      <div class="stat-lbl">In Review</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-val" style="color:var(--blue)" id="stat-design">0</div>
-      <div class="stat-lbl">Design</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-val" style="color:var(--violet)" id="stat-qa">0</div>
-      <div class="stat-lbl">QA</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-val" style="color:var(--red)" id="stat-revision">0</div>
-      <div class="stat-lbl">Revision</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat progress-wrap">
-      <div class="stat-lbl">Progress</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    </div>
-  </div>
+    const ACCENTS = {
+      amber:   { dark: "#f4b73f", deep: "#e09a1a", light: "#c8870c" },
+      orange:  { dark: "#ff9900", deep: "#cc7700", light: "#cc7700" },
+      coral:   { dark: "#ff7a59", deep: "#e55a3a", light: "#d04a2a" },
+      blue:    { dark: "#7aa7ff", deep: "#5a87df", light: "#3a67bf" },
+      lime:    { dark: "#a8e07a", deep: "#88c05a", light: "#5e9034" },
+    };
 
-  <!-- FILTER BAR -->
-  <div class="filterbar">
-    <select class="filter-select" id="filter-section" onchange="applyFilters()">
-      <option value="">All Sections</option>
-      <option value="Core Deck">Core Deck</option>
-      <option value="Appendix A">Appendix A — Workbooks</option>
-      <option value="Appendix B">Appendix B — Business Case</option>
-      <option value="Appendix D">Appendix D — Peer Profiles</option>
-      <option value="Appendix E">Appendix E — Industry Cases</option>
-    </select>
-    <select class="filter-select" id="filter-stage" onchange="applyFilters()">
-      <option value="">All Stages</option>
-      <option value="draft">Draft</option>
-      <option value="content">Content Review</option>
-      <option value="design">Design</option>
-      <option value="qa">QA</option>
-      <option value="approved">CEO Approved</option>
-      <option value="revision">Needs Revision</option>
-    </select>
-    <select class="filter-select" id="filter-owner" onchange="applyFilters()">
-      <option value="">All Owners</option>
-      <option value="Brian">Brian</option>
-      <option value="Stephen">Stephen</option>
-      <option value="Angie">Angie</option>
-      <option value="Deb">Deb</option>
-      <option value="Calvin">Calvin</option>
-    </select>
-    <span class="filter-count" id="filter-count"></span>
-    <button class="filter-clear" onclick="clearFilters()">Clear</button>
-  </div>
+    function App() {
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [route, setRoute] = React.useState({ name: "login", projectId: null });
+      const [theme, setThemeState] = React.useState(tweaks.theme || "dark");
+      const [cmdOpen, setCmdOpen] = React.useState(false);
+      const [inboxOpen, setInboxOpen] = React.useState(false);
+      const [oqOpen, setOqOpen] = React.useState(false);
+      const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
+      const [tweaksToggleSignal, setTweaksToggleSignal] = React.useState(0);
 
-  <!-- STORYBOARD -->
-  <div id="storyboard-view"></div>
+      // Apply theme + accent
+      React.useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+      }, [theme]);
 
-  <!-- KANBAN -->
-  <div id="kanban-view">
-    <div class="kanban-board" id="kanban-board"></div>
-  </div>
-</div>
+      React.useEffect(() => {
+        const palette = ACCENTS[tweaks.accent] || ACCENTS.amber;
+        const accent = theme === "light" ? palette.light : palette.dark;
+        document.documentElement.style.setProperty("--accent", accent);
+        document.documentElement.style.setProperty("--bln-amber-deep", palette.deep);
+        document.body.classList.toggle("grain", tweaks.grain !== false);
+      }, [tweaks.accent, tweaks.grain, theme]);
 
-<!-- MODAL -->
-<div id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div>
-        <div class="modal-num" id="modal-num"></div>
-        <div class="modal-title" id="modal-title"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-main">
-        <div class="modal-actions" id="modal-actions"></div>
-        <div class="modal-section-title">Intent</div>
-        <textarea class="modal-textarea" id="modal-intent" rows="3" placeholder="What should the seller accomplish with this slide?"></textarea>
-        <div class="modal-section-title">Content Sketch</div>
-        <textarea class="modal-textarea" id="modal-content" rows="7" placeholder="Slide content..."></textarea>
-        <div style="display:flex;gap:8px;margin-bottom:24px">
-          <button class="save-btn" id="save-btn" onclick="saveEdits()">Save Changes</button>
-        </div>
-        <div class="modal-section-title">Design Notes</div>
-        <textarea class="modal-textarea" id="modal-design" rows="3" placeholder="Visual direction, layout notes..."></textarea>
-        <div style="margin-bottom:4px">
-          <button class="save-btn" onclick="saveDesignNotes()">Save Notes</button>
-        </div>
-        <div style="margin-top:24px">
-          <div class="modal-section-title">Comments</div>
-          <div class="comments-list" id="comments-list"></div>
-          <div class="comment-form" id="comment-form">
-            <input class="comment-input" id="comment-input" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')addComment()">
-            <button class="comment-submit" onclick="addComment()">Post</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-sidebar">
-        <div class="sidebar-field">
-          <div class="modal-section-title">Stage</div>
-          <div class="sidebar-badge-wrap" id="modal-stage-badge"></div>
-        </div>
-        <div class="sidebar-field">
-          <div class="modal-section-title">Section</div>
-          <div style="font-size:13px;font-weight:600" id="modal-section"></div>
-        </div>
-        <div class="sidebar-field">
-          <div class="modal-section-title">Owner</div>
-          <div style="font-size:13px;font-weight:600" id="modal-owner"></div>
-        </div>
-        <div class="sidebar-field">
-          <div class="modal-section-title">Stage History</div>
-          <div class="history-list" id="history-list"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+      React.useEffect(() => { setTweak("theme", theme); }, [theme]);
 
-<script>
-// ── PASSCODES ──────────────────────────────────────────────────────────────
-const PASSCODES = {
-  ceo:        'aws-ceo',
-  strategist: 'aws-strat',
-  narrative:  'aws-arc',
-  designer:   'aws-deb',
-  qa:         'aws-qa',
-  viewer:     'aws-view'
-};
-const ROLE_LABELS = {
-  ceo:'CEO · Brian', strategist:'Strategist · Stephen',
-  narrative:'Narrative · Angie', designer:'Designer · Deb',
-  qa:'QA · Calvin', viewer:'Viewer (AWS)'
-};
+      // Esc closes overlays
+      React.useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === "Escape") { setCmdOpen(false); setInboxOpen(false); setOqOpen(false); setShortcutsOpen(false); }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+      }, []);
 
-// ── STAGE CONFIG ───────────────────────────────────────────────────────────
-const STAGES = {
-  draft:    {label:'Draft',           cls:'stage-draft',    dot:''},
-  content:  {label:'Content Review',  cls:'stage-content',  dot:'amber'},
-  design:   {label:'Design',          cls:'stage-design',   dot:'blue'},
-  qa:       {label:'QA',              cls:'stage-qa',       dot:'blue'},
-  approved: {label:'CEO Approved',    cls:'stage-approved', dot:'green'},
-  revision: {label:'Needs Revision',  cls:'stage-revision', dot:'red'}
-};
-const KCOL_CLS = {
-  draft:'kcol-draft', content:'kcol-content', design:'kcol-design',
-  qa:'kcol-qa', approved:'kcol-approved', revision:'kcol-revision'
-};
+      const kbdHint = useKeyboardShortcuts({
+        onPalette: () => setCmdOpen(o => !o),
+        onShortcuts: () => setShortcutsOpen(o => !o),
+        onInbox: () => setInboxOpen(o => !o),
+        onQuestions: () => setOqOpen(o => !o),
+        onTweaks: () => setTweaksToggleSignal(s => s + 1),
+        onNav: (name) => navigate(name),
+      });
 
-// ── SLIDE DATA ─────────────────────────────────────────────────────────────
-const SLIDE_DEFS = [
-  // ── CORE DECK ─────────────────────────────────────────────────────────
-  {id:'00', section:'Core Deck', title:'How to Read This Deck', owner:'Brian', stage:'approved',
-   intent:'Orient the seller. This is a diagnostic tool, not a pitch. Set expectations for how the 45–60 min conversation unfolds.',
-   content:'One deck for seller and customer — no separate enablement version.\nSeven moves. Each earns the right to the next.\nThe fulcrum is Slide 03 (Mental Model). Seller reads the room there and chooses fast path or slow path.\nAppendix material is pulled forward live as the conversation demands — not walked linearly.',
-   design:'Simple reference card. Clean typography. Amber accent on key rules.'},
-  {id:'01', section:'Core Deck', title:'The Production Paradox', owner:'Stephen', stage:'content',
-   intent:'Hit the CAIO with the core tension immediately: AI is everywhere, results are nowhere. Establish the autonomy gap before the dual mandate.',
-   content:'88% of enterprises are running AI.\nOnly 6% report transformational financial returns.\n93.6% of AI is "in production" — and stuck at Stage 1–2 autonomy.\nDeployment is not the bottleneck. Autonomy is.\n\nStat: 89% of enterprise agents never reach production. Each failed pilot costs $150K–$800K.\n40%+ of agentic AI projects will be scrapped by 2027 (Gartner).\n\nThe question isn\'t whether your organization uses AI. It\'s whether your AI is working — autonomously, at scale, across every gap in your business.',
-   design:'Bold stat callouts. Dark background, amber numbers. Minimal text — let the data breathe.'},
-  {id:'02', section:'Core Deck', title:'The Dual Mandate', owner:'Angie', stage:'content',
-   intent:'Name the CAIO seat directly. Demonstrate AWS understands the role before pitching anything. This earns the next 40 minutes.',
-   content:'The CAIO is the only C-suite seat with two simultaneous mandates:\n— INTERNAL: Deploy AI as digital labor across the enterprise (operations, cost, efficiency)\n— EXTERNAL: Ship AI as customer-facing product features (revenue, growth, differentiation)\n\nNo settled playbook for either. Often reporting to the CEO with budget authority but without org clarity.\n\n86% of organizations have or plan to appoint a CAIO.\n\nIndustry signal (customize per customer):\n• AdTech: Agent-to-agent communication, AdContext Protocol\n• FSI: Agent identity, audit trail, SEC AI disclosure\n• Healthcare: Clinical-trial agentic workflows, HIPAA-grade governance\n• Manufacturing: Agentic supply chain, OT/IT identity convergence\n\nWhat the CAIO should feel: "They understand my job and my industry. This isn\'t a template."',
-   design:'Split visual — internal mandate (left) / external mandate (right). Industry signal as a subtle tag line at bottom.'},
-  {id:'03', section:'Core Deck', title:'LLM → Agentic: The Mental Model Shift', owner:'Angie', stage:'content',
-   intent:'THE FULCRUM SLIDE. Walk the CAIO from the LLM paradigm to the agentic paradigm. Until this shift happens, every downstream slide misses.',
-   content:'LLM PARADIGM (most leaders are still here):\n• Input: Prompt\n• Output: Response\n• Value: Better answers\n• Buying: Tokens\n\nAGENTIC PARADIGM (where AWS operates):\n• Input: Goal\n• Output: Outcome delivered\n• Value: Problems resolved end-to-end\n• Buying: Orchestration, identity, observability\n\n"We used to look at models as a chat that would provide questions and answers. Now we look at models as entities or agents that can perform tasks on your behalf." — Marco Argenti, CIO Goldman Sachs\n\nBRANCH POINT:\n→ If CAIO nods and uses agentic vocabulary back: FAST PATH. Compress maturity model, spend time on partners + proof.\n→ If CAIO pushes back or stays in LLM language: SLOW PATH. Spend most of the call here and on Slide 05.',
-   design:'Two-column comparison. LLM side muted/gray. Agentic side lit in amber. Argenti quote as a pull-out. Branch point note is seller-only — not visible to customer.'},
-  {id:'04', section:'Core Deck', title:'Agent vs. Autonomy — The Vocabulary', owner:'Stephen', stage:'content',
-   intent:'Install the two-word vocabulary the rest of the conversation depends on. Agents = architecture. Autonomy = maturity level.',
-   content:'AGENT: A software system with scope, identity, and tools. The architecture.\nAUTONOMY: How much independence is granted to that agent. The maturity level.\n\nThe CAIO\'s job: move agents up the autonomy spectrum.\n\nMost organizations have deployed agents (architecture exists).\nAlmost none have granted meaningful autonomy (the maturity journey hasn\'t started).\n\nThis distinction is what separates a Stage 2 organization from a Stage 3 one — not the technology they\'ve purchased.',
-   design:'Clean definitional slide. Two terms, two definitions. Visual separator. No clutter.'},
-  {id:'05', section:'Core Deck', title:'The 4 Stages of Autonomy', owner:'Stephen', stage:'design',
-   intent:'Show the CAIO where their agents are on the spectrum. Both internal and external columns visible — the dual mandate reflected in a single visual.',
-   content:'STAGE 1 — AI AS TOOL: Responds to explicit requests. Zero initiative. Human does the work, AI assists.\nSTAGE 2 — AI AS TEAMMATE: Handles defined tasks within boundaries. Human supervises.\nSTAGE 3 — AI AS DIGITAL EMPLOYEE: Executes complex workflows end-to-end. Minimal human oversight.\nSTAGE 4 — AI AS WORKFORCE LAYER: Autonomous agents operating in networks. Humans set goals and review outcomes.\n\nINTERNAL COLUMN: Operations, cost reduction, digital labor — lights up for operations-focused CAIOs.\nEXTERNAL COLUMN: Product AI, customer-facing features, revenue — lights up for product-focused CAIOs.\n\nREFRAME: 93.6% of AI is "in production" — but stuck at Stage 1–2. You\'re not behind on deployment. You\'re stuck on autonomy.\n\nHAND-OFF: This is where the seller notes the CMO Elevate (external column) or COO Elevate (internal column) modular path if relevant.',
-   design:'2x4 grid. Internal/External columns. Stage 1-4 rows. Color gradient from muted (Stage 1) to amber/green (Stage 4). Dual mandate visible in one visual.'},
-  {id:'06', section:'Core Deck', title:'The 5 Gaps — The Diagnostic', owner:'Angie', stage:'content',
-   intent:'Present the 5 Gaps as autonomy blockers, not technology problems. Designed for RANKING — seller asks CAIO to name the one that hurts most. That gap is where the deal is.',
-   content:'Five autonomy blockers standing between Stage 2 and Stage 3–4:\n\n1. PROFITABILITY GAP — Only 1-in-50 AI initiatives deliver transformational value. Agents stuck in cost mode, not revenue mode.\n2. IDENTITY CRISIS — No IAM framework for non-human agents. 45B+ non-human identities by end 2025; 10% of orgs ready.\n3. PILOT TRAP & SPRAWL — Hundreds of Stage 1–2 pilots. Ungoverned agent fleets. No unified platform. 85% have pilots; 5% have production.\n4. DATA FOUNDATION DEFICIT — Stage 3–4 autonomy requires enterprise-grade data architecture. 75% cite data quality as top barrier.\n5. TRUST GAP — No granular telemetry to evaluate agents like a role. 83% plan to deploy agentic AI; 29% feel ready to do it securely.\n\nCROSS-CUTTING: Agentic AI skills gap — #1 reason Stage 2→3 stalls and #1 partner opportunity.\n\nSELLER PROMPT: "Which of these is the most urgent for you right now?" — The one they name is where the rest of the call goes.',
-   design:'5 tiles, equal size, designed for ranking (not absorbing equally). Each tile: gap name, 1-line blocker statement, 1 quantified stat. Skills gap as a banner underneath all five.'},
-  {id:'07', section:'Core Deck', title:'Gap 1: The Profitability Gap', owner:'Stephen', stage:'draft',
-   intent:'Close the profitability gap with AWS. CAIO persona: the CAIO reporting to CFO who needs to show ROI before scaling.',
-   content:'THE GAP: Only 1-in-50 AI initiatives deliver transformational value. Among those seeing gains, 39% have doubled productivity — but they\'re the outliers.\n\nLOB PERSONA: CFO / Chief Revenue Officer conversation. "Show me the business case before I fund the next phase."\n\nAWS CLOSES IT:\n• Bedrock cost controls + Inferentia for inference efficiency\n• FinOps for AI — visibility into model spend vs. business outcome\n• Foundation → Scaling → Growth buying sequence (GoDaddy proof)\n\nPEER CONVERSATION: Revenue/Growth. "What you take to your CFO and CRO."\n\nREAL-WORLD EXAMPLE: Berta Rodriguez Hervas, Chief AI & Analytics Officer at Pfizer — 3-phase approach: prove value in regulated context, then scale. (See Appendix D4)',
-   design:'Gap tile highlighted amber. AWS services in a 3-band layout. Peer conversation tag. Link to appendix profile.'},
-  {id:'08', section:'Core Deck', title:'Gap 2: The Identity Crisis', owner:'Stephen', stage:'draft',
-   intent:'Close the identity gap. CAIO persona: the CAIO at an FSI firm facing SEC AI disclosure requirements and audit trail demands.',
-   content:'THE GAP: 45B+ non-human identities by end of 2025. Only 10% of organizations have an IAM framework for non-human agents. 23% of IT pros say agents have been tricked into revealing credentials.\n\nLOB PERSONA: CISO / Chief Risk Officer / Legal conversation. "Who authorized what? Can we audit it?"\n\nAWS CLOSES IT:\n• AWS IAM for agents — agent-level identity and permissions\n• Bedrock AgentCore — managed identity for agentic workflows\n• CloudTrail at agent level — complete audit trail\n\nPEER CONVERSATION: Risk/Compliance. "What you take to your CISO and General Counsel."\n\nREAL-WORLD EXAMPLE: Lori Beer, Global CIO at JPMorgan Chase — "Agent-to-agent interactions are very different than system-to-system." Teresa Heitsenrether (CDAO) sits on Operating Committee — foundation-first rigor. (See Appendix D2)',
-   design:'Gap tile highlighted red (risk framing). Three-band AWS services layout. JPMC quote as pull-out.'},
-  {id:'09', section:'Core Deck', title:'Gap 3: The Pilot Trap & Sprawl', owner:'Stephen', stage:'draft',
-   intent:'Close the pilot trap. CAIO persona: the CAIO with hundreds of disconnected pilots and no unified platform to govern them.',
-   content:'THE GAP: 85% of enterprises have AI pilots. Only 5% have production-scale agents. 96% say a unified platform is important; 7% have one. 52% of department-level AI initiatives run without formal oversight.\n\nLOB PERSONA: COO / Chief Digital Officer conversation. "We have 200 pilots and no platform. How do we consolidate?"\n\nAWS CLOSES IT:\n• Amazon Bedrock Agents — unified agent platform\n• Bedrock Flows — visual agent orchestration\n• Amazon Q — enterprise AI assistant at scale\n• AI CoE model — governance framework for agent fleets\n\nPEER CONVERSATION: Cost/Efficiency. "What you take to your COO and CIO."\n\nREAL-WORLD EXAMPLE: Suresh Kumar, CTO/CDO at Walmart — 4 super agents, one framework. 215,000 employees on agentic AI. (See Appendix D3)',
-   design:'Gap tile highlighted amber. Walmart quote prominent. Platform consolidation visual.'},
-  {id:'10', section:'Core Deck', title:'Gap 4: The Data Foundation Deficit', owner:'Stephen', stage:'draft',
-   intent:'Close the data foundation gap. CAIO persona: the CAIO who knows their agents are only as good as the data underneath them.',
-   content:'THE GAP: 75% of enterprises cite data quality as the top barrier to AI maturity (McKinsey). Stage 3–4 autonomy requires enterprise-grade data architecture — clean, governed, accessible.\n\nLOB PERSONA: CIO / Chief Data Officer conversation. "Our data is a mess. How do we build on it?"\n\nAWS CLOSES IT:\n• Bedrock Knowledge Bases — RAG at enterprise scale\n• Amazon DataZone — data governance and catalog\n• SageMaker Feature Store — ML-ready feature management\n• OpenSearch + vector store — semantic retrieval at scale\n\nPEER CONVERSATION: Cost/Efficiency and Risk. "What you take to your CIO and CDO."\n\nBUYING SEQUENCE: This is Foundation layer — non-negotiable first. Nothing scales without it.\n\nREAL-WORLD EXAMPLE: Tracey Franklin, Chief People & Digital Tech Officer at Moderna — merged HR/IT; foundation-first rigor drove vaccine development speed. (See Appendix D5)',
-   design:'Gap tile highlighted blue (technical/infrastructure framing). Buying sequence callout. Foundation layer emphasis.'},
-  {id:'11', section:'Core Deck', title:'Gap 5: The Trust Gap', owner:'Stephen', stage:'draft',
-   intent:'Close the trust gap. CAIO persona: the CAIO who cannot explain to their board what their agents are doing or why.',
-   content:'THE GAP: 83% plan to deploy agentic AI; 29% feel ready to do it securely (Cisco State of AI Security 2026). 23% of IT pros say agents have been tricked into revealing credentials (Okta). Without telemetry, you cannot evaluate an agent like a role.\n\nLOB PERSONA: Board / CEO / Chief Risk Officer conversation. "How do we know the agents are doing what we think they\'re doing?"\n\nAWS CLOSES IT:\n• Bedrock Guardrails — content safety and policy enforcement\n• CloudWatch AI telemetry — agent-level observability\n• Bedrock Model Evaluation — performance and safety scoring\n• Zero data retention option — no customer data stored in model training\n\nPEER CONVERSATION: Risk/Compliance and Product. "What you take to your board and regulators."\n\nREAL-WORLD EXAMPLE: Marco Argenti, CIO at Goldman Sachs — measured rollout, change management at scale, AI-native workforce. Anthropic engineers embedded directly in Goldman\'s tech teams. (See Appendix D1)',
-   design:'Gap tile highlighted violet (trust/governance framing). Zero data retention as a standout feature.'},
-  {id:'12', section:'Core Deck', title:'The Skills Gap — The Cross-Cutting Blocker', owner:'Angie', stage:'design',
-   intent:'Name the skills gap as the #1 reason Stage 2→3 stalls — and the #1 partner opportunity. Bridges diagnostic to solution.',
-   content:'THE SKILLS GAP cuts across all five autonomy blockers.\nIt is the #1 reason Stage 2→3 stalls.\nIt is the #1 partner opportunity in the CAO Elevate ecosystem.\n\nEvery gap has a skills component:\n• Profitability: AI product managers who can build business cases for agent ROI\n• Identity: Security engineers who understand non-human identity\n• Pilot Trap: Platform architects who can govern agent fleets\n• Data Foundation: Data engineers who can build agentic-ready pipelines\n• Trust: AI safety engineers who can build evaluation frameworks\n\nAWS PARTNERS CLOSE THIS: Deloitte, Slalom, Loka, Caylent — each brings workforce development + technical delivery.\n\nCAO ELEVATE SIGNAL: This is why CAO Elevate exists. The event + the ecosystem together address the skills gap at scale.',
-   design:'Banner slide bridging diagnostics to solution. Skills gap as a thread running through all 5 gap tiles above.'},
-  {id:'13', section:'Core Deck', title:'The AWS Stack — Built for Stage 3–4', owner:'Stephen', stage:'content',
-   intent:'Position AWS as the only cloud provider with a complete stack — from data foundation to agent orchestration to enterprise governance — purpose-built for Stage 3–4.',
-   content:'AWS IS THE ONLY COMPLETE STACK FOR STAGE 3–4 AGENTIC AI:\n\nPILLAR 1 — DATA FOUNDATION:\nBedrock Knowledge Bases, DataZone, SageMaker Feature Store, OpenSearch\n\nPILLAR 2 — AGENT ORCHESTRATION:\nBedrock Agents, Bedrock Flows, Amazon Q, AgentCore, Multi-agent frameworks\n\nPILLAR 3 — ENTERPRISE GOVERNANCE:\nBedrock Guardrails, CloudTrail (agent-level), IAM for agents, Model Evaluation, Zero data retention\n\nNo other cloud provider has all three pillars purpose-built for agentic AI at enterprise scale.\n\nWHAT THIS MEANS FOR THE CAIO: You don\'t have to assemble the stack from parts. Foundation → Scaling → Growth is a sequenced, supported journey — not a custom engineering project.',
-   design:'Three-pillar visual. Each pillar with named services. Clean, confident. No feature lists — outcomes only.'},
-  {id:'14', section:'Core Deck', title:'Foundation → Scaling → Growth', owner:'Angie', stage:'content',
-   intent:'Install the buying sequence. Non-negotiable order. Foundation first, always. This is the architecture of every AWS engagement.',
-   content:'THE BUYING SEQUENCE (non-negotiable order):\n\nFOUNDATION FIRST:\nData architecture, agent identity, observability, governance.\nRequired before anything else can scale.\nServices: Bedrock Knowledge Bases, DataZone, AgentCore, IAM, Guardrails\n\nSCALING:\nAgent platforms, digital labor engines, workflow automation.\nBuilds on the foundation — will fail without it.\nServices: Bedrock Agents, Bedrock Flows, Amazon Q, multi-agent orchestration\n\nGROWTH:\nProduct AI, customer-facing agentic features, revenue generation.\nThe payoff of the foundation and scaling investment.\nServices: Agentic product APIs, customer-facing Bedrock integrations\n\nGODDADDY PROOF: Foundation (zero data retention, PII detection, single API proxy) → Scaling (2,000 developers on GoCode, 50% sprint reduction) → Growth (Airo.ai — agentic product, revenue-generating).\n\nMESSAGE: AWS has walked this sequence with customers. We know the path.',
-   design:'Three-step visual flow. Foundation (base/blue), Scaling (mid/amber), Growth (top/green). GoDaddy as the proof thread running alongside.'},
-  {id:'15', section:'Core Deck', title:'The Partner Ecosystem — CAO Elevate', owner:'Stephen', stage:'design',
-   intent:'Show the partner ecosystem as a value chain — not a logo strip. AWS doesn\'t show up alone. The signal to the CAIO: we\'ve assembled the ecosystem so you don\'t have to.',
-   content:'THE STRATEGIC VALUE CHAIN (3 roles, not a logo list):\n1. FOUNDATION MODELS + ORCHESTRATION: Anthropic (Claude on Bedrock) — the intelligence layer\n2. SI DELIVERY: Slalom, Deloitte, Loka, Caylent, Softserve, Capgemini — implementation and workforce development\n3. DATA / SECURITY / GOVERNANCE: Databricks, CrowdStrike, Cyera, Dynatrace, Datadog — trust and data layer\n\nGAP-BY-PARTNER MAP (each gap has multiple named partners):\n• Profitability: Anthropic, Deloitte, Loka, Fireworks, Nvidia\n• Identity: Caylent, CrowdStrike, Cyera, PwC, Deloitte\n• Pilot Trap: Anthropic, Loka, Caylent, Slalom, Softserve\n• Data Foundation: Capgemini, Caylent, Loka, Slalom, Databricks\n• Trust: Caylent, Loka, Slalom, Dynatrace, Datadog\n\nCAO ELEVATE: The flagship event + co-sell motion. This is what brings AWS, partners, and CAIOs together. The signal: your path to Stage 3–4 is not a solo journey.',
-   design:'Value chain headline band (3 roles). Supporting band: 5 gaps × named partners. Not a logo grid — structured by function and gap.'},
-  {id:'16', section:'Core Deck', title:'GoDaddy — The Buying Sequence Executed', owner:'Brian', stage:'approved',
-   intent:'Prove the sequence with a real customer. GoDaddy walks Foundation → Scaling → Growth cleanly. Pilot Trap closed. Trust Gap closed. Profitability proving.',
-   content:'GODADDY + ANTHROPIC ON AMAZON BEDROCK\n\nFOUNDATION:\n• Zero data retention — no customer PII stored in model training\n• Comprehend for PII auto-detection at the API layer\n• Single API proxy for 100+ models — one governance point\n\nSCALING:\n• GoCode: 2,000 developers on AI-assisted coding\n• 50% sprint cycle reduction\n• Standardized on Bedrock — no model sprawl\n\nGROWTH:\n• Airo.ai: customer-facing agentic product\n• Turns website visitor conversations into completed tasks (domain purchase, site build, marketing)\n• Revenue-generating — not a cost center\n\nTHIS IS WHAT THE JOURNEY LOOKS LIKE:\nPilot Trap closed (unified platform, not 200 experiments)\nTrust Gap closed (zero data retention, full audit trail)\nProfitability proving (Airo.ai as a growth product)\n\nFor industry-matched proof: Tapestry/Coca-Cola (retail), JPMC/Goldman (FSI), Pfizer (healthcare), Walmart (retail/mfg). See Appendix E.',
-   design:'Three-panel layout: Foundation / Scaling / Growth. Metrics callouts: 2,000 devs, 50% sprint reduction, 100+ models. Airo.ai as the growth proof.'},
-  {id:'17', section:'Core Deck', title:'Next Steps — Three Options', owner:'Brian', stage:'content',
-   intent:'Give the CAIO a concrete next step sized to where they actually are. Three options, time-boxed, no ambiguity. Then ask two questions.',
-   content:'THREE TIME-BOXED OPTIONS:\n\nOPTION A — DATA FOUNDATION ASSESSMENT (Free)\nFor when: data is the named blocker\nWhat happens: 2-week assessment of data readiness for agentic AI\nOutput: Data readiness scorecard + 90-day modernization plan\n\nOPTION B — 30-DAY AGENT PILOT\nFor when: CAIO wants to see an agent in production quickly\nWhat happens: One workflow, one metric, AWS + Anthropic + named SI co-build\nOutput: Agent in production + ROI case + path to scale\n\nOPTION C — CROSS-FUNCTIONAL WORKING SESSION\nFor when: CAIO needs to bring peers into the conversation\nWhat happens: 2-hour readiness session with AWS + partner SMEs\nOutput: Prioritized roadmap + named partner team + executive sponsor map\n\nTHE TWO QUESTIONS:\n1. "Which of these makes sense as a first step for you?"\n2. "Who else would need to be in the room for the next conversation?" [The CAIO names the C-suite peer who owns the gap they identified — that person is invited to the second meeting]',
-   design:'Three option cards side-by-side. Each with: name, timing, trigger condition, output. Two questions as a close panel at bottom.'},
-  {id:'18', section:'Core Deck', title:'The Close — 5 Things the CAIO Should Believe', owner:'Angie', stage:'content',
-   intent:'The belief test. Before leaving, the CAIO should hold these five beliefs. If they don\'t, the call didn\'t work.',
-   content:'WHAT THE CAIO WALKS AWAY BELIEVING:\n\n1. AWS understands the CAIO seat as a dual mandate — not a CTO extension.\n\n2. The real bottleneck is autonomy, not deployment. 93.6% of AI is at Stage 1–2 — that\'s the problem to solve.\n\n3. The 5 Gaps are the right diagnostic framework to run their own program against.\n\n4. AWS has a sequenced answer — foundation, scaling, growth — and a partner ecosystem that closes each gap.\n\n5. There is a credible business case and a documented case study (GoDaddy) showing the path from Stage 1 to Stage 3.\n\nBONUS: AWS shows up with partners — model providers, SIs, governance partners — not alone.\n\nNEXT MEETING: Named on the calendar. Right people in the room. Concrete deliverable agreed.',
-   design:'5 belief statements as numbered list. Clean, confident. Final slide energy. Calendar icon / next meeting CTA at bottom.'},
-
-  // ── APPENDIX A — WORKBOOKS ────────────────────────────────────────────
-  {id:'A1', section:'Appendix A', title:'Discovery Diagnostic: Autonomy', owner:'Stephen', stage:'draft',
-   intent:'Help the CAIO locate their organization on the 4-stage autonomy spectrum across key workflows.',
-   content:'WHERE IS THE VALUE? AUTONOMY DIAGNOSTIC WORKBOOK\n\nFor each major workflow, rate current autonomy level (Stage 1–4):\n□ Customer service / support\n□ Sales / revenue operations\n□ Finance / procurement\n□ HR / talent operations\n□ IT / infrastructure management\n□ Product development / R&D\n□ Supply chain / logistics\n□ Marketing / content operations\n\nFor each workflow rated Stage 1–2:\n• What is blocking Stage 3?\n• Which of the 5 Gaps applies?\n• What is the cost of staying at Stage 1–2 for 12 more months?\n\nSeller uses this to identify the highest-value, lowest-barrier workflow for Option B (30-Day Pilot).',
-   design:'Clean workbook layout. Table format. Printable/fillable. BLN24 branding subtle.'},
-  {id:'A2', section:'Appendix A', title:'Discovery Diagnostic: Digital Labor', owner:'Stephen', stage:'draft',
-   intent:'Map the CAIO\'s internal digital labor opportunity — where human work can be augmented or replaced by agents.',
-   content:'DIGITAL LABOR DIAGNOSTIC WORKBOOK\n\nFor each function, estimate:\n• FTE hours/week on repetitive, rule-based tasks\n• Current AI/automation coverage (%)\n• Estimated hours achievable with Stage 3–4 agents\n\nFunctions to map:\n□ Finance operations (reconciliation, reporting, forecasting)\n□ Legal / compliance (contract review, regulatory monitoring)\n□ HR (onboarding, benefits, performance support)\n□ IT (ticket routing, infrastructure monitoring, provisioning)\n□ Customer ops (support, escalation routing, follow-up)\n□ Sales ops (CRM hygiene, pipeline reporting, outreach)\n\nOutput: Digital labor opportunity score (hours/yr recoverable) mapped to AWS digital labor stack.',
-   design:'Workbook / calculator format. Input fields for FTE hours. Output formula visible.'},
-  {id:'A3', section:'Appendix A', title:'Discovery Diagnostic: Revenue', owner:'Stephen', stage:'draft',
-   intent:'Map the CAIO\'s external product AI opportunity — where agents can generate or accelerate revenue.',
-   content:'REVENUE DIAGNOSTIC WORKBOOK\n\nFor each customer-facing product/workflow, estimate:\n• Current AI feature coverage\n• Revenue impact if Stage 3–4 agentic capability deployed\n• Time to value estimate\n\nProduct AI opportunities to map:\n□ Agentic customer onboarding (reduce friction → conversion)\n□ Personalization at scale (recommendation → purchase)\n□ Proactive service (predict need → resolve before complaint)\n□ Agentic commerce (conversation → transaction, like Airo.ai)\n□ Embedded AI features (product stickiness, premium tier)\n\nOutput: Revenue AI opportunity score mapped to AWS growth stack + Anthropic Claude on Bedrock.',
-   design:'Workbook format. Maps to Growth layer of buying sequence. Links to GoDaddy/Airo.ai proof.'},
-
-  // ── APPENDIX B — BUSINESS CASE ───────────────────────────────────────
-  {id:'B1', section:'Appendix B', title:'AI Business Case Framework', owner:'Brian', stage:'draft',
-   intent:'Give the CAIO the framework to take to their CFO. Three value drivers, three formulas, one business case structure.',
-   content:'AI BUSINESS CASE FRAMEWORK — THREE VALUE DRIVERS\n\nDRIVER 1: AUTONOMY VALUE\nFormula: (Hours of human work automated/yr) × (Fully-loaded cost/hour) × (Autonomy uplift factor)\nTarget: Stage 1→3 autonomy for highest-cost workflows\n\nDRIVER 2: DIGITAL LABOR VALUE\nFormula: (FTE equivalents created by agents) × (Fully-loaded FTE cost) × (Quality adjustment factor)\nTarget: 10–40% of high-volume back-office workflows\n\nDRIVER 3: REVENUE/GROWTH VALUE\nFormula: (Revenue at risk or opportunity) × (AI capture rate) × (Time-to-value factor)\nTarget: 1–3 customer-facing agentic product features\n\nSUMMARY TABLE: Driver | Current State | Target State | Value | AWS Services | Time-to-Value\n\nCFO PRESENTATION GUIDE: Lead with Driver 3 (growth) if CAIO reports to CEO. Lead with Driver 2 (cost) if CAIO reports to COO. Use Driver 1 (autonomy) as the technical proof layer.',
-   design:'Framework slide. Clean table. Formula callouts. CFO presentation guide as a sidebar.'},
-  {id:'B2', section:'Appendix B', title:'Cost & Time to Value Workbook', owner:'Brian', stage:'draft',
-   intent:'Give the CAIO a concrete cost model for the three next-step options (A, B, C) with expected time-to-value.',
-   content:'COST & TIME TO VALUE WORKBOOK\n\nOPTION A — DATA FOUNDATION ASSESSMENT:\nCost: $0 (AWS-funded)\nTime to Output: 2 weeks\nTime to Value: 90-day modernization plan → 6–12 months to production-ready data layer\nROI Signal: Unlocks Options B and C\n\nOPTION B — 30-DAY AGENT PILOT:\nTypical Investment: $150K–$400K (AWS + partner co-funded first phase)\nTime to Output: 30 days to agent in production\nTime to Value: 60–90 days to measurable ROI metric\nROI Signal: 2–5x productivity on target workflow; business case for Phase 2\n\nOPTION C — CROSS-FUNCTIONAL WORKING SESSION:\nCost: $0 (AWS + partner funded)\nTime to Output: 2-hour session → prioritized roadmap in 1 week\nTime to Value: 30 days to named partner team + roadmap + executive sponsor\nROI Signal: Accelerates decision cycle by 60–90 days\n\nCOMPETITOR COMPARISON: Build vs. Buy vs. AWS Platform — total cost of ownership over 24 months.',
-   design:'Cost comparison table. Timeline visual. Build/Buy/AWS TCO comparison. Clean and printable.'},
-
-  // ── APPENDIX D — PEER PROFILES ───────────────────────────────────────
-  {id:'D1', section:'Appendix D', title:'Marco Argenti — Goldman Sachs', owner:'Stephen', stage:'draft',
-   intent:'Peer profile for the Identity/Trust gap. Argenti is the most quotable enterprise CIO on agentic AI. Proof the mental model shift is already the operating language of a marquee FSI firm.',
-   content:'MARCO ARGENTI — CIO, Goldman Sachs\nGAP: Trust + Profitability\n\nKEY QUOTE: "We used to look at models as a chat that would provide questions and answers. Now a year later, we look at models as essentially entities or agents that can perform tasks on your behalf."\n\nON SCALE: "We have the entire organization that needs to somehow re-tune and re-tool itself for AI." — Change management at scale.\n\nON WORKFORCE: Preparing the next generation of "AI-native" employees who don\'t know a pre-AI workflow.\n\nAWS CONNECTION: Goldman has embedded Anthropic engineers directly into its technology teams to co-build autonomous agents for financial processes.\n\nWHY THIS MATTERS FOR THE DECK: Argenti has publicly walked the LLM→agent paradigm shift in his own words. His language maps one-for-one onto the mental model slide.\n\nSources: Fortune, Goldman Sachs "AI Exchanges" series.',
-   design:'Profile card. Photo placeholder. Quote callout. Gap badge (Trust). AWS connection noted.'},
-  {id:'D2', section:'Appendix D', title:'Lori Beer & Teresa Heitsenrether — JPMorgan Chase', owner:'Stephen', stage:'draft',
-   intent:'Peer profile for the Identity + Data Foundation gaps. The JPMC pairing is the cleanest real-world example of the dual mandate operating as a two-person team.',
-   content:'LORI BEER — Global CIO, JPMorgan Chase\nTERESA HEITSENRETHER — Chief Data & Analytics Officer, JPMorgan Chase\nGAP: Identity + Data Foundation\n\nLORI BEER ON IDENTITY: "Agent-to-agent interactions are very different than system-to-system." Leading the most sophisticated non-human identity program in financial services.\n\nTERESA HEITSENRETHER ON GOVERNANCE: Sits on the Operating Committee. Data governance framework underpins every AI initiative. Foundation-first approach is non-negotiable.\n\nTHE DUAL MANDATE IN PRACTICE: Beer owns the internal infrastructure. Heitsenrether owns the data foundation. Together they represent the CAIO dual mandate as two separate seats — what most organizations are trying to compress into one.\n\nSCALE: JPMC has the most aggressive agentic AI program in FSI — including agent identity, audit trail, and SEC AI disclosure compliance.\n\nSources: Bloomberg, JPMC investor relations, internal conference presentations.',
-   design:'Two-person profile card. Split layout. Gap badges: Identity + Data Foundation.'},
-  {id:'D3', section:'Appendix D', title:'Suresh Kumar — Walmart', owner:'Stephen', stage:'draft',
-   intent:'Peer profile for the Pilot Trap gap. Kumar built the playbook for consolidating from agent sprawl to a unified platform at 215,000-employee scale.',
-   content:'SURESH KUMAR — Global CTO & CDO, Walmart\nGAP: Pilot Trap & Sprawl\n\nTHE PROBLEM HE SOLVED: Walmart had hundreds of disconnected AI experiments across business units. No unified platform. No governance. No scale.\n\nTHE SOLUTION: 4 super agents, one framework. Consolidated the entire enterprise onto a single agentic platform — internal and customer-facing.\n\nSCALE: 215,000 employees now operating with agentic AI support. The largest internal digital labor deployment in retail.\n\nKEY MOVE: Defined the platform architecture first (foundation), then deployed agents at scale. The buying sequence executed at Walmart scale.\n\nWHY THIS MATTERS: Kumar is the proof that the Pilot Trap is closable — and that the path through it is a unified platform, not more pilots.\n\nSources: Walmart Tech blog, NRF 2025, Bloomberg Technology.',
-   design:'Profile card. Walmart scale callout (215K employees). 4 super agents as a visual anchor. Gap badge: Pilot Trap.'},
-  {id:'D4', section:'Appendix D', title:'Berta Rodriguez Hervas — Pfizer', owner:'Stephen', stage:'draft',
-   intent:'Peer profile for the Profitability + Trust gaps in a regulated industry. Proof that the buying sequence works in pharma/healthcare.',
-   content:'BERTA RODRIGUEZ HERVAS — Chief AI & Analytics Officer, Pfizer\nGAP: Profitability + Trust (regulated industry)\n\nTHE CHALLENGE: Proving ROI in a heavily regulated industry where every AI decision touches patient safety, clinical trials, and FDA compliance.\n\nTHREE-PHASE APPROACH:\nPhase 1: Prove value in a controlled, auditable context (Trust Gap focus)\nPhase 2: Scale proven use cases with governance framework in place (Data Foundation)\nPhase 3: Expand to revenue-generating applications (Profitability)\n\nKEY INSIGHT: In regulated industries, Trust is not a gate after deployment — it is built into the architecture from day one. This is why Bedrock Guardrails and zero data retention are not optional features.\n\nAWS CONNECTION: Pfizer\'s agentic AI for drug discovery and clinical trial acceleration runs on Bedrock with Anthropic.\n\nSources: Pfizer AI strategy presentations, Forbes, BioPharma Dive.',
-   design:'Profile card. Regulated industry badge. Three-phase approach as a visual. Gap badges: Profitability + Trust.'},
-  {id:'D5', section:'Appendix D', title:'Tracey Franklin — Moderna', owner:'Stephen', stage:'draft',
-   intent:'Peer profile for the Data Foundation + Skills gaps. Franklin\'s merger of HR and IT is the proof that digital labor starts with the data and people foundation.',
-   content:'TRACEY FRANKLIN — Chief People & Digital Technology Officer, Moderna\nGAP: Data Foundation + Skills\n\nUNIQUE MOVE: Franklin merged the Chief People Officer and Chief Digital Technology Officer roles — the only C-suite executive explicitly responsible for both the human workforce and the digital workforce simultaneously.\n\nFOUNDATION-FIRST RIGOR: Moderna\'s COVID-19 vaccine development speed (fastest in history) was enabled by a data foundation built years earlier. The lesson: you cannot accelerate when it matters if you haven\'t built the foundation when you had time.\n\nSKILLS GAP IN PRACTICE: Franklin is building the workforce that can work alongside AI agents — not just the AI agents themselves. Digital and human workforce development as parallel tracks.\n\nWHY THIS MATTERS: Franklin is the proof that the Data Foundation and Skills gaps are not IT problems — they are organizational and human capital problems. The CAIO who solves them wins.\n\nSources: Moderna Annual Report, Forbes Future of Work, HR Technology Conference.',
-   design:'Profile card. Merged role callout (unique). Foundation-first emphasis. Gap badges: Data Foundation + Skills.'},
-
-  // ── APPENDIX E — INDUSTRY CASES ──────────────────────────────────────
-  {id:'E1', section:'Appendix E', title:'Industry: Retail', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for retail CAIOs. Proof points and partner plays.',
-   content:'RETAIL — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Agentic commerce: Conversation → transaction (Amazon/Airo.ai model)\n2. Demand forecasting agents: Real-time inventory optimization\n3. Personalization at scale: Customer-facing product recommendations → purchase\n4. Supply chain orchestration: Agent-managed supplier relationships and logistics\n5. Store operations: Computer vision + agentic task routing\n\nKEY PROOF POINTS:\n• Walmart: 215K employees on unified agent platform (Pilot Trap → solved)\n• Amazon: End-to-end agentic commerce stack (Foundation → Growth)\n• Tapestry/Coca-Cola: Customer data foundation on Bedrock\n\nPRIMARY GAPS FOR RETAIL CAIOs:\n• Pilot Trap (fragmented agentic commerce experiments)\n• Data Foundation (unified customer data for personalization)\n• Profitability (agent ROI in margin-compressed environment)\n\nPARTNERS: Slalom (retail SI), Databricks (data), Anthropic (customer-facing agents)',
-   design:'Industry card. Retail visual palette. Top 3 gaps highlighted. Partner logos.'},
-  {id:'E2', section:'Appendix E', title:'Industry: Restaurants', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for restaurants and QSR CAIOs.',
-   content:'RESTAURANTS / QSR — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Agentic ordering: Voice/text conversation → order completion (drive-through, app)\n2. Labor scheduling agents: Real-time staff optimization based on demand signals\n3. Supply chain agents: Predictive ordering, waste reduction\n4. Customer loyalty agents: Personalized offers → repeat visits\n5. Kitchen operations: Order routing + prep time optimization\n\nKEY CHALLENGES FOR RESTAURANT CAIOs:\n• High transaction volume, low margin — ROI bar is immediate\n• Multi-location governance: 1,000s of locations, one AI platform\n• Data fragmentation across POS systems, loyalty apps, delivery platforms\n\nPRIMARY GAPS:\n• Pilot Trap (hundreds of location-level experiments, no unified platform)\n• Data Foundation (unified customer + operations data)\n• Trust (agent errors in food orders have immediate customer impact)\n\nPARTNERS: Caylent (AWS specialist), Anthropic (conversational agents), Slalom (franchise ops)',
-   design:'Industry card. QSR visual. High-volume transaction emphasis.'},
-  {id:'E3', section:'Appendix E', title:'Industry: CPG', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for CPG CAIOs.',
-   content:'CPG — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Trade promotion agents: Real-time optimization of $500B+ in annual trade spend\n2. Demand sensing: Agent-managed forecasting across SKUs and geographies\n3. New product development: Agentic R&D acceleration (formulation, testing, launch)\n4. Supply chain resilience: Multi-agent supplier risk monitoring and rerouting\n5. Consumer insights: Agentic social listening → product iteration\n\nKEY PROOF POINTS:\n• Coca-Cola: Bedrock for creative + marketing automation at scale\n• Unilever: Supply chain agents for sustainability and cost optimization\n\nPRIMARY GAPS FOR CPG CAIOs:\n• Data Foundation (retailer data partnerships, syndicated data governance)\n• Identity (third-party data agent authorization)\n• Profitability (proving ROI in multi-year product development cycles)\n\nPARTNERS: Databricks (data foundation), Capgemini (global SI for CPG), Anthropic',
-   design:'Industry card. CPG visual. Trade spend opportunity callout ($500B).'},
-  {id:'E4', section:'Appendix E', title:'Industry: Everyday Essentials', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for everyday essentials / grocery CAIOs.',
-   content:'EVERYDAY ESSENTIALS / GROCERY — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Fresh inventory agents: Real-time perishable management (reduce waste, maximize turns)\n2. Agentic store operations: Task routing, restocking, safety monitoring\n3. Personalized promotions: Customer-facing offer agents based on purchase patterns\n4. Supplier collaboration: Agent-managed EDI and order management\n5. Energy management: Agentic building operations (refrigeration, HVAC, lighting)\n\nKEY CHALLENGES:\n• Thin margins demand immediate, measurable ROI\n• Regulatory complexity (food safety, labor law across jurisdictions)\n• Data siloed across loyalty programs, POS, supply chain\n\nPRIMARY GAPS:\n• Data Foundation (unified view of customer + supply chain data)\n• Pilot Trap (chain-level vs. enterprise-level AI governance)\n• Trust (food safety compliance for AI-driven decisions)\n\nPARTNERS: Slalom, Caylent, AWS supply chain suite',
-   design:'Industry card. Grocery/everyday essentials visual. Margin pressure emphasis.'},
-  {id:'E5', section:'Appendix E', title:'Industry: Financial Services', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for FSI CAIOs. Deepest regulatory complexity, highest identity and trust stakes.',
-   content:'FINANCIAL SERVICES — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Agentic trading and research: Autonomous market analysis → trade execution support\n2. Risk and compliance agents: Real-time regulatory monitoring, report generation\n3. Customer advisory agents: Wealth management, loan origination, claims processing\n4. Fraud detection: Agent-level anomaly detection across transaction networks\n5. Back-office automation: Reconciliation, KYC/AML, regulatory filings\n\nKEY PROOF POINTS:\n• Goldman Sachs: Argenti + Anthropic co-build for financial process agents\n• JPMorgan Chase: Beer + Heitsenrether dual-mandate model; most advanced non-human identity program in FSI\n• Wells Fargo: Saul Van Beurden + 215,000 employee agentic AI deployment\n\nPRIMARY GAPS FOR FSI CAIOs:\n• Identity (SEC AI disclosure, agent-level audit trail — non-negotiable)\n• Trust (model evaluation, zero data retention, regulatory compliance)\n• Data Foundation (unstructured document processing at scale)\n\nPARTNERS: CrowdStrike (security), Cyera (data security), PwC/Deloitte (regulatory compliance)',
-   design:'Industry card. FSI visual. Regulatory badge prominent. JPMC/Goldman proof callouts.'},
-  {id:'E6', section:'Appendix E', title:'Industry: AdTech', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for AdTech CAIOs. Elena\'s primary domain — agent-to-agent communication and AdContext Protocol are the frontier.',
-   content:'ADTECH — AGENTIC AI USE CASES\n\nFRONTIER CONCERN: AdContext Protocol — agent-to-agent communication changing how ads are delivered, targeted, and measured in an agentic browsing world.\n\nTOP AGENTIC OPPORTUNITIES:\n1. Agentic media buying: Real-time bidding optimization across channels\n2. Creative generation agents: Dynamic ad creative adapted to context and audience\n3. Attribution agents: Cross-channel, cookieless measurement in agentic environments\n4. Publisher yield optimization: Agent-managed inventory pricing and packaging\n5. Brand safety agents: Real-time monitoring of ad placement in agentic content environments\n\nKEY PROOF POINTS:\n• Zefr (Jon Morra, CPO): Trust issues with agents in brand safety context\n• The Trade Desk: Agentic bidding at scale\n\nPRIMARY GAPS FOR ADTECH CAIOs:\n• Trust (brand safety in agent-generated content environments)\n• Identity (agent-to-agent authorization in programmatic pipelines)\n• Data Foundation (cookieless, first-party data architecture for agentic targeting)\n\nPARTNERS: Anthropic (Claude for creative/content), CrowdStrike (brand safety), AWS Clean Rooms (privacy-safe data)',
-   design:'Industry card. AdTech visual. AdContext Protocol callout as frontier signal. Brand safety emphasis.'},
-  {id:'E7', section:'Appendix E', title:'Industry: Healthcare', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for Healthcare/Pharma CAIOs. Highest regulatory complexity; Trust and Data Foundation are the dominant gaps.',
-   content:'HEALTHCARE / PHARMA — AGENTIC AI USE CASES\n\nFRONTIER CONCERN: Clinical-trial agentic workflows, HIPAA-grade governance, FDA AI disclosure requirements.\n\nTOP AGENTIC OPPORTUNITIES:\n1. Clinical trial acceleration: Agentic patient matching, protocol optimization, data collection\n2. Drug discovery agents: Molecular modeling, literature synthesis, target identification\n3. Care coordination agents: Multi-provider workflow orchestration, patient follow-up\n4. Revenue cycle management: Claims processing, denial management, prior authorization\n5. Regulatory submissions: Automated document generation and compliance checking\n\nKEY PROOF POINTS:\n• Pfizer: Berta Rodriguez Hervas — 3-phase regulated approach (Trust → Data → Profitability)\n• Moderna: Tracey Franklin — data foundation enabled fastest vaccine development in history\n\nPRIMARY GAPS FOR HEALTHCARE CAIOs:\n• Trust (HIPAA compliance, patient safety, FDA AI guidance)\n• Data Foundation (fragmented EHR data, interoperability)\n• Identity (HIPAA-compliant agent authorization and audit trail)\n\nPARTNERS: AWS HealthLake, Anthropic (HIPAA BAA available), Deloitte (regulatory compliance)',
-   design:'Industry card. Healthcare visual. HIPAA compliance badge. Pfizer/Moderna callouts.'},
-  {id:'E8', section:'Appendix E', title:'Industry: Automotive', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for Automotive CAIOs. OT/IT identity convergence is the frontier concern.',
-   content:'AUTOMOTIVE — AGENTIC AI USE CASES\n\nFRONTIER CONCERN: OT/IT identity convergence — agents operating across operational technology (factory floor, vehicle systems) and IT environments require new identity frameworks.\n\nTOP AGENTIC OPPORTUNITIES:\n1. Agentic manufacturing: Quality control, defect detection, production optimization\n2. Connected vehicle agents: In-vehicle agentic assistants, OTA update orchestration\n3. Supply chain resilience: Multi-tier supplier monitoring and rerouting\n4. Dealer network agents: Inventory optimization, customer engagement, service scheduling\n5. Design acceleration: Generative AI + agents for vehicle design iteration\n\nKEY PROOF POINTS:\n• Volkswagen: Conversational AI + agents across vehicle and manufacturing stack\n• BMW: Agent-assisted manufacturing quality control\n\nPRIMARY GAPS FOR AUTOMOTIVE CAIOs:\n• Identity (OT/IT convergence — factory agents + vehicle agents + enterprise agents)\n• Data Foundation (connected vehicle data + manufacturing data integration)\n• Trust (safety-critical systems require zero-error agent governance)\n\nPARTNERS: AWS IoT + Bedrock, Capgemini (automotive SI), CrowdStrike (OT security)',
-   design:'Industry card. Automotive visual. OT/IT convergence callout as frontier signal.'},
-  {id:'E9', section:'Appendix E', title:'Industry: Manufacturing', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for Manufacturing CAIOs.',
-   content:'MANUFACTURING — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Predictive maintenance agents: Real-time equipment monitoring → proactive intervention\n2. Quality control agents: Vision-based defect detection at production line speed\n3. Supply chain orchestration: Multi-agent supplier, logistics, and inventory management\n4. Energy optimization agents: Real-time energy consumption reduction\n5. Safety agents: Real-time workplace safety monitoring and incident prevention\n\nKEY CHALLENGES FOR MANUFACTURING CAIOs:\n• Legacy OT infrastructure not built for AI connectivity\n• Safety-critical environment — agent errors have physical consequences\n• Multi-site governance across global manufacturing footprints\n\nPRIMARY GAPS:\n• Data Foundation (OT/IT data integration, historian data modernization)\n• Identity (machine and agent identity across OT environments)\n• Trust (safety-critical agent governance — zero tolerance for errors)\n\nPARTNERS: AWS IoT SiteWise + Bedrock, Capgemini (manufacturing SI), CrowdStrike (OT security), Databricks (manufacturing data)',
-   design:'Industry card. Manufacturing visual. Safety-critical emphasis.'},
-  {id:'E10', section:'Appendix E', title:'Industry: Telecom', owner:'Deb', stage:'draft',
-   intent:'Industry-specific agentic AI use cases for Telecom CAIOs.',
-   content:'TELECOM — AGENTIC AI USE CASES\n\nTOP AGENTIC OPPORTUNITIES:\n1. Network operations agents: Autonomous fault detection, ticket routing, and resolution\n2. Customer service agents: End-to-end service issue resolution without human handoff\n3. Churn prevention agents: Proactive customer intervention based on behavioral signals\n4. Network capacity planning: Agentic traffic prediction and capacity allocation\n5. Fraud detection: Real-time agent-driven anomaly detection across calling patterns\n\nKEY PROOF POINTS:\n• T-Mobile: Agentic customer service at scale on AWS\n• Verizon: Network operations agents for 5G infrastructure management\n\nPRIMARY GAPS FOR TELECOM CAIOs:\n• Pilot Trap (hundreds of network and customer ops experiments, no unified platform)\n• Data Foundation (unified view of network + customer data at petabyte scale)\n• Trust (network agents operating autonomously on critical infrastructure)\n\nPARTNERS: AWS Bedrock + Graviton (telco-optimized compute), Ericsson/Nokia (network SI), Anthropic',
-   design:'Industry card. Telecom visual. Network operations emphasis. 5G callout.'},
-];
-
-// ── STATE ──────────────────────────────────────────────────────────────────
-let currentRole = null;
-let currentSlideId = null;
-let currentView = 'storyboard';
-let slides = {};
-
-function loadState() {
-  const saved = localStorage.getItem('deck_state_v2');
-  if (saved) {
-    try { slides = JSON.parse(saved); } catch(e) { slides = {}; }
-  }
-  SLIDE_DEFS.forEach(def => {
-    if (!slides[def.id]) {
-      slides[def.id] = {
-        stage: def.stage,
-        intent: def.intent,
-        content: def.content,
-        design: def.design || '',
-        comments: [],
-        history: [{ ts: Date.now() - 86400000, role: 'System', stage: def.stage, note: 'Slide initialized' }]
+      const navigate = (name, projectId = null) => {
+        setRoute({ name, projectId });
+        window.scrollTo({ top: 0, behavior: "instant" });
       };
+
+      if (route.name === "login") return <LoginScreen onSignIn={() => navigate("dashboard")} />;
+
+      return (
+        <>
+          <Topbar
+            current={route.name}
+            onNav={(n) => navigate(n)}
+            onOpenSearch={() => setCmdOpen(true)}
+            onOpenInbox={() => setInboxOpen(true)}
+            onOpenQuestions={() => setOqOpen(true)}
+            theme={theme}
+            setTheme={setThemeState}
+            onNewProject={() => navigate("create")}
+          />
+          {route.name === "dashboard" && <Dashboard onOpenProject={(id) => navigate("workspace", id)} onNewProject={() => navigate("create")} />}
+          {route.name === "create" && <CreatePlay onCancel={() => navigate("dashboard")} onCreate={() => navigate("workspace", "cmo-2026")} />}
+          {route.name === "workspace" && <Workspace projectId={route.projectId} onBack={() => navigate("dashboard")} onNav={navigate} aiMode={tweaks.aiMode} />}
+          {route.name === "library" && <Library onOpenProject={(id) => navigate("workspace", id)} />}
+          {route.name === "calendar" && <CalendarPage />}
+          {route.name === "templates" && <TemplatesPage onNav={navigate} />}
+          {route.name === "runners" && <RunnersPage />}
+          {route.name === "settings" && <SettingsPage />}
+
+          <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onNav={navigate} />
+          <Inbox open={inboxOpen} onClose={() => setInboxOpen(false)} onNav={navigate} />
+          <OpenQuestions open={oqOpen} onClose={() => setOqOpen(false)} />
+          <OpenQuestionsToast />
+          <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+          <KbdHintToast hint={kbdHint} />
+          <DemoGuide
+            open={tweaks.demoMode}
+            onClose={() => setTweak("demoMode", false)}
+            onJump={(b) => navigate(b.route, b.projectId || null)}
+          />
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="Theme">
+              <TweakRadio label="Mode" value={theme} options={[{value:"dark",label:"Dark"},{value:"light",label:"Light"}]} onChange={setThemeState} />
+              <TweakSelect label="Accent color" value={tweaks.accent} options={[
+                {value:"amber",label:"BLN24 Amber"},
+                {value:"orange",label:"AWS Orange"},
+                {value:"coral",label:"Coral"},
+                {value:"blue",label:"Cobalt"},
+                {value:"lime",label:"Lime"},
+              ]} onChange={v => setTweak("accent", v)} />
+              <TweakToggle label="Film-grain texture" value={tweaks.grain !== false} onChange={v => setTweak("grain", v)} />
+            </TweakSection>
+            <TweakSection title="AI presence (T24)">
+              <TweakRadio label="How visible is T24?" value={tweaks.aiMode} options={[
+                {value:"dock",label:"Floating dock"},
+                {value:"panel",label:"Side panel"},
+                {value:"invisible",label:"Invisible"},
+              ]} onChange={v => setTweak("aiMode", v)} />
+            </TweakSection>
+            <TweakSection title="Demo">
+              <TweakToggle label="Demo mode (presenter guide)" value={!!tweaks.demoMode} onChange={v => setTweak("demoMode", v)} />
+            </TweakSection>
+            <TweakSection title="Branding">
+              <TweakToggle label="Show AWS tag in header" value={tweaks.showAwsTag !== false} onChange={v => setTweak("showAwsTag", v)} />
+            </TweakSection>
+            <TweakSection title="Jump to">
+              <TweakButton onClick={() => navigate("login")}>Login screen</TweakButton>
+              <TweakButton onClick={() => navigate("dashboard")}>Dashboard</TweakButton>
+              <TweakButton onClick={() => navigate("create")}>Create new play</TweakButton>
+              <TweakButton onClick={() => navigate("workspace", "cmo-2026")}>Workspace · CMO Storyboard</TweakButton>
+              <TweakButton onClick={() => navigate("workspace", "cto-bedrock")}>Workspace · CTO Narrative</TweakButton>
+              <TweakButton onClick={() => navigate("workspace", "cxo-personal")}>Workspace · CXO Deck</TweakButton>
+              <TweakButton onClick={() => navigate("library")}>Library</TweakButton>
+              <TweakButton onClick={() => navigate("calendar")}>Calendar</TweakButton>
+              <TweakButton onClick={() => navigate("templates")}>Templates</TweakButton>
+              <TweakButton onClick={() => navigate("runners")}>Runners spec</TweakButton>
+              <TweakButton onClick={() => navigate("settings")}>Settings</TweakButton>
+              <TweakButton onClick={() => setShortcutsOpen(true)}>Keyboard shortcuts</TweakButton>
+              <TweakButton onClick={() => setOqOpen(true)}>Open questions panel</TweakButton>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
     }
-  });
-}
 
-function saveState() {
-  localStorage.setItem('deck_state_v2', JSON.stringify(slides));
-}
-
-// ── AUTH ───────────────────────────────────────────────────────────────────
-function doLogin() {
-  const role = document.getElementById('role-select').value;
-  const pass = document.getElementById('passcode-input').value;
-  const err  = document.getElementById('auth-error');
-  if (!role) { err.style.display='block'; err.textContent='Please select a role.'; return; }
-  if (pass !== PASSCODES[role]) { err.style.display='block'; err.textContent='Wrong passcode. Try again.'; return; }
-  currentRole = role;
-  document.getElementById('auth').classList.add('hidden');
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('role-label').textContent = ROLE_LABELS[role];
-  loadState();
-  renderAll();
-}
-
-function logout() {
-  currentRole = null;
-  document.getElementById('auth').classList.remove('hidden');
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('passcode-input').value = '';
-  document.getElementById('role-select').value = '';
-  document.getElementById('auth-error').style.display = 'none';
-}
-
-document.getElementById('passcode-input').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-
-// ── VIEW ───────────────────────────────────────────────────────────────────
-function setView(v) {
-  currentView = v;
-  document.getElementById('storyboard-view').style.display = v==='storyboard' ? 'block' : 'none';
-  document.getElementById('kanban-view').style.display = v==='kanban' ? 'block' : 'none';
-  document.getElementById('btn-storyboard').classList.toggle('active', v==='storyboard');
-  document.getElementById('btn-kanban').classList.toggle('active', v==='kanban');
-  if (v==='kanban') renderKanban();
-}
-
-// ── STATS ──────────────────────────────────────────────────────────────────
-function updateStats() {
-  const counts = { draft:0, content:0, design:0, qa:0, approved:0, revision:0 };
-  let total = 0;
-  SLIDE_DEFS.forEach(def => {
-    const s = slides[def.id];
-    if (s) { counts[s.stage] = (counts[s.stage]||0)+1; total++; }
-  });
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-approved').textContent = counts.approved;
-  document.getElementById('stat-content').textContent = counts.content;
-  document.getElementById('stat-design').textContent = counts.design;
-  document.getElementById('stat-qa').textContent = counts.qa;
-  document.getElementById('stat-revision').textContent = counts.revision;
-  const pct = total ? Math.round((counts.approved/total)*100) : 0;
-  document.getElementById('progress-fill').style.width = pct+'%';
-}
-
-// ── FILTERS ────────────────────────────────────────────────────────────────
-function getFilters() {
-  return {
-    section: document.getElementById('filter-section').value,
-    stage:   document.getElementById('filter-stage').value,
-    owner:   document.getElementById('filter-owner').value,
-  };
-}
-
-function matchesFilters(def) {
-  const f = getFilters();
-  const s = slides[def.id];
-  if (f.section && !def.section.startsWith(f.section)) return false;
-  if (f.stage && s && s.stage !== f.stage) return false;
-  if (f.owner && def.owner !== f.owner) return false;
-  return true;
-}
-
-function applyFilters() {
-  renderStoryboard();
-  if (currentView==='kanban') renderKanban();
-}
-
-function clearFilters() {
-  document.getElementById('filter-section').value='';
-  document.getElementById('filter-stage').value='';
-  document.getElementById('filter-owner').value='';
-  applyFilters();
-}
-
-// ── STORYBOARD ─────────────────────────────────────────────────────────────
-const SECTIONS_ORDER = ['Core Deck','Appendix A','Appendix B','Appendix D','Appendix E'];
-const SECTION_LABELS = {
-  'Core Deck':'Core Deck',
-  'Appendix A':'Appendix A — Workbooks',
-  'Appendix B':'Appendix B — Business Case',
-  'Appendix D':'Appendix D — Peer Leader Profiles',
-  'Appendix E':'Appendix E — Industry Use Cases'
-};
-
-function renderStoryboard() {
-  const container = document.getElementById('storyboard-view');
-  let html = '';
-  let totalVisible = 0;
-
-  SECTIONS_ORDER.forEach(sectionKey => {
-    const defs = SLIDE_DEFS.filter(d => d.section === sectionKey && matchesFilters(d));
-    if (!defs.length) return;
-    totalVisible += defs.length;
-    html += `<div class="section-header">
-      <div class="section-title">${SECTION_LABELS[sectionKey]}</div>
-      <div class="section-line"></div>
-      <div class="section-count">${defs.length} slide${defs.length!==1?'s':''}</div>
-    </div>
-    <div class="cards-grid">`;
-    defs.forEach(def => {
-      const s = slides[def.id];
-      const stage = s ? s.stage : def.stage;
-      const stageInfo = STAGES[stage];
-      const commentCount = s ? s.comments.length : 0;
-      const intent = (s ? s.intent : def.intent) || '';
-      html += `<div class="slide-card" onclick="openModal('${def.id}')" style="--stage-color:${stageColorVal(stage)}">
-        <div class="card-top">
-          <div class="card-num">${def.id}</div>
-          <div class="stage-badge ${stageInfo.cls}">${stageInfo.label}</div>
-        </div>
-        <div class="card-title">${def.title}</div>
-        <div class="card-intent">${escHtml(intent)}</div>
-        <div class="card-footer">
-          <div class="owner-chip">${def.owner}</div>
-          ${commentCount > 0 ? `<div class="comment-count">💬 ${commentCount}</div>` : ''}
-        </div>
-      </div>`;
-    });
-    html += '</div>';
-  });
-
-  document.getElementById('filter-count').textContent = totalVisible + ' slides';
-  container.innerHTML = html;
-}
-
-function stageColorVal(stage) {
-  const map = { draft:'#6f6a61', content:'#f4b73f', design:'#72b7ff', qa:'#b79cff', approved:'#58d68d', revision:'#ff6b6b' };
-  return map[stage] || 'transparent';
-}
-
-// ── KANBAN ────────────────────────────────────────────────────────────────
-function renderKanban() {
-  const board = document.getElementById('kanban-board');
-  const stageOrder = ['draft','content','design','qa','approved','revision'];
-  let html = '';
-  stageOrder.forEach(stage => {
-    const info = STAGES[stage];
-    const defs = SLIDE_DEFS.filter(d => {
-      const s = slides[d.id];
-      return s && s.stage === stage && matchesFilters(d);
-    });
-    html += `<div class="kanban-col ${KCOL_CLS[stage]}">
-      <div class="kanban-col-header">
-        <div class="kanban-col-title">${info.label}</div>
-        <div class="kanban-col-count">${defs.length}</div>
-      </div>
-      <div class="kanban-cards">`;
-    defs.forEach(def => {
-      html += `<div class="kanban-card" onclick="openModal('${def.id}')">
-        <div class="kanban-card-num">${def.id}</div>
-        <div class="kanban-card-title">${def.title}</div>
-        <div class="kanban-card-owner">${def.owner}</div>
-      </div>`;
-    });
-    html += '</div></div>';
-  });
-  board.innerHTML = html;
-}
-
-// ── MODAL ─────────────────────────────────────────────────────────────────
-function openModal(id) {
-  currentSlideId = id;
-  const def = SLIDE_DEFS.find(d => d.id === id);
-  const s = slides[id];
-  if (!def || !s) return;
-
-  document.getElementById('modal-num').textContent = 'Slide ' + id;
-  document.getElementById('modal-title').textContent = def.title;
-  document.getElementById('modal-section').textContent = SECTION_LABELS[def.section];
-  document.getElementById('modal-owner').textContent = def.owner;
-
-  // Stage badge
-  const stageInfo = STAGES[s.stage];
-  document.getElementById('modal-stage-badge').innerHTML =
-    `<span class="stage-badge ${stageInfo.cls}" style="display:inline-block">${stageInfo.label}</span>`;
-
-  // Editable fields
-  const canEditContent = ['ceo','strategist','narrative'].includes(currentRole);
-  const canEditDesign  = ['ceo','designer'].includes(currentRole);
-  const intentEl  = document.getElementById('modal-intent');
-  const contentEl = document.getElementById('modal-content');
-  const designEl  = document.getElementById('modal-design');
-  const saveBtn   = document.getElementById('save-btn');
-
-  intentEl.value  = s.intent || '';
-  contentEl.value = s.content || '';
-  designEl.value  = s.design || '';
-  intentEl.readOnly  = !canEditContent;
-  contentEl.readOnly = !canEditContent;
-  designEl.readOnly  = !canEditDesign;
-  saveBtn.style.display = canEditContent ? 'inline-block' : 'none';
-
-  // Comments
-  renderComments(s.comments);
-  const commentForm = document.getElementById('comment-form');
-  commentForm.style.display = currentRole === 'viewer' ? 'none' : 'flex';
-
-  // History
-  renderHistory(s.history);
-
-  // Action buttons
-  renderActions(s.stage);
-
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  currentSlideId = null;
-}
-
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-function renderActions(stage) {
-  const container = document.getElementById('modal-actions');
-  let btns = '';
-  if (currentRole === 'ceo') {
-    btns += `<button class="action-btn approve" onclick="moveStage('approved')">✓ Approve</button>`;
-    btns += `<button class="action-btn revise" onclick="moveStage('revision')">↩ Request Revision</button>`;
-  } else if (currentRole === 'strategist' || currentRole === 'narrative') {
-    btns += `<button class="action-btn submit" onclick="moveStage('content')">→ Submit for Review</button>`;
-  } else if (currentRole === 'designer') {
-    btns += `<button class="action-btn design-send" onclick="moveStage('qa')">→ Send to QA</button>`;
-  } else if (currentRole === 'qa') {
-    btns += `<button class="action-btn qa-pass" onclick="moveStage('approved')">✓ QA Pass</button>`;
-    btns += `<button class="action-btn qa-flag" onclick="moveStage('revision')">⚑ Flag Issue</button>`;
-  }
-  container.innerHTML = btns;
-}
-
-function moveStage(newStage) {
-  if (!currentSlideId) return;
-  const s = slides[currentSlideId];
-  if (!s) return;
-  const oldStage = s.stage;
-  s.stage = newStage;
-  s.history.push({ ts: Date.now(), role: ROLE_LABELS[currentRole], stage: newStage, note: `${STAGES[oldStage].label} → ${STAGES[newStage].label}` });
-  saveState();
-  renderAll();
-  // Update modal
-  const stageInfo = STAGES[newStage];
-  document.getElementById('modal-stage-badge').innerHTML =
-    `<span class="stage-badge ${stageInfo.cls}" style="display:inline-block">${stageInfo.label}</span>`;
-  renderHistory(s.history);
-  renderActions(newStage);
-}
-
-function saveEdits() {
-  if (!currentSlideId) return;
-  const s = slides[currentSlideId];
-  if (!s) return;
-  s.intent  = document.getElementById('modal-intent').value;
-  s.content = document.getElementById('modal-content').value;
-  s.history.push({ ts: Date.now(), role: ROLE_LABELS[currentRole], stage: s.stage, note: 'Content edited' });
-  saveState();
-  renderStoryboard();
-  updateStats();
-}
-
-function saveDesignNotes() {
-  if (!currentSlideId) return;
-  const s = slides[currentSlideId];
-  if (!s) return;
-  s.design = document.getElementById('modal-design').value;
-  s.history.push({ ts: Date.now(), role: ROLE_LABELS[currentRole], stage: s.stage, note: 'Design notes updated' });
-  saveState();
-}
-
-function addComment() {
-  if (!currentSlideId) return;
-  const input = document.getElementById('comment-input');
-  const text  = input.value.trim();
-  if (!text) return;
-  const s = slides[currentSlideId];
-  if (!s) return;
-  s.comments.push({ ts: Date.now(), role: ROLE_LABELS[currentRole], text });
-  input.value = '';
-  saveState();
-  renderComments(s.comments);
-  renderStoryboard();
-}
-
-function renderComments(comments) {
-  const list = document.getElementById('comments-list');
-  if (!comments.length) { list.innerHTML = '<div style="color:var(--quiet);font-size:12px">No comments yet.</div>'; return; }
-  list.innerHTML = comments.map(c => `
-    <div class="comment">
-      <div class="comment-meta"><strong>${escHtml(c.role)}</strong> · ${timeAgo(c.ts)}</div>
-      <div class="comment-text">${escHtml(c.text)}</div>
-    </div>`).join('');
-  list.scrollTop = list.scrollHeight;
-}
-
-function renderHistory(history) {
-  const list = document.getElementById('history-list');
-  if (!history.length) { list.innerHTML = '<div style="color:var(--quiet);font-size:11px">No history.</div>'; return; }
-  const dotMap = { approved:'green', content:'amber', design:'blue', qa:'blue', revision:'red', draft:'' };
-  list.innerHTML = [...history].reverse().map(h => `
-    <div class="history-item">
-      <div class="history-dot ${dotMap[h.stage]||''}"></div>
-      <div><div style="font-size:10px;color:var(--quiet)">${timeAgo(h.ts)}</div><div>${escHtml(h.note)}</div></div>
-    </div>`).join('');
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────────
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function timeAgo(ts) {
-  const d = Date.now() - ts;
-  if (d < 60000) return 'just now';
-  if (d < 3600000) return Math.floor(d/60000)+'m ago';
-  if (d < 86400000) return Math.floor(d/3600000)+'h ago';
-  return Math.floor(d/86400000)+'d ago';
-}
-
-function renderAll() {
-  updateStats();
-  renderStoryboard();
-  if (currentView==='kanban') renderKanban();
-}
-
-// Init
-loadState();
-</script>
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
