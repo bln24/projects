@@ -20,13 +20,8 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
-
   <script>
-    /* === BLN24 / OpenClaw integration config ===
-       Tenant + client IDs from Microsoft Entra app registration.
-       Workspace URL serves the play folder read-only via Cloudflare Tunnel.
-       Agents URL is the OpenClaw chat the team deeplinks into. */
+    /* === BLN24 / OpenClaw integration config === */
     window.BLN24_CONFIG = {
       tenantId: "bce59a38-0a4f-42df-8ff2-8d40797d61f1",
       clientId: "6eaa2169-cf1c-42a1-9086-a44db8081f67",
@@ -35,18 +30,38 @@
       workspaceUrl: "https://workspace.bln24.com",
       agentsUrl: "https://agents.bln24.com"
     };
+  </script>
 
-    /* Initialise MSAL once, expose globally. */
-    window.msalInstance = new msal.PublicClientApplication({
-      auth: {
-        clientId: window.BLN24_CONFIG.clientId,
-        authority: "https://login.microsoftonline.com/" + window.BLN24_CONFIG.tenantId,
-        redirectUri: window.BLN24_CONFIG.redirectUri,
-        postLogoutRedirectUri: window.BLN24_CONFIG.redirectUri
-      },
-      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
-    });
-    window.msalReady = window.msalInstance.initialize();
+  <!-- MSAL: try primary CDN, then fallback -->
+  <!-- alcdn.msauth.net/3.10.0 returns 404; load directly from unpkg -->
+  <script src="https://unpkg.com/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"
+          onload="window.__initMsal&&window.__initMsal()"></script>
+
+  <script>
+    window.__initMsal = function() {
+      if (typeof msal === "undefined") {
+        console.error("MSAL failed to load from both CDNs.");
+        window.msalLoadError = true;
+        return;
+      }
+      try {
+        window.msalInstance = new msal.PublicClientApplication({
+          auth: {
+            clientId: window.BLN24_CONFIG.clientId,
+            authority: "https://login.microsoftonline.com/" + window.BLN24_CONFIG.tenantId,
+            redirectUri: window.BLN24_CONFIG.redirectUri,
+            postLogoutRedirectUri: window.BLN24_CONFIG.redirectUri
+          },
+          cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
+        });
+        window.msalReady = window.msalInstance.initialize();
+      } catch (e) {
+        console.error("MSAL init failed:", e);
+        window.msalLoadError = e.message;
+      }
+    };
+    /* In case the onload fired before this script ran. */
+    if (typeof msal !== "undefined" && !window.msalInstance) window.__initMsal();
   </script>
 </head>
 <body class="grain">
@@ -55,8 +70,8 @@
   <script type="text/babel" src="tweaks-panel.jsx"></script>
   <script type="text/babel" src="icons.jsx"></script>
   <script type="text/babel" src="shared.jsx"></script>
-  <script type="text/babel" src="workspace-data.jsx"></script>
-  <script type="text/babel" src="login.jsx"></script>
+  <script type="text/babel" src="workspace-data.jsx?v=20260512a"></script>
+  <script type="text/babel" src="login.jsx?v=20260512a"></script>
   <script type="text/babel" src="dashboard.jsx"></script>
   <script type="text/babel" src="create.jsx"></script>
   <script type="text/babel" src="narrative-content.jsx"></script>
