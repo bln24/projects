@@ -25,6 +25,36 @@ const T24 = {
   // delivered to a cohort of Fortune 500 companies.
   projects: [
     {
+      id: "caio-elevate-2026",
+      slug: "CAIO Elevate",           // matches Teams folder name
+      persona: "CAIO",
+      personaFull: "Chief AI Officer",
+      industry: "Cross-industry · Fortune 500",
+      title: "From a single client meeting to a deck Fortune 500 buyers say yes to.",
+      cohort: ["L'Oréal", "Delta", "Regions", "Deloitte", "Accenture"],
+      cohortSize: 5,
+      stage: "storyboard",
+      stageIndex: 2,
+      progress: 60,
+      due: "TBD",
+      dueIn: 0,
+      status: "Storyboard in Review",
+      statusKind: "review",
+      lead: "stephen",               // Stephen owns storyboard+
+      narrativeLead: "angie",        // Angie owns narrative/arc
+      team: ["angie", "stephen"],
+      live: ["stephen"],
+      lastActivity: "CAO_Elevate_Storyboard_FINAL.docx uploaded",
+      lastActivityAt: "May 1",
+      cover: "linear-gradient(135deg,#3a2d5c 0%,#5c2d4a 50%,#3a2d5c 100%)",
+      accent: "#c79bff",
+      tags: ["CAIO", "CXO Elevate"],
+      // Approval state per stage (0=Narrative, 1=Arc, 2=Storyboard, 3=Deck)
+      // Angie approves 0+1, Stephen+Angie approve 2, AWS approves 3
+      stageOwners: ["angie", "angie", "stephen", "aws"],
+    },
+
+    {
       id: "cmo-2026",
       persona: "CMO",
       personaFull: "Chief Marketing Officer",
@@ -173,18 +203,18 @@ const T24 = {
 
   // Personas catalog used by the create flow
   personaCatalog: [
-    { id: "CEO",  name: "CEO",  full: "Chief Executive Officer", count: 0 },
-    { id: "CMO",  name: "CMO",  full: "Chief Marketing Officer", count: 1 },
-    { id: "CTO",  name: "CTO",  full: "Chief Technology Officer", count: 1 },
-    { id: "CFO",  name: "CFO",  full: "Chief Financial Officer", count: 0 },
-    { id: "CIO",  name: "CIO",  full: "Chief Information Officer", count: 0 },
-    { id: "CDO",  name: "CDO",  full: "Chief Data Officer", count: 1 },
-    { id: "CISO", name: "CISO", full: "Chief Information Security Officer", count: 1 },
-    { id: "CXO",  name: "CXO",  full: "Chief Experience Officer", count: 1 },
-    { id: "CMIO", name: "CMIO", full: "Chief Medical Information Officer", count: 1 },
-    { id: "CHRO", name: "CHRO", full: "Chief Human Resources Officer", count: 0 },
-    { id: "COO",  name: "COO",  full: "Chief Operating Officer", count: 0 },
-    { id: "CRO",  name: "CRO",  full: "Chief Revenue Officer", count: 0 },
+    { id: "CAIO", name: "CAIO", full: "Chief AI Officer",                   count: 1 },
+    { id: "CEO",  name: "CEO",  full: "Chief Executive Officer",              count: 0 },
+    { id: "CMO",  name: "CMO",  full: "Chief Marketing Officer",              count: 1 },
+    { id: "COO",  name: "COO",  full: "Chief Operating Officer",              count: 1 },
+    { id: "CTO",  name: "CTO",  full: "Chief Technology Officer",             count: 0 },
+    { id: "CFO",  name: "CFO",  full: "Chief Financial Officer",              count: 0 },
+    { id: "CIO",  name: "CIO",  full: "Chief Information Officer",            count: 0 },
+    { id: "CDO",  name: "CDO",  full: "Chief Data Officer",                   count: 0 },
+    { id: "CISO", name: "CISO", full: "Chief Information Security Officer",   count: 0 },
+    { id: "CXO",  name: "CXO",  full: "Chief Experience Officer",             count: 0 },
+    { id: "CRO",  name: "CRO",  full: "Chief Revenue Officer",                count: 0 },
+    { id: "CHRO", name: "CHRO", full: "Chief Human Resources Officer",        count: 0 },
   ],
 
   // Fortune 500 starter list for cohort building

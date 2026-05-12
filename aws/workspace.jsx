@@ -43,11 +43,11 @@ function Workspace({ projectId, onBack, onNav, aiMode = "dock" }) {
         <div className="ws-meta-row">
           <div className="ws-meta-item">
             <span className="live-dot" />
-            <span><strong>Stephen</strong> is reviewing now</span>
+            <span><strong>{stageIdx <= 1 ? "Angie" : stageIdx === 2 ? "Stephen" : "AWS"}</strong> {stageIdx === 3 ? "approves" : "is reviewing now"}</span>
           </div>
           <div className="ws-meta-item">
             <Icon name="users" size={13} />
-            <span>Lead: <strong>Angie Paik</strong></span>
+            <span>Lead: <strong>{stageIdx <= 1 ? "Angie Paik" : "Stephen Yi"}</strong></span>
             <div className="avatar-stack avatar-stack-sm" style={{ marginLeft: 4 }}>
               {project.team.map(p => {
                 const person = T24.people[p];
@@ -209,7 +209,7 @@ function Workspace({ projectId, onBack, onNav, aiMode = "dock" }) {
             )}
           </div>
 
-          <ApprovalBar stage={stage} version={version} />
+          <ApprovalBar stage={stage} version={version} stageIdx={stageIdx} project={project} />
         </main>
 
         {/* Right rail */}
@@ -855,8 +855,34 @@ function SlideHead({ slide }) {
   );
 }
 
-function ApprovalBar({ stage, version }) {
+// Stage owner labels — who approves each stage
+const STAGE_OWNER_LABELS = [
+  { approver: "Angie",         hint: "Angie reviews and approves the narrative before it moves to Arc." },
+  { approver: "Angie",         hint: "Angie approves the Arc before Stephen builds the storyboard." },
+  { approver: "Angie + Stephen", hint: "Both Angie and Stephen sign off on the storyboard before the deck is built." },
+  { approver: "AWS",           hint: "Client (AWS) approves the final deck. Mark approved once confirmed via email or Zoom." },
+];
+
+function ApprovalBar({ stage, version, stageIdx, project }) {
   const [voiceOpen, setVoiceOpen] = React.useState(false);
+  const playSlug = project?.slug || project?.id || "";
+  const [approval, setApproval] = React.useState(() =>
+    window.spGetApproval ? spGetApproval(playSlug, stageIdx) : null
+  );
+  const ownerInfo = STAGE_OWNER_LABELS[stageIdx] || STAGE_OWNER_LABELS[0];
+
+  const handleApprove = () => {
+    if (!window.spSetApproval) return;
+    const user = window.msalInstance?.getAllAccounts?.()?.[0]?.name || ownerInfo.approver;
+    const data = spSetApproval(playSlug, stageIdx, user);
+    setApproval(data);
+  };
+
+  const handleUnapprove = () => {
+    if (!window.spClearApproval) return;
+    spClearApproval(playSlug, stageIdx);
+    setApproval(null);
+  };
   const tells = [
     { phrase: "running on instinct for a generation", note: "Cliché. Angie's spec calls for tighter, more declarative openings.", suggest: "running on instinct" },
     { phrase: "remarkably good", note: "Soft hedge. AWS reviewers consistently flag these.", suggest: "good" },
@@ -907,8 +933,19 @@ function ApprovalBar({ stage, version }) {
       )}
       <div className="approval-bar">
         <div className="approval-bar-info">
-          <span className="lbl">Ready when you are</span>
-          <span className="val">Approving advances <strong>{stage.name}</strong> to the next stage and locks v{version}.</span>
+          {approval ? (
+            <>
+              <span className="lbl" style={{color:"var(--success,#22c55e)"}}>✓ Approved</span>
+              <span className="val">{stage.name} approved by <strong>{approval.by}</strong> · {new Date(approval.at).toLocaleDateString()}</span>
+            </>
+          ) : (
+            <>
+              <span className="lbl">Awaiting approval</span>
+              <span className="val">
+                <strong>{ownerInfo.approver}</strong> approves. {ownerInfo.hint}
+              </span>
+            </>
+          )}
         </div>
         <div className="approval-bar-actions">
           <button className={"btn btn-ghost " + (voiceOpen ? "active" : "")} onClick={() => setVoiceOpen(!voiceOpen)}>
@@ -918,7 +955,15 @@ function ApprovalBar({ stage, version }) {
           </button>
           <button className="btn btn-ghost"><Icon name="message" size={13} />Request changes</button>
           <button className="btn btn-ghost"><Icon name="sparkles" size={13} />Ask T24 for v{version + 1}</button>
-          <button className="btn btn-accent"><Icon name="check" size={13} />Approve {stage.name}</button>
+          {approval ? (
+            <button className="btn btn-ghost" style={{color:"var(--muted)"}} onClick={handleUnapprove}>
+              <Icon name="close" size={13} />Unapprove
+            </button>
+          ) : (
+            <button className="btn btn-accent" onClick={handleApprove}>
+              <Icon name="check" size={13} />Mark {stage.name} Approved
+            </button>
+          )}
         </div>
       </div>
     </>

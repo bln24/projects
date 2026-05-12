@@ -7,10 +7,12 @@ function CreatePlay({ onCancel, onCreate }) {
   const [cohort, setCohort] = React.useState([]);
   const [title, setTitle] = React.useState("");
   const [template, setTemplate] = React.useState("engagement");
-  const [sources, setSources] = React.useState([]);
+  const [sources, setSources] = React.useState([]);   // { name, size, _file }
   const [draggingOver, setDraggingOver] = React.useState(false);
   const [generating, setGenerating] = React.useState(false);
   const [genStep, setGenStep] = React.useState(0);
+  const [genError, setGenError] = React.useState(null);
+  const [uploadProgress, setUploadProgress] = React.useState({});
 
   const steps = ["Persona", "Cohort", "Brief", "Sources", "Review"];
 
@@ -18,16 +20,38 @@ function CreatePlay({ onCancel, onCreate }) {
     setCohort(c => c.includes(name) ? c.filter(x => x !== name) : [...c, name]);
   };
 
-  const submit = () => {
+  const submit = async () => {
     setGenerating(true);
-    let i = 0;
-    const tick = () => {
-      i++;
-      setGenStep(i);
-      if (i < 4) setTimeout(tick, 900);
-      else setTimeout(() => onCreate({ persona, cohort, title, template }), 600);
-    };
-    setTimeout(tick, 400);
+    setGenError(null);
+    const personaId = persona === "__custom" ? customPersona.toUpperCase().slice(0, 6) : persona;
+    const playSlug = (window.SP?.playFolderName?.[personaId]) || `${personaId} Elevate`;
+
+    try {
+      // Phase 1: Create SharePoint folders
+      setGenStep(1);
+      if (window.spEnsureFolders) {
+        await spEnsureFolders(playSlug).catch(e => console.warn("Folder create:", e));
+      }
+
+      // Phase 2: Upload source files to 01 - Source Materials
+      setGenStep(2);
+      const realFiles = sources.filter(s => s._file);
+      for (const s of realFiles) {
+        await spUpload(s._file, playSlug, "sources", (pct) => {
+          setUploadProgress(prev => ({ ...prev, [s.name]: pct }));
+        }).catch(e => console.warn("Upload", s.name, e));
+      }
+
+      // Phase 3: Notify team
+      setGenStep(3);
+      await new Promise(r => setTimeout(r, 800));
+
+      setGenStep(4);
+      setTimeout(() => onCreate({ persona: personaId, cohort, title, template, playSlug }), 600);
+    } catch (e) {
+      setGenError(e.message);
+      setGenerating(false);
+    }
   };
 
   const next = () => setStep(s => Math.min(s + 1, steps.length - 1));
@@ -41,10 +65,11 @@ function CreatePlay({ onCancel, onCreate }) {
 
   if (generating) {
     const phases = [
-      "Reading your sources…",
-      "Drafting Narrative v1…",
-      "Provisioning SharePoint folders…",
-      "Inviting your team…",
+      "Preparing…",
+      "Creating SharePoint folders in Teams…",
+      `Uploading ${sources.filter(s=>s._file).length || ""} source file${sources.filter(s=>s._file).length === 1 ? "" : "s"} to AWS T24 channel…`,
+      "Notifying Angie + Stephen…",
+      "Done — opening your play.",
     ];
     return (
       <div className="create-stage" style={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
@@ -55,7 +80,7 @@ function CreatePlay({ onCancel, onCreate }) {
           </h1>
           <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
             {phases.map((p, i) => (
-              <div key={i} className={"gen-step " + (i < genStep ? "done" : i === genStep ? "active" : "")}>
+              <div key={i} className={"gen-step " + (i < genStep ? "done" : i === genStep ? "active" : "")} style={{opacity: i > genStep ? 0.35 : 1}}>
                 <span className="dot" />
                 <span>{p}</span>
                 {i < genStep && <Icon name="check" size={14} className="amber" />}
@@ -208,7 +233,22 @@ function CreatePlay({ onCancel, onCreate }) {
             <div className={"big-dropzone " + (draggingOver ? "active" : "")}
                  onDragOver={e => { e.preventDefault(); setDraggingOver(true); }}
                  onDragLeave={() => setDraggingOver(false)}
-                 onDrop={e => { e.preventDefault(); setDraggingOver(false); setSources(s => [...s, ...Array.from(e.dataTransfer.files).map(f => ({ name: f.name, size: f.size, type: "file" }))]); }}>
+                 onDrop={e => {
+                   e.preventDefault(); setDraggingOver(false);
+                   const newFiles = Array.from(e.dataTransfer.files).map(f => ({ name: f.name, size: f.size, _file: f }));
+                   setSources(s => [...s, ...newFiles]);
+                 }}
+                 onClick={() => {
+                   const input = document.createElement("input");
+                   input.type = "file";
+                   input.multiple = true;
+                   input.accept = ".docx,.pdf,.pptx,.txt,.vtt,.mp4,.xlsx";
+                   input.onchange = e => {
+                     const newFiles = Array.from(e.target.files).map(f => ({ name: f.name, size: f.size, _file: f }));
+                     setSources(s => [...s, ...newFiles]);
+                   };
+                   input.click();
+                 }}>
               <Icon name="upload" size={32} />
               <div className="big" style={{ fontFamily: "var(--display)", fontSize: 32, marginTop: 12 }}>Drop transcripts, decks, notes, PDFs</div>
               <div className="muted" style={{ marginTop: 8 }}>or click to browse · .docx, .pdf, .pptx, .txt, .vtt</div>
