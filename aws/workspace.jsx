@@ -90,16 +90,31 @@ function DocViewer({ file, onClose }) {
         const token = await spGetUserToken();
         const groupId = window.SP && SP.groupId;
         if (!groupId || !file.id) throw new Error("missing ids");
+
+        // Try Graph download URL first
         const res = await fetch(
           `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        if (!res.ok) throw new Error(`Graph ${res.status}`);
-        const data = await res.json();
-        const dlUrl = data["@microsoft.graph.downloadUrl"];
-        if (!dlUrl) throw new Error("No download URL — try Open in Word");
-        setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
-        setMode("iframe");
+        if (res.ok) {
+          const data = await res.json();
+          const dlUrl = data["@microsoft.graph.downloadUrl"];
+          if (dlUrl) {
+            setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
+            setMode("iframe");
+            return;
+          }
+        }
+
+        // Fallback: SharePoint embed URL (works if browser is logged in to SharePoint)
+        if (file.webUrl) {
+          const spEmbedUrl = file.webUrl.replace(/action=default/, "action=embedview") + "&wdAllowInteractivity=False";
+          setEmbedUrl(spEmbedUrl);
+          setMode("iframe");
+          return;
+        }
+
+        throw new Error("No preview URL available");
       } catch (e) {
         console.error("[DocViewer]", e.message);
         setMode("error");
