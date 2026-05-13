@@ -1,34 +1,63 @@
-/* global React, Icon, T24, StatusPill */
+/* global React, Icon, T24, StatusPill, useLivePlays */
 
 function Dashboard({ onOpenProject, onNewProject }) {
   const [tab, setTab] = React.useState("active");
   const [view, setView] = React.useState("grid");
+  const { loading, plays, error } = useLivePlays();
 
-  const active = T24.projects.filter(p => !p.done);
-  const done = T24.projects.filter(p => p.done);
-  const review = T24.projects.filter(p => p.statusKind === "review" && !p.done);
+  // Derive stats from live data
+  const allPlays = plays.length > 0 ? plays : [];
+  const active = allPlays.filter(p => !p.done);
+  const done = allPlays.filter(p => p.done);
+  const review = allPlays.filter(p => p.statusKind === "review" && !p.done);
   const filtered =
     tab === "active" ? active :
     tab === "review" ? review :
-    tab === "done" ? done : T24.projects;
+    tab === "done" ? done : allPlays;
 
-  const featured = active[0];
-  const rest = filtered.filter(p => p.id !== (tab === "active" ? featured.id : "__none"));
+  const featured = active[0] || null;
+  const rest = filtered.filter(p => !featured || p.id !== (tab === "active" ? featured.id : "__none"));
+
+  // Live greeting
+  const now = new Date();
+  const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
+  const dateStr = now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const reviewCount = review.length;
+  const deckReady = allPlays.filter(p => p.stageIndex === 3 && p.statusKind === "review").length;
+
+  if (loading) return (
+    <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 320 }}>
+      <div style={{ textAlign: "center", color: "var(--muted)" }}>
+        <div style={{ fontFamily: "var(--display)", fontSize: 28, marginBottom: 12 }}>Loading plays…</div>
+        <div style={{ fontSize: 13 }}>Fetching from SharePoint</div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="dash-page">
       <section className="dash-hero">
-        <div className="eyebrow">Tuesday, 14 April 2026 · Quarterly cycle Q2</div>
+        <div className="eyebrow">{dayName}, {dateStr}</div>
         <h1 className="dash-greeting">
-          Good morning, Brian.<br/>
-          <span className="ink-soft">You have</span> <em>3 narratives</em> <span className="ink-soft">awaiting your review and</span> <em>1 deck</em> <span className="ink-soft">ready to ship to AWS.</span>
+          {greeting}, Brian.<br/>
+          {error ? (
+            <span className="ink-soft" style={{ fontSize: "0.6em", color: "var(--muted)" }}>Couldn't load SharePoint data — {error}</span>
+          ) : reviewCount > 0 || deckReady > 0 ? (
+            <><span className="ink-soft">You have</span>{reviewCount > 0 && <> <em>{reviewCount} {reviewCount === 1 ? "play" : "plays"}</em> <span className="ink-soft">awaiting review</span></>}{reviewCount > 0 && deckReady > 0 && <span className="ink-soft"> and</span>}{deckReady > 0 && <> <em>{deckReady} {deckReady === 1 ? "deck" : "decks"}</em> <span className="ink-soft">ready to ship.</span></>}</>
+          ) : active.length > 0 ? (
+            <><span className="ink-soft">You have</span> <em>{active.length} active {active.length === 1 ? "play" : "plays"}</em> <span className="ink-soft">in progress.</span></>
+          ) : (
+            <span className="ink-soft">No active plays. Start one.</span>
+          )}
         </h1>
 
         <div className="dash-stats">
-          <div className="dash-stat"><span className="num"><em>06</em></span><span className="lbl">Active Plays</span><span className="delta up">+2 this month</span></div>
-          <div className="dash-stat"><span className="num"><em>03</em></span><span className="lbl">In Review</span><span className="delta">avg. turn 1.2d</span></div>
-          <div className="dash-stat"><span className="num"><em>14</em></span><span className="lbl">Decks Delivered</span><span className="delta up">+4 vs Q1</span></div>
-          <div className="dash-stat"><span className="num"><em>92</em>%</span><span className="lbl">AWS Approval Rate</span><span className="delta up">+11 vs Q1</span></div>
+          <div className="dash-stat"><span className="num"><em>{String(active.length).padStart(2,"0")}</em></span><span className="lbl">Active Plays</span></div>
+          <div className="dash-stat"><span className="num"><em>{String(reviewCount).padStart(2,"0")}</em></span><span className="lbl">In Review</span></div>
+          <div className="dash-stat"><span className="num"><em>{String(done.length).padStart(2,"0")}</em></span><span className="lbl">Delivered</span></div>
+          <div className="dash-stat"><span className="num"><em>{allPlays.length}</em></span><span className="lbl">Total Plays</span></div>
         </div>
       </section>
 
@@ -37,7 +66,7 @@ function Dashboard({ onOpenProject, onNewProject }) {
           <button className={"dash-tab " + (tab === "active" ? "active" : "")} onClick={() => setTab("active")}>Active <span className="count">{active.length}</span></button>
           <button className={"dash-tab " + (tab === "review" ? "active" : "")} onClick={() => setTab("review")}>Awaiting Review <span className="count">{review.length}</span></button>
           <button className={"dash-tab " + (tab === "done" ? "active" : "")} onClick={() => setTab("done")}>Delivered <span className="count">{done.length}</span></button>
-          <button className={"dash-tab " + (tab === "all" ? "active" : "")} onClick={() => setTab("all")}>All <span className="count">{T24.projects.length}</span></button>
+          <button className={"dash-tab " + (tab === "all" ? "active" : "")} onClick={() => setTab("all")}>All <span className="count">{allPlays.length}</span></button>
         </div>
         <div className="dash-toolbar-right">
           <button className="btn btn-ghost btn-sm"><Icon name="filter" size={13} />Filter by persona</button>
@@ -49,7 +78,14 @@ function Dashboard({ onOpenProject, onNewProject }) {
         </div>
       </div>
 
-      {tab === "active" && <FeaturedPlay project={featured} onOpen={() => onOpenProject(featured.id)} />}
+      {tab === "active" && featured && <FeaturedPlay project={featured} onOpen={() => onOpenProject(featured.id)} />}
+      {tab === "active" && !featured && active.length === 0 && (
+        <div style={{ textAlign: "center", padding: "64px 24px", color: "var(--muted)" }}>
+          <div style={{ fontFamily: "var(--display)", fontSize: 32, marginBottom: 8 }}>No active plays</div>
+          <div style={{ fontSize: 14, marginBottom: 24 }}>Create your first play to get started.</div>
+          <button className="btn btn-accent" onClick={onNewProject}><Icon name="plus" size={13} />New play</button>
+        </div>
+      )}
 
       {view === "grid" ? (
         <>

@@ -1,101 +1,162 @@
 /* global React */
-/* Live play loader. Reads the OpenClaw play folder over Cloudflare Tunnel
-   (https://workspace.bln24.com) and exposes a useLivePlays() hook.
-   Falls back to T24.projects (seeded mocks) on any error. */
+/*
+  workspace-data.jsx — Live play loader from SharePoint T24 Plays list.
+  Falls back to [] on any error.
 
-const WORKSPACE_URL = (window.BLN24_CONFIG && window.BLN24_CONFIG.workspaceUrl) || "https://workspace.bln24.com";
+  SharePoint:
+    Site:    thebln24.sharepoint.com/sites/AWST24
+    List ID: 621fcc09-a31a-458c-9d8d-2ddc5f305e98
+*/
 
-/* The plays we expect to see in the workspace. Add new slugs here as Anvil
-   produces new plays — or wire to an index.json once OpenClaw writes one. */
-const KNOWN_PLAYS = [
-  { slug: "cxo-elevate-caio-2026", persona: "CAIO", personaFull: "Chief AI Officer" },
-];
+const SP_SITE_ID   = "thebln24.sharepoint.com,c5a784dc-1541-42e7-81de-ccf367b4f2e5,8addf76a-63d1-48ef-a0e3-ce14a52731e9";
+const SP_LIST_ID   = "621fcc09-a31a-458c-9d8d-2ddc5f305e98";
 
-async function readPlayFile(slug, filename) {
+async function spGetUserToken() {
+  if (!window.msalInstance) throw new Error("MSAL not initialized");
+  const acct = window.msalInstance.getAllAccounts()[0];
+  if (!acct) throw new Error("Not signed in");
   try {
-    const r = await fetch(`${WORKSPACE_URL}/${slug}/${filename}`, { cache: "no-store" });
-    if (!r.ok) return null;
-    return await r.text();
-  } catch (e) { return null; }
+    const r = await window.msalInstance.acquireTokenSilent({
+      scopes: ["https://graph.microsoft.com/Sites.Read.All"],
+      account: acct,
+    });
+    return r.accessToken;
+  } catch {
+    const r = await window.msalInstance.acquireTokenPopup({
+      scopes: ["https://graph.microsoft.com/Sites.Read.All"],
+    });
+    return r.accessToken;
+  }
 }
 
-function parseBrief(text) {
-  if (!text) return null;
-  const title = (text.match(/^#\s+(.+)$/m) || [])[1];
-  const cohort = (text.match(/(?:cohort|targets?)\s*:\s*([^\n]+)/i) || [])[1];
+// Map a SharePoint list item → the play shape the app expects
+function mapItem(item) {
+  const f = item.fields;
+
+  let cohort = [];
+  try { cohort = JSON.parse(f.Cohort || "[]"); } catch {}
+
+  let team = [];
+  try { team = JSON.parse(f.Team || "[]"); } catch {}
+
+  const stageIndex = typeof f.StageIndex === "number" ? f.StageIndex : 0;
+  const stages = ["narrative", "arc", "storyboard", "deck"];
+
+  // Due date → "May 30" style + daysLeft
+  let dueLabel = "TBD";
+  let dueIn = 0;
+  if (f.Due) {
+    const d = new Date(f.Due);
+    dueLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    dueIn = Math.round((d - Date.now()) / 86400000);
+  }
+
+  const personaId = (f.Persona || "").toUpperCase();
+
   return {
-    title: title ? title.trim() : null,
-    summary: text.split("\n").slice(0, 8).join(" ").slice(0, 280),
-    cohortNote: cohort ? cohort.trim() : null,
-  };
-}
-
-function detectStage(files) {
-  if (files.deck) return { idx: 3, name: "Deck",       status: "Deck rendered" };
-  if (files.story) return { idx: 2, name: "Storyboard", status: "Storyboard ready" };
-  if (files.arc) return { idx: 1, name: "Narrative Arc", status: "Arc approved" };
-  if (files.narrative) return { idx: 0, name: "Narrative", status: "Narrative drafted" };
-  return { idx: 0, name: "Narrative", status: "Awaiting first draft" };
-}
-
-async function loadOnePlay(meta) {
-  const [brief, narrative, arc, story, deck] = await Promise.all([
-    readPlayFile(meta.slug, "00_brief.md"),
-    readPlayFile(meta.slug, "02_narrative.md"),
-    readPlayFile(meta.slug, "03_arc.md"),
-    readPlayFile(meta.slug, "04_storyboard.md"),
-    readPlayFile(meta.slug, "05_deck.pptx"),
-  ]);
-  if (!brief) return null;
-  const parsed = parseBrief(brief);
-  const stage = detectStage({ narrative, arc, story, deck });
-  return {
-    id: meta.slug,
-    slug: meta.slug,
-    persona: meta.persona,
-    personaFull: meta.personaFull,
-    title: parsed.title || `${meta.personaFull} play`,
-    cohort: parsed.cohortNote ? [parsed.cohortNote] : [],
-    cohortSize: 1,
-    stage: stage.name.toLowerCase(),
-    stageIndex: stage.idx,
-    status: stage.status,
-    statusKind: deck ? "approved" : "live",
-    progress: [25, 50, 75, 100][stage.idx],
-    due: "—",
-    dueIn: 0,
-    lead: "anvil",
-    team: ["anvil", "stephen", "scout"],
-    live: stage.idx < 3 ? ["anvil"] : [],
-    lastActivity: `Anvil last touched ${stage.name.toLowerCase()}`,
-    lastActivityAt: "live",
-    cover: "linear-gradient(135deg,#3a2d5c 0%,#5c2d4a 50%,#3a2d5c 100%)",
-    accent: "#c79bff",
-    tags: [meta.persona, "OpenClaw"],
-    industry: "Cross-industry · Fortune 500",
+    // identity
+    id: String(item.id),
+    spItemId: item.id,
+    slug: f.Persona ? `${f.Persona.toLowerCase()}-elevate` : String(item.id),
+    // display
+    persona: f.Persona || "?",
+    personaFull: f.PersonaFull || f.Persona || "Unknown",
+    industry: f.Industry || "Enterprise",
+    title: f.Title || `${f.PersonaFull || f.Persona} play`,
+    // cohort
+    cohort,
+    cohortSize: typeof f.CohortSize === "number" ? f.CohortSize : cohort.length,
+    // stage
+    stage: stages[stageIndex] || "narrative",
+    stageIndex,
+    progress: [25, 50, 75, 100][stageIndex] || 25,
+    // status
+    status: f.Status || "In progress",
+    statusKind: f.StatusKind || "live",
+    // dates
+    due: dueLabel,
+    dueIn,
+    // team
+    lead: f.Lead || "angie",
+    team: team.length ? team : [f.Lead || "angie"],
+    live: stageIndex < 3 ? [f.Lead || "angie"] : [],
+    // activity
+    lastActivity: f.LastActivity || "",
+    lastActivityAt: "",
+    // visual
+    cover: f.CoverGradient || "linear-gradient(135deg,#1a3a5c 0%,#2d5a8c 100%)",
+    accent: f.AccentColor || "#7aa7ff",
+    // meta
+    tags: [f.Persona, "T24"].filter(Boolean),
+    done: f.Done === true,
+    stageOwners: ["angie", "angie", "stephen", "aws"],
     live_source: true,
-    files: { brief: !!brief, narrative: !!narrative, arc: !!arc, story: !!story, deck: !!deck },
   };
 }
 
 function useLivePlays() {
-  const [state, setState] = React.useState({ loading: true, plays: null, error: null });
+  const [state, setState] = React.useState({ loading: true, plays: [], error: null });
+
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const loaded = await Promise.all(KNOWN_PLAYS.map(loadOnePlay));
+        const token = await spGetUserToken();
+        const url = `https://graph.microsoft.com/v1.0/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items?expand=fields&$top=100`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error(`Graph ${res.status}`);
+        const data = await res.json();
         if (cancelled) return;
-        const valid = loaded.filter(Boolean);
-        setState({ loading: false, plays: valid, error: null });
+        const plays = (data.value || []).map(mapItem);
+        setState({ loading: false, plays, error: null });
       } catch (e) {
-        if (!cancelled) setState({ loading: false, plays: null, error: e.message });
+        if (!cancelled) setState({ loading: false, plays: [], error: e.message });
       }
     })();
     return () => { cancelled = true; };
   }, []);
+
   return state;
 }
 
+// Write a new play to SharePoint
+async function spCreatePlay(fields) {
+  const token = await spGetUserToken();
+  const body = {
+    fields: {
+      Title:          fields.title,
+      Persona:        fields.persona,
+      PersonaFull:    fields.personaFull,
+      Industry:       fields.industry || "",
+      Cohort:         JSON.stringify(fields.cohort || []),
+      CohortSize:     fields.cohortSize || (fields.cohort || []).length,
+      Due:            fields.due ? new Date(fields.due).toISOString() : null,
+      Team:           JSON.stringify(fields.team || []),
+      Lead:           fields.lead || "",
+      StageIndex:     0,
+      Status:         "Awaiting first draft",
+      StatusKind:     "idle",
+      Done:           false,
+      LastActivity:   "Play created",
+      CoverGradient:  fields.cover || "linear-gradient(135deg,#1a3a5c 0%,#2d5a8c 100%)",
+      AccentColor:    fields.accent || "#7aa7ff",
+    }
+  };
+  const url = `https://graph.microsoft.com/v1.0/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Graph ${res.status}`);
+  }
+  const item = await res.json();
+  return mapItem(item);
+}
+
 window.useLivePlays = useLivePlays;
-window.WORKSPACE_URL = WORKSPACE_URL;
+window.spCreatePlay = spCreatePlay;
+window.SP_SITE_ID = SP_SITE_ID;
+window.SP_LIST_ID = SP_LIST_ID;

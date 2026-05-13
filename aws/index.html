@@ -26,7 +26,7 @@
       tenantId: "bce59a38-0a4f-42df-8ff2-8d40797d61f1",
       clientId: "3ba92d21-924f-487e-b27d-59dc4ac44619",
       redirectUri: "https://projects.bln24.com/aws/",
-      scopes: ["openid", "profile", "email", "User.Read", "https://graph.microsoft.com/Files.ReadWrite.All"],
+      scopes: ["openid", "profile", "email", "User.Read", "https://graph.microsoft.com/Files.ReadWrite.All", "https://graph.microsoft.com/Sites.Read.All", "https://graph.microsoft.com/Sites.ReadWrite.All"],
       workspaceUrl: "https://workspace.bln24.com",
       agentsUrl: "https://agents.bln24.com"
     };
@@ -246,6 +246,112 @@ function spClearApproval(playSlug, stageIdx) {
   localStorage.removeItem(APPROVAL_KEY(playSlug, stageIdx));
 }
 
+// ── spCreatePlay: Write a new play to the T24 Plays SharePoint list ──
+// Site: https://thebln24.sharepoint.com/sites/AWST24
+// List: T24 Plays (dynamically resolved by name — Danny creates the list)
+// Requires Sites.ReadWrite.All scope in addition to Files.ReadWrite.All.
+
+let _t24PlaysSiteId = null;
+let _t24PlaysListId = null;
+
+async function spGetSiteToken() {
+  if (!window.msalInstance) throw new Error("MSAL not initialized");
+  const acct = window.msalInstance.getAllAccounts()[0];
+  if (!acct) throw new Error("Not signed in");
+  try {
+    const r = await window.msalInstance.acquireTokenSilent({
+      scopes: ["https://graph.microsoft.com/Sites.ReadWrite.All"],
+      account: acct,
+    });
+    return r.accessToken;
+  } catch {
+    const r = await window.msalInstance.acquireTokenPopup({
+      scopes: ["https://graph.microsoft.com/Sites.ReadWrite.All"],
+    });
+    return r.accessToken;
+  }
+}
+
+async function _resolvePlaysListIds(token) {
+  if (_t24PlaysSiteId && _t24PlaysListId) {
+    return { siteId: _t24PlaysSiteId, listId: _t24PlaysListId };
+  }
+
+  // 1. Resolve site
+  const siteRes = await fetch(
+    "https://graph.microsoft.com/v1.0/sites/thebln24.sharepoint.com:/sites/AWST24",
+    { headers: { "Authorization": `Bearer ${token}` } }
+  );
+  if (!siteRes.ok) {
+    const e = await siteRes.json().catch(() => ({}));
+    throw new Error(e?.error?.message || `Could not resolve AWST24 site (${siteRes.status})`);
+  }
+  const site = await siteRes.json();
+  _t24PlaysSiteId = site.id;
+
+  // 2. Find the T24 Plays list by display name
+  const listRes = await fetch(
+    `https://graph.microsoft.com/v1.0/sites/${_t24PlaysSiteId}/lists?$filter=displayName eq 'T24 Plays'`,
+    { headers: { "Authorization": `Bearer ${token}` } }
+  );
+  if (!listRes.ok) {
+    const e = await listRes.json().catch(() => ({}));
+    throw new Error(e?.error?.message || `Could not query lists on AWST24 site (${listRes.status})`);
+  }
+  const listData = await listRes.json();
+  const list = (listData.value || [])[0];
+  if (!list) {
+    throw new Error("T24 Plays list not found in the AWST24 site. Ask Danny to create it first.");
+  }
+  _t24PlaysListId = list.id;
+
+  return { siteId: _t24PlaysSiteId, listId: _t24PlaysListId };
+}
+
+// PUBLIC: Create a new play item in the T24 Plays SharePoint list.
+// formData: { title, persona, personaFull, industry, cohort[], dueDate, lead, team[] }
+// Returns the new SharePoint list item ID (string).
+async function spCreatePlay(formData) {
+  const token = await spGetSiteToken();
+  const { siteId, listId } = await _resolvePlaysListIds(token);
+
+  const fields = {
+    Title:        formData.title,
+    Persona:      formData.persona,
+    PersonaFull:  formData.personaFull,
+    Industry:     formData.industry || "",
+    Cohort:       JSON.stringify(formData.cohort || []),
+    CohortSize:   (formData.cohort || []).length,
+    Due:          formData.dueDate || null,
+    Team:         JSON.stringify(formData.team || []),
+    Lead:         formData.lead,
+    StageIndex:   0,
+    Status:       "Awaiting first draft",
+    StatusKind:   "idle",
+    Done:         false,
+  };
+
+  const res = await fetch(
+    `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type":  "application/json",
+      },
+      body: JSON.stringify({ fields }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Failed to create play in SharePoint (${res.status})`);
+  }
+
+  const item = await res.json();
+  return item.id;
+}
+
 window.SP = SP;
 window.spUpload = spUpload;
 window.spEnsureFolders = spEnsureFolders;
@@ -253,12 +359,13 @@ window.spListFiles = spListFiles;
 window.spGetApproval = spGetApproval;
 window.spSetApproval = spSetApproval;
 window.spClearApproval = spClearApproval;
+window.spCreatePlay = spCreatePlay;
 
   </script>
-  <script type="text/babel" src="workspace-data.jsx?v=20260513"></script>
+  <script type="text/babel" src="workspace-data.jsx?v=20260513b"></script>
   <script type="text/babel" src="login.jsx?v=20260513"></script>
-  <script type="text/babel" src="dashboard.jsx?v=20260513"></script>
-  <script type="text/babel" src="create.jsx?v=20260513"></script>
+  <script type="text/babel" src="dashboard.jsx?v=20260513b"></script>
+  <script type="text/babel" src="create.jsx?v=20260514"></script>
   <script type="text/babel" src="narrative-content.jsx?v=20260513"></script>
   <script type="text/babel" src="narrative-views.jsx?v=20260513"></script>
   <script type="text/babel" src="deck-content.jsx?v=20260513"></script>
@@ -355,7 +462,7 @@ window.spClearApproval = spClearApproval;
             onNewProject={() => navigate("create")}
           />
           {route.name === "dashboard" && <Dashboard onOpenProject={(id) => navigate("workspace", id)} onNewProject={() => navigate("create")} />}
-          {route.name === "create" && <CreatePlay onCancel={() => navigate("dashboard")} onCreate={() => navigate("workspace", "cmo-2026")} />}
+          {route.name === "create" && <CreatePlay onCancel={() => navigate("dashboard")} onCreated={(id) => navigate("workspace", id)} />}
           {route.name === "workspace" && <Workspace projectId={route.projectId} onBack={() => navigate("dashboard")} onNav={navigate} aiMode={tweaks.aiMode} />}
           {route.name === "library" && <Library onOpenProject={(id) => navigate("workspace", id)} />}
           {route.name === "calendar" && <CalendarPage />}
