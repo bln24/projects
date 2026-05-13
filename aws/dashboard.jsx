@@ -109,7 +109,7 @@ function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
         <PlayListView projects={filtered} onOpen={onOpenProject} />
       )}
 
-      <ActivityStrip />
+      <ActivityStrip plays={allPlays} />
     </div>
   );
 }
@@ -296,31 +296,34 @@ function PlayListView({ projects, onOpen }) {
   );
 }
 
-function ActivityStrip() {
-  const items = [
-    { who: "stephen", what: "approved", target: "CTO play · Narrative v3", time: "12m" },
-    { who: "michael", what: "uploaded 4 visuals to", target: "CXO play · Deck", time: "1h" },
-    { who: "t24", what: "generated v3 of", target: "CTO play · Narrative", time: "1h" },
-    { who: "angie", what: "left feedback on", target: "CMIO play · Arc", time: "3h" },
-    { who: "aws", what: "approved", target: "CISO play · Deck", time: "yesterday" },
-  ];
+function ActivityStrip({ plays = [] }) {
+  // Derive activity from real plays — show last activity per play, most recent first
+  const items = plays
+    .filter(p => p.lastActivity)
+    .sort((a, b) => (b.lastActivityAt || "").localeCompare(a.lastActivityAt || ""))
+    .slice(0, 5)
+    .map(p => ({
+      persona: p.persona,
+      target: `${p.persona} play`,
+      what: p.lastActivity,
+      statusKind: p.statusKind,
+    }));
+
   return (
     <section style={{ marginTop: 56 }}>
       <div className="section-head">
         <h3>Activity</h3>
-        <button className="btn-quiet">View all <Icon name="arrow_right" size={11} /></button>
       </div>
       <div className="activity-list">
-        {items.map((a, i) => {
-          const person = T24.people[a.who];
-          return (
-            <div key={i} className="activity-row">
-              <span className="avatar avatar-sm" style={{ background: person.color, color: "#0c0b08" }}>{person.initials}</span>
-              <span className="flex-1"><strong>{person.name}</strong> <span className="muted">{a.what}</span> <span className="amber">{a.target}</span></span>
-              <span className="mono muted" style={{ fontSize: 11 }}>{a.time}</span>
-            </div>
-          );
-        })}
+        {items.length === 0 ? (
+          <div style={{ padding: "32px 20px", textAlign: "center", color: "var(--muted)", fontSize: 13 }}>No activity yet.</div>
+        ) : items.map((a, i) => (
+          <div key={i} className="activity-row">
+            <span className="avatar avatar-sm" style={{ background: "var(--accent)", color: "#0c0b08", fontSize: 11 }}>{a.persona.slice(0,2)}</span>
+            <span className="flex-1"><span className="amber">{a.target}</span> <span className="muted">—</span> <span>{a.what}</span></span>
+            <StatusPill statusKind={a.statusKind} label={a.statusKind} />
+          </div>
+        ))}
       </div>
       <style>{`
         .activity-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }

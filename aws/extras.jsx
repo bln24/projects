@@ -59,26 +59,39 @@ function Library({ onOpenProject }) {
 }
 
 function Calendar() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const today = now.getDate();
+  const monthName = now.toLocaleDateString("en-US", { month: "long" });
+  const quarterNum = Math.ceil((month + 1) / 3);
+
+  // Build calendar grid for current month
   const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  const weeks = [
-    [null,null,1,2,3,4,5],
-    [6,7,8,9,10,11,12],
-    [13,14,15,16,17,18,19],
-    [20,21,22,23,24,25,26],
-    [27,28,29,30,null,null,null],
-  ];
-  const events = {
-    14: [{ p: "Marriott", k: "Deck due", c: "#ff9d6e" }],
-    18: [{ p: "CarMax", k: "Storyboard review", c: "#7aa7ff" }],
-    22: [{ p: "Pfizer", k: "Arc due", c: "#d9a0ff" }],
-    24: [{ p: "John Deere", k: "Narrative due", c: "#a8e07a" }],
-  };
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Shift so Monday is first
+  const startOffset = (firstDay + 6) % 7;
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+  // Events come from live plays with due dates — empty for now until data is wired
+  const events = {};
 
   return (
     <div className="dash-page">
       <section className="dash-hero">
-        <div className="eyebrow">April · Q2 2026</div>
-        <h1 className="dash-greeting"><em>Six</em> due dates<br/><span className="ink-soft">across four projects this month.</span></h1>
+        <div className="eyebrow">{monthName} · Q{quarterNum} {year}</div>
+        <h1 className="dash-greeting">
+          {Object.keys(events).length > 0
+            ? <><em>{Object.keys(events).length}</em> <span className="ink-soft">due dates this month.</span></>
+            : <><span className="ink-soft">No deadlines scheduled yet.</span><br/><span className="ink-soft" style={{fontSize:"0.6em"}}>Due dates will appear here as plays are created.</span></>
+          }
+        </h1>
       </section>
 
       <div className="card" style={{ marginTop: 24, overflow: "hidden" }}>
@@ -88,10 +101,13 @@ function Calendar() {
         {weeks.map((w,i) => (
           <div key={i} style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: i < weeks.length-1 ? "1px solid var(--line)" : "none" }}>
             {w.map((d,j) => (
-              <div key={j} style={{ minHeight: 110, padding: 12, borderRight: j < 6 ? "1px solid var(--line)" : "none", background: d === 14 ? "var(--paper-elev-2)" : "transparent" }}>
+              <div key={j} style={{ minHeight: 110, padding: 12, borderRight: j < 6 ? "1px solid var(--line)" : "none", background: d === today ? "var(--paper-elev-2)" : "transparent" }}>
                 {d && (
                   <>
-                    <div style={{ fontFamily: "var(--display)", fontSize: 22, color: d === 14 ? "var(--accent)" : "var(--ink)" }}>{String(d).padStart(2,"0")}</div>
+                    <div style={{ fontFamily: "var(--display)", fontSize: 22, color: d === today ? "var(--accent)" : "var(--ink)", fontWeight: d === today ? 700 : 400 }}>
+                      {String(d).padStart(2,"0")}
+                      {d === today && <span className="muted" style={{ fontSize: 10, marginLeft: 4, fontFamily: "var(--mono)", letterSpacing: "0.1em" }}>TODAY</span>}
+                    </div>
                     {(events[d] || []).map((e,k) => (
                       <div key={k} style={{ marginTop: 6, padding: "5px 8px", borderLeft: "2px solid " + e.c, background: "var(--paper-elev)", fontSize: 11, color: "var(--ink-soft)", borderRadius: "0 4px 4px 0" }}>
                         <div style={{ color: "var(--ink)", fontWeight: 500 }}>{e.p}</div>
@@ -146,13 +162,7 @@ function Templates() {
 
 function Inbox({ open, onClose, onNav }) {
   if (!open) return null;
-  const items = [
-    { unread: true, who: "stephen", target: "CarMax · Narrative", text: "left 4 comments mentioning you", time: "12m" },
-    { unread: true, who: "t24", target: "John Deere · Narrative v3", text: "is ready for your review", time: "1h" },
-    { unread: true, who: "michael", target: "Marriott · Deck", text: "uploaded final visuals — ready to ship", time: "1h" },
-    { unread: false, who: "angie", target: "Pfizer · Arc", text: "approved your edits", time: "yesterday" },
-    { unread: false, who: "aws", target: "FedEx · Deck", text: "approved the final deck — delivered", time: "3d" },
-  ];
+  const items = [];
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 70 }} />
@@ -160,12 +170,17 @@ function Inbox({ open, onClose, onNav }) {
         <div className="inbox-head">
           <div>
             <div style={{ fontFamily: "var(--display)", fontSize: 20 }}>Inbox</div>
-            <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>3 new</div>
+            <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{items.filter(i => i.unread).length > 0 ? items.filter(i => i.unread).length + " new" : "Up to date"}</div>
           </div>
           <button className="btn-quiet btn-sm">Mark all read</button>
         </div>
         <div className="inbox-list">
-          {items.map((it, i) => {
+          {items.length === 0 ? (
+            <div style={{ padding: "40px 24px", textAlign: "center", color: "var(--muted)" }}>
+              <div style={{ fontFamily: "var(--display)", fontSize: 20, marginBottom: 8 }}>All clear.</div>
+              <div style={{ fontSize: 13 }}>No notifications yet.</div>
+            </div>
+          ) : items.map((it, i) => {
             const person = T24.people[it.who];
             return (
               <div key={i} className={"inbox-item " + (it.unread ? "unread" : "")}>
