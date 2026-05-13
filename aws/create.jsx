@@ -1,6 +1,6 @@
 /* global React, Icon, T24, PersonaMark */
 
-function CreatePlay({ onCancel, onCreate }) {
+function CreatePlay({ onCancel, onCreated }) {
   const [step, setStep] = React.useState(0);
   const [persona, setPersona] = React.useState(null);
   const [customPersona, setCustomPersona] = React.useState("");
@@ -58,29 +58,40 @@ function CreatePlay({ onCancel, onCreate }) {
     true;
 
   if (generating) {
+    const fileCount = sources.filter(s => s._file).length;
+    const totalUploadPct = fileCount === 0 ? 100 : Math.round(
+      Object.values(uploadProgress).reduce((a, b) => a + b, 0) / (fileCount * 100) * 100
+    );
     const phases = [
-      "Preparing…",
-      "Creating SharePoint folders in Teams…",
-      `Uploading ${sources.filter(s=>s._file).length || ""} source file${sources.filter(s=>s._file).length === 1 ? "" : "s"} to AWS T24 channel…`,
-      "Notifying Angie + Stephen…",
-      "Done — opening your play.",
+      { label: "Creating play in SharePoint…", done: genStep > 1 },
+      { label: "Setting up Teams folders…", done: genStep > 2 },
+      { label: fileCount > 0 ? `Uploading ${fileCount} source file${fileCount === 1 ? "" : "s"}… ${genStep === 3 ? totalUploadPct + "%" : ""}` : "No files to upload", done: genStep > 3 },
+      { label: "Done — opening your play.", done: genStep >= 4 },
     ];
     return (
       <div className="create-stage" style={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
         <div style={{ maxWidth: 540, textAlign: "center" }}>
-          <div className="eyebrow amber">T24 is starting your play</div>
-          <h1 className="display" style={{ fontSize: 56, marginTop: 18, lineHeight: 1, letterSpacing: "-0.02em" }}>
-            <em style={{ fontStyle: "italic" }}>Building</em> the<br/>opening narrative.
+          <div className="eyebrow amber">Creating your play</div>
+          <h1 className="display" style={{ fontSize: 48, marginTop: 18, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+            Setting up the<br/><em style={{ fontStyle: "italic" }}>CAIO Elevate</em> play.
           </h1>
           <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
             {phases.map((p, i) => (
-              <div key={i} className={"gen-step " + (i < genStep ? "done" : i === genStep ? "active" : "")} style={{opacity: i > genStep ? 0.35 : 1}}>
+              <div key={i} className={"gen-step " + (p.done ? "done" : i + 1 === genStep ? "active" : "")} style={{opacity: i + 1 > genStep ? 0.35 : 1}}>
                 <span className="dot" />
-                <span>{p}</span>
-                {i < genStep && <Icon name="check" size={14} className="amber" />}
+                <span style={{ flex: 1 }}>{p.label}</span>
+                {p.done && <Icon name="check" size={14} className="amber" />}
               </div>
             ))}
           </div>
+          {genStep >= 4 && (
+            <div style={{ marginTop: 24, padding: 16, background: "var(--paper-elev)", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", fontSize: 13 }}>
+              <span className="muted">If the page doesn't redirect automatically — </span>
+              <button className="btn btn-accent btn-sm" style={{ marginLeft: 8 }} onClick={() => onCreated && onCreated("latest")}>
+                Open play <Icon name="arrow_right" size={12} />
+              </button>
+            </div>
+          )}
           <style>{`
             .gen-step { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--paper-elev); border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 13.5px; color: var(--muted); opacity: 0.4; transition: all .3s; }
             .gen-step.active, .gen-step.done { opacity: 1; color: var(--ink-soft); }
