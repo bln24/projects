@@ -6,25 +6,41 @@ function LoginScreen({ onSignIn }) {
   const [error, setError] = React.useState(null);
   const [account, setAccount] = React.useState(null);
 
-  /* === On mount: handle redirect return ONLY ===
-     Do NOT auto-sign-in from cached accounts — the user must click the button.
-     This guarantees they see the login screen every time, even if a Microsoft
-     session exists elsewhere in the browser. */
+  /* === On mount: handle redirect OR restore cached session ===
+     1. If returning from Microsoft redirect → complete sign-in.
+     2. If a valid cached account exists → silently acquire token and auto sign-in.
+     3. Otherwise → show login screen, user clicks once. */
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         await window.msalReady;
+        // Handle redirect return first
         const result = await window.msalInstance.handleRedirectPromise();
         if (cancelled) return;
         if (result && result.account) {
-          /* We just came back from Microsoft's sign-in page. */
           window.msalInstance.setActiveAccount(result.account);
           setAccount(result.account);
           setStage("provision");
-          setTimeout(() => onSignIn(result.account), 600);
+          setTimeout(() => onSignIn(result.account), 400);
+          return;
         }
-        /* If no redirect result, do nothing — user must click the button. */
+        // No redirect — check for a cached account and try silent token
+        const cached = window.msalInstance.getAllAccounts()[0];
+        if (cached) {
+          setStage("provision");
+          try {
+            await window.msalInstance.acquireTokenSilent({
+              scopes: window.BLN24_CONFIG.scopes,
+              account: cached,
+            });
+            window.msalInstance.setActiveAccount(cached);
+            if (!cancelled) onSignIn(cached);
+          } catch {
+            // Silent refresh failed — token truly expired, show login button
+            if (!cancelled) setStage("idle");
+          }
+        }
       } catch (e) {
         if (!cancelled) setError(e.message || String(e));
       }
@@ -38,14 +54,8 @@ function LoginScreen({ onSignIn }) {
     setStage("auth");
     try {
       await window.msalReady;
-      /* Clear any cached accounts so Microsoft always asks for credentials. */
-      window.msalInstance.getAllAccounts().forEach(a => {
-        try { sessionStorage.clear(); } catch (_) {}
-      });
-      /* prompt: "login" forces Microsoft's sign-in form even if a session exists. */
       await window.msalInstance.loginRedirect({
         scopes: window.BLN24_CONFIG.scopes,
-        prompt: "login"
       });
     } catch (e) {
       setError(e.message || String(e));
