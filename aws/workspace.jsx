@@ -122,7 +122,18 @@ function DocViewer({ file, onClose }) {
     })();
   }, [file?.id]);
 
-  if (!file) return null;
+  if (!file) return (
+    <div style={{
+      height: "100%", minHeight: 480,
+      border: "1px solid var(--line)", borderRadius: "var(--r-md)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--paper-elev)", color: "var(--muted)", fontSize: 13,
+      flexDirection: "column", gap: 8,
+    }}>
+      <Icon name="doc_text" size={24} />
+      <span>Select a file to preview it here</span>
+    </div>
+  );
 
   return (
     <div className="ws-doc-viewer">
@@ -137,9 +148,11 @@ function DocViewer({ file, onClose }) {
               <Icon name="external" size={12} />Open in Word
             </a>
           )}
-          <button className="btn btn-quiet btn-sm" onClick={onClose}>
-            <Icon name="close" size={12} />Close
-          </button>
+          {onClose && (
+            <button className="btn btn-quiet btn-sm" onClick={onClose}>
+              <Icon name="close" size={12} />Close
+            </button>
+          )}
         </div>
       </div>
       {mode === "loading" && (
@@ -279,10 +292,11 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
       setFilesByFolder(map);
       setLoading(false);
       if (onFilesChange) onFilesChange(map);
-      // Auto-open the first primary file
-      const primaryFolderKeys = (STAGE_FOLDERS[stageIdx] || ["sources"]).filter(f => f !== "sources");
-      const firstPrimary = primaryFolderKeys.flatMap(k => map[k] || [])[0];
-      if (firstPrimary && setViewingFile) setViewingFile(firstPrimary);
+      // Auto-select first primary file so viewer shows immediately
+      const pFolders = (STAGE_FOLDERS[stageIdx] || ["sources"]).filter(f => f !== "sources");
+      const firstFile = pFolders.flatMap(k => map[k] || [])[0];
+      if (firstFile && setViewingFile) setViewingFile(prev => prev || firstFile);
+
     });
   }, [playSlug, stageIdx, refreshTick]);
 
@@ -456,16 +470,7 @@ function Workspace({ project, onBack, onNav }) {
 
   return (
     <div className="ws-page">
-      {/* Full-page document viewer overlay */}
-      {viewingFile && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 200,
-          background: "var(--paper)",
-          display: "flex", flexDirection: "column",
-        }}>
-          <DocViewer file={viewingFile} onClose={() => setViewingFile(null)} />
-        </div>
-      )}
+
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
       {/* Header */}
