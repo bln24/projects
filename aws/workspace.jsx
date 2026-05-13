@@ -240,9 +240,8 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
   );
 }
 
-function DocumentShelf({ playSlug, stageIdx, onFilesChange }) {
+function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setViewingFile }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
-  const [viewingFile, setViewingFile] = React.useState(null);
   const [filesByFolder, setFilesByFolder] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [sourcesExpanded, setSourcesExpanded] = React.useState(false);
@@ -357,6 +356,7 @@ function Workspace({ project, onBack, onNav }) {
   const [stageIdx, setStageIdx] = React.useState(project ? (project.stageIndex || 0) : 0);
   const [advancing, setAdvancing] = React.useState(false);
   const [toast, setToast] = React.useState(null);
+  const [viewingFile, setViewingFile] = React.useState(null);
 
   // Sync stageIdx if project changes
   React.useEffect(() => {
@@ -517,7 +517,16 @@ function Workspace({ project, onBack, onNav }) {
           <DocumentShelf
             playSlug={playSlug}
             stageIdx={stageIdx}
+            viewingFile={viewingFile}
+            setViewingFile={setViewingFile}
           />
+
+          {/* Doc viewer — full width, below shelf */}
+          {viewingFile && (
+            <div style={{ marginTop: 16 }}>
+              <DocViewer file={viewingFile} onClose={() => setViewingFile(null)} />
+            </div>
+          )}
 
           {/* Stage Progression */}
           <div className="ws-stage-actions">
