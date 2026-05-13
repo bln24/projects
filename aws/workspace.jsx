@@ -58,7 +58,10 @@ function FileCard({ file, onView, isViewing }) {
       </div>
       <div className="ws-file-actions">
         {viewable && (
-          <button className={"btn btn-sm " + (isViewing ? "btn-accent" : "btn-ghost")} onClick={() => onView(isViewing ? null : file)}>
+          <button
+            className={"btn btn-sm " + (isViewing ? "btn-accent" : "btn-ghost")}
+            onClick={() => { console.log("[FileCard] View clicked:", file.name); onView(isViewing ? null : file); }}
+          >
             <Icon name={isViewing ? "close" : "eye"} size={12} />{isViewing ? "Close" : "View"}
           </button>
         )}
@@ -73,30 +76,33 @@ function FileCard({ file, onView, isViewing }) {
 }
 
 function DocViewer({ file, onClose }) {
+  const [mode, setMode] = React.useState("loading"); // loading | iframe | error
   const [embedUrl, setEmbedUrl] = React.useState(null);
-  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     if (!file) return;
+    setMode("loading");
     setEmbedUrl(null);
-    setError(null);
 
-    // Fetch a pre-authenticated download URL from Graph, then pass to Office Online
     (async () => {
       try {
-        const token = await (window.spGetUserToken ? spGetUserToken() : Promise.reject("no token"));
-        const driveId = window.SP_DRIVE_ID;
-        if (!driveId || !file.id) throw new Error("Missing drive or file ID");
+        if (!window.spGetUserToken) throw new Error("auth not ready");
+        const token = await spGetUserToken();
+        const groupId = window.SP && SP.groupId;
+        if (!groupId || !file.id) throw new Error("missing ids");
         const res = await fetch(
-          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${file.id}?$select=@microsoft.graph.downloadUrl`,
+          `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        if (!res.ok) throw new Error(`Graph ${res.status}`);
         const data = await res.json();
         const dlUrl = data["@microsoft.graph.downloadUrl"];
-        if (!dlUrl) throw new Error("No download URL returned");
+        if (!dlUrl) throw new Error("No download URL — try Open in Word");
         setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
+        setMode("iframe");
       } catch (e) {
-        setError(e.message || "Could not load preview");
+        console.error("[DocViewer]", e.message);
+        setMode("error");
       }
     })();
   }, [file?.id]);
@@ -121,23 +127,23 @@ function DocViewer({ file, onClose }) {
           </button>
         </div>
       </div>
-      {error && (
-        <div style={{ padding: 24, color: "var(--muted)", fontSize: 13, textAlign: "center" }}>
-          {error}
-          {file.webUrl && <><br/><a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="amber" style={{ marginTop: 8, display: "inline-block" }}>Open in SharePoint instead →</a></>}
+      {mode === "loading" && (
+        <div style={{ padding: 32, textAlign: "center", color: "var(--muted)", fontSize: 13 }}>
+          <span>Loading preview…</span>
         </div>
       )}
-      {!error && !embedUrl && (
-        <div style={{ padding: 24, color: "var(--muted)", fontSize: 13, textAlign: "center" }}>Loading preview…</div>
+      {mode === "error" && (
+        <div style={{ padding: 32, textAlign: "center", fontSize: 13 }}>
+          <div className="muted" style={{ marginBottom: 12 }}>Inline preview unavailable.</div>
+          {file.webUrl && (
+            <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-sm">
+              <Icon name="external" size={12} />Open in Word Online
+            </a>
+          )}
+        </div>
       )}
-      {embedUrl && (
-        <iframe
-          src={embedUrl}
-          className="ws-doc-iframe"
-          title={file.name}
-          frameBorder="0"
-          allowFullScreen
-        />
+      {mode === "iframe" && embedUrl && (
+        <iframe src={embedUrl} className="ws-doc-iframe" title={file.name} frameBorder="0" allowFullScreen />
       )}
     </div>
   );
