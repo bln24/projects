@@ -214,7 +214,11 @@ async function spListFiles(playSlug, stage = "sources") {
   const path = spFolderPath(playSlug, stage);
   const url = `https://graph.microsoft.com/v1.0/groups/${SP.groupId}/drive/root:/${spEncodePath(path)}:/children`;
   const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    console.error(`[spListFiles] ${res.status} for ${path}:`, errBody?.error?.code, errBody?.error?.message);
+    return [];
+  }
   const data = await res.json();
   return (data.value || []).map(i => ({
     id: i.id,
