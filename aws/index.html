@@ -67,6 +67,7 @@
 
 const SP = {
   driveId: "b!W-Fy9of3xUKBUCYYvYtORFxqX_Ml4-FNl7UVlPIFfxTXAi6pHB34S7n0EoXtUpeJ",
+  groupId: "21a55d48-2f31-4923-a082-a4d6510dd501",
   channelRoot: "AWS T24",
   // Map stage keys → folder names (matches what's in Teams)
   stageFolders: {
@@ -124,7 +125,7 @@ function spFolderPath(playSlug, stage) {
 
 // Simple PUT upload (files < 4 MB)
 async function _simpleUpload(token, filePath, file) {
-  const url = `https://graph.microsoft.com/v1.0/drives/${SP.driveId}/root:/${spEncodePath(filePath)}:/content`;
+  const url = `https://graph.microsoft.com/v1.0/groups/${SP.groupId}/drive/root:/${spEncodePath(filePath)}:/content`;
   const res = await fetch(url, {
     method: "PUT",
     headers: {
@@ -142,7 +143,7 @@ async function _simpleUpload(token, filePath, file) {
 
 // Upload session for large files (>= 4 MB)
 async function _sessionUpload(token, filePath, file, onProgress) {
-  const sessionUrl = `https://graph.microsoft.com/v1.0/drives/${SP.driveId}/root:/${spEncodePath(filePath)}:/createUploadSession`;
+  const sessionUrl = `https://graph.microsoft.com/v1.0/groups/${SP.groupId}/drive/root:/${spEncodePath(filePath)}:/createUploadSession`;
   const sessRes = await fetch(sessionUrl, {
     method: "POST",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
@@ -193,7 +194,7 @@ async function spUpload(file, playSlug, stage = "sources", onProgress) {
 async function spEnsureFolders(playSlug) {
   const token = await spGetToken();
   const playPath = `${SP.channelRoot}/${playSlug}`;
-  const url = `https://graph.microsoft.com/v1.0/drives/${SP.driveId}/root:/${spEncodePath(playPath)}:/children`;
+  const url = `https://graph.microsoft.com/v1.0/groups/${SP.groupId}/drive/root:/${spEncodePath(playPath)}:/children`;
 
   const seen = new Set();
   for (const name of Object.values(SP.stageFolders)) {
@@ -211,7 +212,7 @@ async function spEnsureFolders(playSlug) {
 async function spListFiles(playSlug, stage = "sources") {
   const token = await spGetToken();
   const path = spFolderPath(playSlug, stage);
-  const url = `https://graph.microsoft.com/v1.0/drives/${SP.driveId}/root:/${spEncodePath(path)}:/children`;
+  const url = `https://graph.microsoft.com/v1.0/groups/${SP.groupId}/drive/root:/${spEncodePath(path)}:/children`;
   const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
   if (!res.ok) return [];
   const data = await res.json();
