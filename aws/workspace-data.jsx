@@ -158,6 +158,7 @@ async function spListStageFiles(playSlug, stage) {
 }
 
 window.useLivePlays = useLivePlays;
+window.spGetUserToken = spGetUserToken;
 window.spCreatePlay = spCreatePlay;
 window.spAdvanceStage = spAdvanceStage;
 window.spListStageFiles = spListStageFiles;
