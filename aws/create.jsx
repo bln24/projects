@@ -12,6 +12,7 @@ function CreatePlay({ onCancel, onCreated }) {
   const [genStep, setGenStep] = React.useState(0);
   const [genError, setGenError] = React.useState(null);
   const [uploadProgress, setUploadProgress] = React.useState({});
+  const [createdPlayId, setCreatedPlayId] = React.useState(null);
 
   const steps = ["Persona", "Brief", "Sources", "Review"];
 
@@ -87,7 +88,9 @@ function CreatePlay({ onCancel, onCreated }) {
           {genStep >= 4 && (
             <div style={{ marginTop: 24, padding: 16, background: "var(--paper-elev)", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", fontSize: 13 }}>
               <span className="muted">If the page doesn't redirect automatically — </span>
-              <button className="btn btn-accent btn-sm" style={{ marginLeft: 8 }} onClick={() => onCreated && onCreated("latest")}>
+              <button className="btn btn-accent btn-sm" style={{ marginLeft: 8 }} onClick={() => {
+                if (onCancel) onCancel();
+              }}>
                 Open play <Icon name="arrow_right" size={12} />
               </button>
             </div>

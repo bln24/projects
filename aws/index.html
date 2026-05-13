@@ -440,6 +440,7 @@ window.spCreatePlay = spCreatePlay;
       });
 
       const [livePlays, setLivePlays] = React.useState([]);
+      const [pendingPlay, setPendingPlay] = React.useState(null);
 
       const navigate = (name, projectId = null) => {
         setRoute({ name, projectId });
@@ -461,8 +462,8 @@ window.spCreatePlay = spCreatePlay;
             onNewProject={() => navigate("create")}
           />
           {route.name === "dashboard" && <Dashboard onOpenProject={(id) => navigate("workspace", id)} onNewProject={() => navigate("create")} onPlaysLoaded={(plays) => setLivePlays(plays)} />}
-          {route.name === "create" && <CreatePlay onCancel={() => navigate("dashboard")} onCreated={(id) => navigate("workspace", id)} />}
-          {route.name === "workspace" && <Workspace project={livePlays.find(p => p.id === route.projectId) || null} onBack={() => navigate("dashboard")} onNav={navigate} />}
+          {route.name === "create" && <CreatePlay onCancel={() => navigate("dashboard")} onCreated={(play) => { if (play && play.id) { setLivePlays(prev => [play, ...prev.filter(p => p.id !== play.id)]); navigate("workspace", play.id); } else { navigate("dashboard"); } }} />}
+          {route.name === "workspace" && <Workspace project={livePlays.find(p => p.id === route.projectId) || null} onBack={() => navigate("dashboard")} onNav={navigate} onRefresh={(updatedPlay) => { if (updatedPlay) setLivePlays(prev => prev.map(p => p.id === updatedPlay.id ? updatedPlay : p)); }} />}
           {route.name === "library" && <Library onOpenProject={(id) => navigate("workspace", id)} />}
           {route.name === "calendar" && <CalendarPage />}
           {route.name === "templates" && <TemplatesPage onNav={navigate} />}
