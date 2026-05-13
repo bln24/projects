@@ -452,6 +452,16 @@ function Workspace({ project, onBack, onNav }) {
 
   return (
     <div className="ws-page">
+      {/* Full-page document viewer overlay */}
+      {viewingFile && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "var(--paper)",
+          display: "flex", flexDirection: "column",
+        }}>
+          <DocViewer file={viewingFile} onClose={() => setViewingFile(null)} />
+        </div>
+      )}
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
       {/* Header */}
@@ -536,12 +546,7 @@ function Workspace({ project, onBack, onNav }) {
             setViewingFile={setViewingFile}
           />
 
-          {/* Doc viewer — full width, below shelf */}
-          {viewingFile && (
-            <div style={{ marginTop: 16 }}>
-              <DocViewer file={viewingFile} onClose={() => setViewingFile(null)} />
-            </div>
-          )}
+
 
           {/* Stage Progression */}
           <div className="ws-stage-actions">
