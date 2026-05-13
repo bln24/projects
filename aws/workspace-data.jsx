@@ -7,7 +7,7 @@
   File:  /T24-Plays.json  (root of drive)
 */
 
-const SP_DRIVE_ID = "b!3ISnxUEV50KB3szzZ7Ty5Wr33YrRY-9IoOPOFKUnMenxCY-azpTKRZn2TNKrq73O";
+// Store plays in signed-in user's OneDrive — always accessible with Files.ReadWrite.All
 const SP_PLAYS_PATH = "T24-Plays.json";
 
 async function spGetUserToken(scope) {
@@ -28,7 +28,7 @@ async function spGetUserToken(scope) {
 
 async function readPlaysFile() {
   const token = await spGetUserToken();
-  const url = `https://graph.microsoft.com/v1.0/drives/${SP_DRIVE_ID}/root:/${SP_PLAYS_PATH}:/content`;
+  const url = `https://graph.microsoft.com/v1.0/me/drive/root:/${SP_PLAYS_PATH}:/content`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (res.status === 404) return { plays: [], version: 1 };
   if (!res.ok) throw new Error(`Graph ${res.status}`);
@@ -37,7 +37,7 @@ async function readPlaysFile() {
 
 async function writePlaysFile(data) {
   const token = await spGetUserToken();
-  const url = `https://graph.microsoft.com/v1.0/drives/${SP_DRIVE_ID}/root:/${SP_PLAYS_PATH}:/content`;
+  const url = `https://graph.microsoft.com/v1.0/me/drive/root:/${SP_PLAYS_PATH}:/content`;
   const res = await fetch(url, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
