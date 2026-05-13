@@ -155,7 +155,6 @@ function FeaturedPlay({ project, onOpen }) {
       <div className="featured-body">
         <div className="eyebrow">Stage {project.stageIndex + 1} of 4 · {T24.stages[project.stageIndex].name}</div>
         <h2>{project.title}</h2>
-        <CohortStrip cohort={project.cohort} total={project.cohortSize} />
         <div className="pcard-stages">
           {T24.stages.map((s, i) => (
             <div key={s.id} className={"pcard-stage " + (i < project.stageIndex ? "passed" : i === project.stageIndex ? "active" : "")} />
@@ -182,20 +181,6 @@ function FeaturedPlay({ project, onOpen }) {
   );
 }
 
-function CohortStrip({ cohort, total }) {
-  const shown = cohort.slice(0, 5);
-  const remainder = total - shown.length;
-  return (
-    <div className="cohort-strip">
-      <span className="eyebrow" style={{ marginRight: 4 }}>Cohort</span>
-      {shown.map((c, i) => (
-        <span key={i} className="cohort-chip">{c}</span>
-      ))}
-      {remainder > 0 && <span className="cohort-chip cohort-chip-more">+{remainder} more</span>}
-    </div>
-  );
-}
-
 function PlayCard({ project, onOpen }) {
   const dueClass = project.done ? "overdue" : project.dueIn <= 3 ? "urgent" : "";
   return (
@@ -206,14 +191,13 @@ function PlayCard({ project, onOpen }) {
           <PersonaMark persona={project.persona} size={48} />
           <div>
             <div style={{ fontFamily: "var(--display)", fontSize: 22, color: "white", lineHeight: 1, fontStyle: "italic", fontWeight: 400 }}>{project.personaFull}s</div>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "rgba(255,255,255,.65)", textTransform: "uppercase", letterSpacing: "0.14em", marginTop: 4 }}>{project.cohortSize} targets · {project.industry.split(" · ")[0]}</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "rgba(255,255,255,.65)", textTransform: "uppercase", letterSpacing: "0.14em", marginTop: 4 }}>{project.industry.split(" · ")[0]}</div>
           </div>
         </div>
       </div>
       <div className="pcard-body">
         <div className="pcard-title">{project.title}</div>
 
-        <CohortStrip cohort={project.cohort} total={project.cohortSize} />
 
         <div>
           <div className="pcard-stages">
@@ -258,8 +242,7 @@ function NewPlayCard({ onClick }) {
       <div className="row gap-2"><Icon name="plus" size={18} className="amber" /><span className="eyebrow">Start a new play</span></div>
       <div className="big">
         Pick a <em className="amber" style={{ fontStyle: "italic" }}>persona.</em><br/>
-        Build a <em className="amber" style={{ fontStyle: "italic" }}>cohort.</em><br/>
-        Drop the meeting.
+Drop the meeting.
       </div>
       <div className="row gap-2 muted" style={{ fontSize: 12 }}>
         <Icon name="arrow_right" size={12} />T24 takes it from there.
@@ -287,7 +270,6 @@ function PlayListView({ projects, onOpen }) {
               <span className="muted" style={{ fontSize: 12, textAlign: "left" }}>{p.title}</span>
             </span>
           </span>
-          <span style={{ flex: 1 }} className="muted mono" title={p.cohort.join(", ")}>{p.cohortSize} targets</span>
           <span style={{ flex: 1 }}>
             <span className={"stage-chip " + (!p.done ? "stage-active" : "")}>
               <span className="stage-num mono">{T24.stages[p.stageIndex].short}</span>
@@ -351,4 +333,3 @@ function ActivityStrip() {
 
 window.Dashboard = Dashboard;
 window.PersonaMark = PersonaMark;
-window.CohortStrip = CohortStrip;

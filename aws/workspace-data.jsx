@@ -33,8 +33,6 @@ async function spGetUserToken() {
 function mapItem(item) {
   const f = item.fields;
 
-  let cohort = [];
-  try { cohort = JSON.parse(f.Cohort || "[]"); } catch {}
 
   let team = [];
   try { team = JSON.parse(f.Team || "[]"); } catch {}
@@ -63,9 +61,6 @@ function mapItem(item) {
     personaFull: f.PersonaFull || f.Persona || "Unknown",
     industry: f.Industry || "Enterprise",
     title: f.Title || `${f.PersonaFull || f.Persona} play`,
-    // cohort
-    cohort,
-    cohortSize: typeof f.CohortSize === "number" ? f.CohortSize : cohort.length,
     // stage
     stage: stages[stageIndex] || "narrative",
     stageIndex,
@@ -128,8 +123,6 @@ async function spCreatePlay(fields) {
       Persona:        fields.persona,
       PersonaFull:    fields.personaFull,
       Industry:       fields.industry || "",
-      Cohort:         JSON.stringify(fields.cohort || []),
-      CohortSize:     fields.cohortSize || (fields.cohort || []).length,
       Due:            fields.due ? new Date(fields.due).toISOString() : null,
       Team:           JSON.stringify(fields.team || []),
       Lead:           fields.lead || "",

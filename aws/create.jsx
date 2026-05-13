@@ -4,7 +4,6 @@ function CreatePlay({ onCancel, onCreate }) {
   const [step, setStep] = React.useState(0);
   const [persona, setPersona] = React.useState(null);
   const [customPersona, setCustomPersona] = React.useState("");
-  const [cohort, setCohort] = React.useState([]);
   const [title, setTitle] = React.useState("");
   const [template, setTemplate] = React.useState("engagement");
   const [sources, setSources] = React.useState([]);   // { name, size, _file }
@@ -14,11 +13,7 @@ function CreatePlay({ onCancel, onCreate }) {
   const [genError, setGenError] = React.useState(null);
   const [uploadProgress, setUploadProgress] = React.useState({});
 
-  const steps = ["Persona", "Cohort", "Brief", "Sources", "Review"];
-
-  const toggleCohort = (name) => {
-    setCohort(c => c.includes(name) ? c.filter(x => x !== name) : [...c, name]);
-  };
+  const steps = ["Persona", "Brief", "Sources", "Review"];
 
   const submit = async () => {
     setGenerating(true);
@@ -47,7 +42,7 @@ function CreatePlay({ onCancel, onCreate }) {
       await new Promise(r => setTimeout(r, 800));
 
       setGenStep(4);
-      setTimeout(() => onCreate({ persona: personaId, cohort, title, template, playSlug }), 600);
+      setTimeout(() => onCreate({ persona: personaId, title, template, playSlug }), 600);
     } catch (e) {
       setGenError(e.message);
       setGenerating(false);
@@ -59,8 +54,7 @@ function CreatePlay({ onCancel, onCreate }) {
 
   const canNext =
     step === 0 ? !!persona :
-    step === 1 ? cohort.length >= 1 :
-    step === 2 ? title.trim().length > 4 :
+    step === 1 ? title.trim().length > 4 :
     true;
 
   if (generating) {
@@ -147,61 +141,7 @@ function CreatePlay({ onCancel, onCreate }) {
 
         {step === 1 && (
           <div className="create-step">
-            <div className="eyebrow">Step 02 · Cohort</div>
-            <h1 className="create-title">Which <em>{(T24.personaCatalog.find(p => p.id === persona)?.full || customPersona) + "s"}</em> are we going after?</h1>
-            <p className="create-sub">Build a list of Fortune 500 companies. T24 will personalize the deck for each one when it's time to ship.</p>
-
-            <div className="cohort-builder">
-              <div className="cohort-search">
-                <Icon name="search" size={14} className="muted" />
-                <input className="input" style={{ border: "none", background: "transparent", padding: 4 }} placeholder="Search Fortune 500 companies, or paste a list…" />
-                <button className="btn btn-ghost btn-sm"><Icon name="upload" size={12} />Import .csv</button>
-              </div>
-
-              <div className="cohort-cols">
-                <div className="cohort-col">
-                  <div className="cohort-col-head">
-                    <span className="eyebrow">Available · {T24.cohortCatalog.length}</span>
-                    <button className="btn-quiet btn-sm">Filter <Icon name="chevron_down" size={11} /></button>
-                  </div>
-                  <div className="cohort-list">
-                    {T24.cohortCatalog.map(c => (
-                      <button key={c.name} className={"cohort-row " + (cohort.includes(c.name) ? "selected" : "")} onClick={() => toggleCohort(c.name)}>
-                        <span className="cohort-row-mark">{cohort.includes(c.name) ? <Icon name="check" size={12} /> : <Icon name="plus" size={12} />}</span>
-                        <span className="cohort-row-name">{c.name}</span>
-                        <span className="muted mono" style={{ fontSize: 10.5 }}>{c.industry}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="cohort-col">
-                  <div className="cohort-col-head">
-                    <span className="eyebrow amber">Selected · {cohort.length}</span>
-                    <button className="btn-quiet btn-sm" onClick={() => setCohort([])}>Clear</button>
-                  </div>
-                  <div className="cohort-list">
-                    {cohort.length === 0 && <div className="cohort-empty">Select companies on the left, or drop a CSV.<br/><span className="muted" style={{ fontSize: 11 }}>Aim for 6–24 — that's the sweet spot.</span></div>}
-                    {cohort.map(name => {
-                      const item = T24.cohortCatalog.find(c => c.name === name);
-                      return (
-                        <button key={name} className="cohort-row selected" onClick={() => toggleCohort(name)}>
-                          <span className="cohort-row-mark"><Icon name="check" size={12} /></span>
-                          <span className="cohort-row-name">{name}</span>
-                          <span className="muted mono" style={{ fontSize: 10.5 }}>{item?.industry}</span>
-                          <Icon name="close" size={12} className="muted" style={{ marginLeft: "auto" }} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="create-step">
-            <div className="eyebrow">Step 03 · Brief</div>
+            <div className="eyebrow">Step 02 · Brief</div>
             <h1 className="create-title">What's the <em>working title?</em></h1>
             <p className="create-sub">A one-line provocation that will headline the narrative. T24 will refine it after reading your sources.</p>
             <input className="big-input" placeholder={`Working title for the ${persona || ""} play…`} value={title} onChange={e => setTitle(e.target.value)} autoFocus />
@@ -225,9 +165,9 @@ function CreatePlay({ onCancel, onCreate }) {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div className="create-step">
-            <div className="eyebrow">Step 04 · Sources</div>
+            <div className="eyebrow">Step 03 · Sources</div>
             <h1 className="create-title">Feed T24 the <em>raw material.</em></h1>
             <p className="create-sub">Drop the meeting transcript, internal decks, briefs — anything from the client. The more T24 reads, the less it sounds like AI.</p>
             <div className={"big-dropzone " + (draggingOver ? "active" : "")}
@@ -276,9 +216,9 @@ function CreatePlay({ onCancel, onCreate }) {
           </div>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <div className="create-step">
-            <div className="eyebrow">Step 05 · Review</div>
+            <div className="eyebrow">Step 04 · Review</div>
             <h1 className="create-title">Ready to <em>start the play?</em></h1>
             <p className="create-sub">T24 will draft Narrative v1, create your SharePoint folders, and notify the team. You can change anything later.</p>
 
@@ -288,16 +228,6 @@ function CreatePlay({ onCancel, onCreate }) {
                 <span className="val">
                   <PersonaMark persona={persona === "__custom" ? customPersona.slice(0,3).toUpperCase() : persona} size={28} color="rgba(244,183,63,.2)" />
                   {persona === "__custom" ? customPersona : T24.personaCatalog.find(p => p.id === persona)?.full}
-                </span>
-              </div>
-              <div className="review-row">
-                <span className="lbl">Cohort</span>
-                <span className="val" style={{ flexWrap: "wrap" }}>
-                  {cohort.length} compan{cohort.length === 1 ? "y" : "ies"} · 
-                  <span style={{ display: "inline-flex", flexWrap: "wrap", gap: 4 }}>
-                    {cohort.slice(0, 6).map(c => <span key={c} className="cohort-chip">{c}</span>)}
-                    {cohort.length > 6 && <span className="cohort-chip cohort-chip-more">+{cohort.length - 6}</span>}
-                  </span>
                 </span>
               </div>
               <div className="review-row"><span className="lbl">Working title</span><span className="val" style={{ fontFamily: "var(--display)", fontSize: 18, fontStyle: "italic" }}>"{title}"</span></div>
