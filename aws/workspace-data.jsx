@@ -69,7 +69,7 @@ function enrichPlay(raw) {
   return {
     id: String(raw.id),
     spItemId: raw.id,
-    slug: raw.persona ? `${raw.persona.toLowerCase()}-elevate` : String(raw.id),
+    slug: raw.persona ? `${raw.persona} Elevate` : String(raw.id),
     persona: raw.persona || "?",
     personaFull: raw.personaFull || raw.persona || "Unknown",
     industry: raw.industry || "Enterprise",
