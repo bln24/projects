@@ -1,9 +1,13 @@
 /* global React, Icon, T24, StatusPill, useLivePlays */
 
-function Dashboard({ onOpenProject, onNewProject }) {
+function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
   const [tab, setTab] = React.useState("active");
   const [view, setView] = React.useState("grid");
   const { loading, plays, error } = useLivePlays();
+
+  React.useEffect(() => {
+    if (!loading && plays.length > 0 && onPlaysLoaded) onPlaysLoaded(plays);
+  }, [loading, plays]);
 
   // Derive stats from live data
   const allPlays = plays.length > 0 ? plays : [];

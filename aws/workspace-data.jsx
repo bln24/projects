@@ -156,7 +156,33 @@ async function spCreatePlay(fields) {
   return mapItem(item);
 }
 
+async function spAdvanceStage(spItemId, newStageIndex, extraFields = {}) {
+  const token = await spGetUserToken();
+  const fields = {
+    StageIndex: newStageIndex,
+    ...extraFields,
+  };
+  const url = `https://graph.microsoft.com/v1.0/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items/${spItemId}/fields`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Graph ${res.status}`);
+  }
+  return await res.json();
+}
+
+async function spListStageFiles(playSlug, stage) {
+  // Uses existing spListFiles from the inlined sp-upload block
+  return window.spListFiles ? spListFiles(playSlug, stage) : [];
+}
+
 window.useLivePlays = useLivePlays;
 window.spCreatePlay = spCreatePlay;
+window.spAdvanceStage = spAdvanceStage;
+window.spListStageFiles = spListStageFiles;
 window.SP_SITE_ID = SP_SITE_ID;
 window.SP_LIST_ID = SP_LIST_ID;
