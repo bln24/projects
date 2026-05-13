@@ -279,6 +279,10 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
       setFilesByFolder(map);
       setLoading(false);
       if (onFilesChange) onFilesChange(map);
+      // Auto-open the first primary file
+      const primaryFolderKeys = (STAGE_FOLDERS[stageIdx] || ["sources"]).filter(f => f !== "sources");
+      const firstPrimary = primaryFolderKeys.flatMap(k => map[k] || [])[0];
+      if (firstPrimary && setViewingFile) setViewingFile(firstPrimary);
     });
   }, [playSlug, stageIdx, refreshTick]);
 
