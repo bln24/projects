@@ -245,12 +245,13 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange }) {
   React.useEffect(() => {
     if (!playSlug) return;
     setLoading(true);
+    console.log("[DocumentShelf] loading files for slug:", playSlug, "stageIdx:", stageIdx);
     const foldersToLoad = [...new Set([...stageFolders, "sources"])];
     Promise.all(
       foldersToLoad.map(folder =>
         (window.spListFiles ? spListFiles(playSlug, folder) : Promise.resolve([]))
-          .then(files => ({ folder, files }))
-          .catch(() => ({ folder, files: [] }))
+          .then(files => { console.log(`[DocumentShelf] ${folder}: ${files.length} files`); return { folder, files }; })
+          .catch(e => { console.error(`[DocumentShelf] ${folder} error:`, e); return { folder, files: [] }; })
       )
     ).then(results => {
       const map = {};
