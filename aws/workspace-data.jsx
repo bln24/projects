@@ -9,7 +9,7 @@
 
 // AWS Elevate Program SharePoint drive (Teams: AWS T24 group 21a55d48)
 const SP_DRIVE_ID = "b!W-Fy9of3xUKBUCYYvYtORFxqX_Ml4-FNl7UVlPIFfxTXAi6pHB34S7n0EoXtUpeJ";
-const SP_PLAYS_PATH = "T24-Plays.json";
+const SP_PLAYS_PATH = "AWS T24/T24-Plays.json";
 
 async function spGetUserToken(scope) {
   const scopes = scope
