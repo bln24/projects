@@ -41,14 +41,12 @@ function formatDate(iso) {
 }
 
 /* ---- Document Shelf ---- */
-function FileCard({ file }) {
-  const sharePointBase = "https://thebln24.sharepoint.com/sites/AWST24/_layouts/15/WopiFrame.aspx";
-  const openUrl = file.id
-    ? `${sharePointBase}?sourcedoc=${encodeURIComponent(file.id)}&action=view`
-    : file.webUrl;
+function FileCard({ file, onView, isViewing }) {
+  const ext = (file.name || "").split(".").pop().toLowerCase();
+  const viewable = ["docx","doc","pptx","ppt","xlsx","xls","pdf"].includes(ext);
 
   return (
-    <div className="ws-file-card">
+    <div className={"ws-file-card" + (isViewing ? " ws-file-card--active" : "")}>
       <div className="ws-file-icon">
         <Icon name={fileIcon(file.name)} size={20} />
       </div>
@@ -59,10 +57,10 @@ function FileCard({ file }) {
         </div>
       </div>
       <div className="ws-file-actions">
-        {openUrl && (
-          <a href={openUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-            <Icon name="eye" size={12} />Open
-          </a>
+        {viewable && (
+          <button className={"btn btn-sm " + (isViewing ? "btn-accent" : "btn-ghost")} onClick={() => onView(isViewing ? null : file)}>
+            <Icon name={isViewing ? "close" : "eye"} size={12} />{isViewing ? "Close" : "View"}
+          </button>
         )}
         {file.webUrl && (
           <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-quiet btn-sm">
@@ -70,6 +68,37 @@ function FileCard({ file }) {
           </a>
         )}
       </div>
+    </div>
+  );
+}
+
+function DocViewer({ file, onClose }) {
+  if (!file) return null;
+  // Microsoft Office Online embed — works for docx, pptx, xlsx
+  const embedUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(file.webUrl)}`;
+  return (
+    <div className="ws-doc-viewer">
+      <div className="ws-doc-viewer-header">
+        <div className="ws-doc-viewer-title">
+          <Icon name={fileIcon(file.name)} size={14} />
+          <span>{file.name}</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+            <Icon name="external" size={12} />Open in Word
+          </a>
+          <button className="btn btn-quiet btn-sm" onClick={onClose}>
+            <Icon name="close" size={12} />Close
+          </button>
+        </div>
+      </div>
+      <iframe
+        src={embedUrl}
+        className="ws-doc-iframe"
+        title={file.name}
+        frameBorder="0"
+        allowFullScreen
+      />
     </div>
   );
 }
@@ -167,6 +196,7 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
 
 function DocumentShelf({ playSlug, stageIdx, onFilesChange }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
+  const [viewingFile, setViewingFile] = React.useState(null);
   const [filesByFolder, setFilesByFolder] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [sourcesExpanded, setSourcesExpanded] = React.useState(false);
@@ -214,7 +244,7 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange }) {
           </div>
           {hasAnyPrimary ? (
             <div className="ws-file-list">
-              {primaryFiles.map(f => <FileCard key={f.id || f.name} file={f} />)}
+              {primaryFiles.map(f => <FileCard key={f.id || f.name} file={f} onView={setViewingFile} isViewing={viewingFile?.id === f.id || viewingFile?.name === f.name} />)}
             </div>
           ) : (
             <UploadPanel
@@ -247,7 +277,7 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange }) {
         {sourcesExpanded && (
           sourceFiles.length > 0 ? (
             <div className="ws-file-list">
-              {sourceFiles.map(f => <FileCard key={f.id || f.name} file={f} />)}
+              {sourceFiles.map(f => <FileCard key={f.id || f.name} file={f} onView={setViewingFile} isViewing={viewingFile?.id === f.id || viewingFile?.name === f.name} />)}
             </div>
           ) : (
             <UploadPanel
@@ -494,6 +524,21 @@ function TeamStrip({ team }) {
       </div>
     </div>
   );
+}
+
+
+/* inject ws-doc-viewer styles */
+if (!document.getElementById('ws-doc-viewer-styles')) {
+  const s = document.createElement('style');
+  s.id = 'ws-doc-viewer-styles';
+  s.textContent = `
+    .ws-file-card--active { border-color: var(--accent) !important; }
+    .ws-doc-viewer { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--paper-elev); }
+    .ws-doc-viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--paper-elev-2); }
+    .ws-doc-viewer-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
+    .ws-doc-iframe { width: 100%; height: 70vh; display: block; border: none; }
+  `;
+  document.head.appendChild(s);
 }
 
 window.Workspace = Workspace;
