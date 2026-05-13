@@ -17,13 +17,13 @@ async function spGetUserToken() {
   if (!acct) throw new Error("Not signed in");
   try {
     const r = await window.msalInstance.acquireTokenSilent({
-      scopes: ["https://graph.microsoft.com/Sites.Read.All"],
+      scopes: ["https://graph.microsoft.com/Sites.ReadWrite.All"],
       account: acct,
     });
     return r.accessToken;
   } catch {
     const r = await window.msalInstance.acquireTokenPopup({
-      scopes: ["https://graph.microsoft.com/Sites.Read.All"],
+      scopes: ["https://graph.microsoft.com/Sites.ReadWrite.All"],
     });
     return r.accessToken;
   }
