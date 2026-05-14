@@ -461,25 +461,35 @@ function Workspace({ project, onBack, onNav }) {
   };
 
   const handleSendBack = async () => {
-    if (advancing || stageIdx === 0) return;
+    if (advancing) return;
     if (!sendBackOpen) { setSendBackOpen(true); return; }
     if (!feedbackText.trim()) return;
     setAdvancing(true);
     try {
-      const newIdx = stageIdx - 1;
       const sourceLabel = fromRole === 'client' ? 'Client' : 'BLN24 Staff';
-      const extraFields = {
-        Status: "Returned for revision",
-        FeedbackFrom: sourceLabel,
-        FeedbackNotes: feedbackText.trim(),
-      };
-      if (window.spAdvanceStage) {
-        await spAdvanceStage(project.spItemId, newIdx, extraFields);
+      if (stageIdx > 0) {
+        const newIdx = stageIdx - 1;
+        if (window.spAdvanceStage) {
+          await spAdvanceStage(project.spItemId, newIdx, {
+            Status: "Returned for revision",
+            FeedbackFrom: sourceLabel,
+            FeedbackNotes: feedbackText.trim(),
+          });
+        }
+        setStageIdx(newIdx);
+        setToast(`Sent back · ${STAGE_DEFS[newIdx]?.name} · ${sourceLabel} feedback logged.`);
+      } else {
+        if (window.spAdvanceStage) {
+          await spAdvanceStage(project.spItemId, 0, {
+            Status: "Revisions requested",
+            FeedbackFrom: sourceLabel,
+            FeedbackNotes: feedbackText.trim(),
+          });
+        }
+        setToast(`Revisions requested · ${sourceLabel} feedback logged.`);
       }
-      setStageIdx(newIdx);
       setSendBackOpen(false);
       setFeedbackText('');
-      setToast(`Sent back to ${STAGE_DEFS[newIdx]?.name || "previous stage"} · ${sourceLabel} feedback logged.`);
     } catch (e) {
       console.error("Send back failed:", e);
       setToast("Error: " + (e.message || "Could not send back."));
@@ -568,7 +578,7 @@ function Workspace({ project, onBack, onNav }) {
       </div>
 
       {/* Body */}
-      <div className="ws-body ws-body-shelf" style={{ display:"block", maxWidth:860, margin:"0 auto", width:"100%", padding:"0 24px", boxSizing:"border-box" }}>
+      <div className="ws-body ws-body-shelf" style={{ display:"block", maxWidth:1180, margin:"0 auto", width:"100%", padding:"0 32px", boxSizing:"border-box" }}>
         {/* Document Shelf — main content */}
         <main className="ws-editor ws-shelf-main">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
@@ -594,7 +604,7 @@ function Workspace({ project, onBack, onNav }) {
           )}
 
           {/* Stage Progression */}
-          {sendBackOpen && stageIdx > 0 && (
+          {sendBackOpen && (
             <div className="send-back-panel">
               <div className="send-back-head">
                 <div className="send-back-title"><Icon name="return" size={14} />Changes needed — {sendBackLabel}</div>
@@ -623,9 +633,8 @@ function Workspace({ project, onBack, onNav }) {
           <div className="ws-stage-actions">
             <button
               className={"btn btn-ghost" + (sendBackOpen ? ' active' : '')}
-              onClick={() => { if (stageIdx > 0) setSendBackOpen(v => !v); }}
-              disabled={advancing || stageIdx === 0}
-              style={{ opacity: stageIdx === 0 ? 0.3 : 1 }}
+              onClick={() => setSendBackOpen(v => !v)}
+              disabled={advancing}
             >
               <Icon name="arrow_left" size={13} />
               {sendBackLabel}
