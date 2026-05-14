@@ -548,20 +548,18 @@ function Workspace({ project, onBack, onNav }) {
             </span>
           </div>
 
-          {/* Split: file list left, document right */}
-          <div style={{ display: "flex", gap: 24, alignItems: "flex-start", marginTop: 8 }}>
-            <div style={{ width: 280, flexShrink: 0 }}>
-              <DocumentShelf
-                playSlug={playSlug}
-                stageIdx={stageIdx}
-                viewingFile={viewingFile}
-                setViewingFile={setViewingFile}
-              />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          {/* File list top, document below */}
+          <DocumentShelf
+            playSlug={playSlug}
+            stageIdx={stageIdx}
+            viewingFile={viewingFile}
+            setViewingFile={setViewingFile}
+          />
+          {viewingFile && (
+            <div style={{ marginTop: 24 }}>
               <DocViewer file={viewingFile} onClose={null} />
             </div>
-          </div>
+          )}
 
           {/* Stage Progression */}
           <div className="ws-stage-actions">
