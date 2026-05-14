@@ -44,30 +44,57 @@ function formatDate(iso) {
 function FileCard({ file, onView, isViewing }) {
   const ext = (file.name || "").split(".").pop().toLowerCase();
   const viewable = ["docx","doc","pptx","ppt","xlsx","xls","pdf"].includes(ext);
+  const extLabel = ext.toUpperCase();
 
   return (
-    <div className={"ws-file-card" + (isViewing ? " ws-file-card--active" : "")}>
-      <div className="ws-file-icon">
-        <Icon name={fileIcon(file.name)} size={20} />
+    <div
+      onClick={() => viewable && onView(isViewing ? null : file)}
+      style={{
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "12px 16px",
+        border: `1px solid ${isViewing ? "var(--accent)" : "var(--line)"}`,
+        borderRadius: "var(--r-sm)",
+        background: isViewing ? "rgba(var(--accent-rgb, 244,183,63),.06)" : "var(--paper-elev)",
+        cursor: viewable ? "pointer" : "default",
+        transition: "border-color .15s, background .15s",
+      }}
+    >
+      {/* File type badge */}
+      <div style={{
+        width: 40, height: 44, borderRadius: "var(--r-xs)",
+        background: "var(--paper-elev-2)", border: "1px solid var(--line)",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        flexShrink: 0, gap: 2,
+      }}>
+        <Icon name={fileIcon(file.name)} size={16} className="muted" />
+        <span style={{ fontFamily: "var(--mono)", fontSize: 8, letterSpacing: ".08em", color: "var(--muted)", textTransform: "uppercase" }}>{extLabel}</span>
       </div>
-      <div className="ws-file-info">
-        <div className="ws-file-name">{file.name}</div>
-        <div className="ws-file-meta">
+
+      {/* Name + meta */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {file.name}
+        </div>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--muted)", marginTop: 2, letterSpacing: ".04em" }}>
           {formatSize(file.size)}{file.modified ? ` · ${formatDate(file.modified)}` : ""}
         </div>
       </div>
-      <div className="ws-file-actions">
+
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 6, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
         {viewable && (
           <button
-            className={"btn btn-sm " + (isViewing ? "btn-accent" : "btn-ghost")}
-            onClick={() => { console.log("[FileCard] View clicked:", file.name); onView(isViewing ? null : file); }}
+            className={"btn btn-sm " + (isViewing ? "btn-ghost" : "btn-ghost")}
+            style={isViewing ? { color: "var(--accent)", borderColor: "var(--accent)" } : {}}
+            onClick={() => { onView(isViewing ? null : file); }}
           >
-            <Icon name={isViewing ? "close" : "eye"} size={12} />{isViewing ? "Close" : "View"}
+            <Icon name={isViewing ? "close" : "eye"} size={12} />
+            {isViewing ? "Close" : "View"}
           </button>
         )}
         {file.webUrl && (
           <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-quiet btn-sm">
-            <Icon name="download" size={12} />Download
+            <Icon name="download" size={12} />
           </a>
         )}
       </div>
@@ -318,11 +345,8 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
       {/* Main stage files */}
       {primaryFolders.length > 0 && (
         <div className="ws-shelf-section">
-          <div className="ws-shelf-section-label">
-            {primaryFolders.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(" + ")} files
-          </div>
           {hasAnyPrimary ? (
-            <div className="ws-file-list">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {primaryFiles.map(f => <FileCard key={f.id || f.name} file={f} onView={setViewingFile} isViewing={viewingFile?.id === f.id || viewingFile?.name === f.name} />)}
             </div>
           ) : (
@@ -345,26 +369,21 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
       )}
 
       {/* Sources collapsible */}
-      <div className="ws-shelf-section ws-shelf-sources">
+      <div style={{ marginTop: 16, borderTop: "1px solid var(--line)", paddingTop: 12 }}>
         <button
-          className="ws-shelf-section-label ws-shelf-toggle"
+          style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "4px 0", width: "100%", textAlign: "left" }}
           onClick={() => setSourcesExpanded(e => !e)}
         >
-          <Icon name={sourcesExpanded ? "chevron_down" : "chevron_right"} size={12} />
-          Source materials ({sourceFiles.length})
+          <Icon name={sourcesExpanded ? "chevron_down" : "chevron_right"} size={12} className="muted" />
+          <span className="eyebrow" style={{ fontSize: 10.5 }}>Sources ({sourceFiles.length})</span>
         </button>
         {sourcesExpanded && (
-          sourceFiles.length > 0 ? (
-            <div className="ws-file-list">
-              {sourceFiles.map(f => <FileCard key={f.id || f.name} file={f} onView={setViewingFile} isViewing={viewingFile?.id === f.id || viewingFile?.name === f.name} />)}
-            </div>
-          ) : (
-            <UploadPanel
-              playSlug={playSlug}
-              stageKey="sources"
-              onUploaded={handleUploaded}
-            />
-          )
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+            {sourceFiles.length > 0
+              ? sourceFiles.map(f => <FileCard key={f.id || f.name} file={f} onView={setViewingFile} isViewing={viewingFile?.id === f.id || viewingFile?.name === f.name} />)
+              : <UploadPanel playSlug={playSlug} stageKey="sources" onUploaded={handleUploaded} />
+            }
+          </div>
         )}
       </div>
     </div>
@@ -539,10 +558,10 @@ function Workspace({ project, onBack, onNav }) {
       <div className="ws-body ws-body-shelf" style={{ display:"block", maxWidth:860, margin:"0 auto", width:"100%", padding:"0 24px", boxSizing:"border-box" }}>
         {/* Document Shelf — main content */}
         <main className="ws-editor ws-shelf-main">
-          <div className="ws-shelf-header">
-            <h3 className="ws-shelf-title">
-              {stage.name} · Files
-            </h3>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <div>
+              <div className="eyebrow">{stage.label} · {stage.name}</div>
+            </div>
             <span className="muted" style={{ fontSize: 12 }}>
               Owner: <strong>{stage.owner === "aws" ? "AWS" : (T24.people[stage.owner]?.name || stage.owner)}</strong>
             </span>
