@@ -31,7 +31,7 @@ function LoginScreen({ onSignIn }) {
           setStage("provision");
           try {
             await window.msalInstance.acquireTokenSilent({
-              scopes: window.BLN24_CONFIG.scopes,
+              scopes: ["openid", "profile", "email", "User.Read"],
               account: cached,
             });
             window.msalInstance.setActiveAccount(cached);
@@ -54,11 +54,23 @@ function LoginScreen({ onSignIn }) {
     setStage("auth");
     try {
       await window.msalReady;
-      await window.msalInstance.loginRedirect({
-        scopes: window.BLN24_CONFIG.scopes,
-      });
+      const loginScopes = ["openid", "profile", "email", "User.Read"];
+      // On iOS/iPad: loginRedirect breaks with ITP clearing PKCE state.
+      // Use loginPopup (triggered by user gesture, so not blocked by Safari).
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        const result = await window.msalInstance.loginPopup({ scopes: loginScopes });
+        window.msalInstance.setActiveAccount(result.account);
+        setAccount(result.account);
+        setStage("provision");
+        setTimeout(() => onSignIn(result.account), 300);
+      } else {
+        await window.msalInstance.loginRedirect({ scopes: loginScopes });
+      }
     } catch (e) {
-      setError(e.message || String(e));
+      // Surface the real error code so it's debuggable
+      const msg = e.errorCode ? `${e.errorCode}: ${e.message}` : (e.message || String(e));
+      setError(msg);
       setSigning(false);
       setStage("idle");
     }
