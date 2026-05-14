@@ -172,7 +172,7 @@ function DocViewer({ file, onClose }) {
         <div style={{ display: "flex", gap: 8 }}>
           {file.webUrl && (
             <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-              <Icon name="external" size={12} />Open in Word
+              <Icon name="arrow_up_right" size={12} />Open in Word
             </a>
           )}
           {onClose && (
@@ -192,7 +192,7 @@ function DocViewer({ file, onClose }) {
           <div className="muted" style={{ marginBottom: 12 }}>Inline preview unavailable.</div>
           {file.webUrl && (
             <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-sm">
-              <Icon name="external" size={12} />Open in Word Online
+              <Icon name="arrow_up_right" size={12} />Open in Word Online
             </a>
           )}
         </div>
@@ -597,7 +597,7 @@ function Workspace({ project, onBack, onNav }) {
           {sendBackOpen && stageIdx > 0 && (
             <div className="send-back-panel">
               <div className="send-back-head">
-                <div className="send-back-title"><Icon name="undo" size={14} />Changes needed — {sendBackLabel}</div>
+                <div className="send-back-title"><Icon name="return" size={14} />Changes needed — {sendBackLabel}</div>
                 <div className="send-back-from-row">
                   <span className="lbl">From</span>
                   <button className={"from-pill" + (fromRole === 'staff' ? ' active' : '')} onClick={() => setFromRole('staff')}>BLN24 Staff</button>
@@ -615,7 +615,7 @@ function Workspace({ project, onBack, onNav }) {
               <div className="send-back-footer">
                 <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(''); }}>Cancel</button>
                 <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
-                  <Icon name="chevron_left" size={12} />{advancing ? 'Working…' : sendBackLabel}
+                  <Icon name="arrow_left" size={12} />{advancing ? 'Working…' : sendBackLabel}
                 </button>
               </div>
             </div>
@@ -627,7 +627,7 @@ function Workspace({ project, onBack, onNav }) {
               disabled={advancing || stageIdx === 0}
               style={{ opacity: stageIdx === 0 ? 0.3 : 1 }}
             >
-              <Icon name="chevron_left" size={13} />
+              <Icon name="arrow_left" size={13} />
               {sendBackLabel}
             </button>
             <button
