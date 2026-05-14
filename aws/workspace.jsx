@@ -390,6 +390,62 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
   );
 }
 
+/* ---- Left Rail File List ---- */
+function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile }) {
+  const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
+  const primaryFolders = stageFolders.filter(f => f !== "sources");
+  const [files, setFiles] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [tick, setTick] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!playSlug) return;
+    setLoading(true);
+    Promise.all(
+      primaryFolders.map(folder =>
+        (window.spListFiles ? spListFiles(playSlug, folder) : Promise.resolve([]))
+          .catch(() => [])
+      )
+    ).then(results => {
+      const all = results.flat();
+      setFiles(all);
+      setLoading(false);
+      // Auto-select first file
+      if (all.length > 0) setViewingFile(prev => prev || all[0]);
+    });
+  }, [playSlug, stageIdx, tick]);
+
+  if (loading) return <div className="lrf-loading muted">Loading…</div>;
+
+  if (files.length === 0) return (
+    <div className="lrf-empty">
+      <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+    </div>
+  );
+
+  return (
+    <div className="lrf-list">
+      {files.map(f => {
+        const ext = (f.name || "").split(".").pop().toLowerCase();
+        const viewable = ["docx","doc","pptx","ppt","xlsx","xls","pdf"].includes(ext);
+        const isActive = viewingFile?.id === f.id || viewingFile?.name === f.name;
+        return (
+          <button
+            key={f.id || f.name}
+            className={"lrf-file" + (isActive ? " active" : "") + (!viewable ? " disabled" : "")}
+            onClick={() => viewable && setViewingFile(isActive ? null : f)}
+            title={f.name}
+          >
+            <Icon name={fileIcon(f.name)} size={13} />
+            <span className="lrf-name">{f.name}</span>
+            {isActive && <span className="lrf-active-dot" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ---- Toast ---- */
 function Toast({ message, onDone }) {
   React.useEffect(() => {
@@ -415,7 +471,7 @@ function Workspace({ project, onBack, onNav }) {
   const [revisions, setRevisions] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem(`revisions-${project?.id || ''}`) || '[]'); } catch { return []; }
   });
-  const [historyOpen, setHistoryOpen] = React.useState(false);
+  const [historyOpen, setHistoryOpen] = React.useState(true);
 
   // Persist revisions locally as a fallback mirror of SharePoint
   const appendRevision = React.useCallback((entry) => {
@@ -551,7 +607,7 @@ function Workspace({ project, onBack, onNav }) {
 
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
-      {/* Header — slim, full-width */}
+      {/* Header */}
       <div className="ws-head ws-head-3col">
         <div className="ws-crumbs">
           <a onClick={onBack} style={{ cursor: "pointer" }}>Plays</a>
@@ -575,22 +631,18 @@ function Workspace({ project, onBack, onNav }) {
       {/* Three-column body */}
       <div className="ws-3col-body">
 
-        {/* LEFT RAIL — Stage navigation */}
+        {/* LEFT RAIL — Stage nav + files */}
         <nav className="ws-left-rail">
           <div className="ws-left-rail-label">Pipeline</div>
           {STAGE_DEFS.map((s, i) => {
             const state = i < stageIdx ? "passed" : i === stageIdx ? "current" : "future";
             return (
-              <button
-                key={s.id}
-                className={"ws-stage-btn " + state}
-                onClick={() => setStageIdx(i)}
-              >
+              <button key={s.id} className={"ws-stage-btn " + state} onClick={() => setStageIdx(i)}>
                 <span className="ws-stage-btn-num">{s.short}</span>
                 <span className="ws-stage-btn-body">
                   <span className="ws-stage-btn-name">{s.name}</span>
                   <span className="ws-stage-btn-meta">
-                    {state === "passed" ? "Completed" : state === "current" ? "In progress" : "Pending"}
+                    {state === "passed" ? "Done" : state === "current" ? "In progress" : "Pending"}
                     {" · "}{s.owner === "aws" ? "AWS" : (T24.people[s.owner]?.name || s.owner)}
                   </span>
                 </span>
@@ -602,28 +654,35 @@ function Workspace({ project, onBack, onNav }) {
               </button>
             );
           })}
-        </nav>
 
-        {/* CENTER — Document */}
-        <main className="ws-center">
-          <DocumentShelf
+          {/* Files for active stage */}
+          <div className="ws-left-rail-divider" />
+          <div className="ws-left-rail-label">{stage.name} files</div>
+          <LeftRailFiles
             playSlug={playSlug}
             stageIdx={stageIdx}
             viewingFile={viewingFile}
             setViewingFile={setViewingFile}
           />
-          {viewingFile && (
-            <div style={{ marginTop: 20 }}>
-              <DocViewer file={viewingFile} onClose={null} />
+        </nav>
+
+        {/* CENTER — Pure document */}
+        <main className="ws-center">
+          {viewingFile ? (
+            <DocViewer file={viewingFile} onClose={() => setViewingFile(null)} />
+          ) : (
+            <div className="ws-center-empty">
+              <Icon name="doc_text" size={32} />
+              <span>Select a file from the left panel to preview it</span>
             </div>
           )}
         </main>
 
-        {/* RIGHT RAIL — Feedback + Revision history */}
+        {/* RIGHT RAIL — Review + history */}
         {rightRailOpen && (
           <aside className="ws-right-rail">
 
-            {/* Stage label */}
+            {/* Stage context */}
             <div className="ws-right-rail-label">
               <span>{stage.label} · {stage.name}</span>
               <span className="muted" style={{ fontSize: 11 }}>
@@ -631,8 +690,41 @@ function Workspace({ project, onBack, onNav }) {
               </span>
             </div>
 
-            {/* Action buttons */}
-            <div className="ws-right-actions">
+            {/* Scrollable middle: history + send-back panel */}
+            <div className="ws-right-scroll">
+              <RevisionHistory
+                revisions={revisions}
+                open={historyOpen}
+                onToggle={() => setHistoryOpen(v => !v)}
+              />
+
+              {sendBackOpen && (
+                <div className="send-back-panel send-back-rail">
+                  <div className="send-back-from-row" style={{ marginBottom: 8 }}>
+                    <span className="lbl">From</span>
+                    <button className={"from-pill" + (fromRole === "staff" ? " active" : "")} onClick={() => setFromRole("staff")}>BLN24 Staff</button>
+                    <button className={"from-pill" + (fromRole === "client" ? " active" : "")} onClick={() => setFromRole("client")}>Client</button>
+                  </div>
+                  <textarea
+                    className="send-back-input"
+                    placeholder="Describe the changes needed…"
+                    value={feedbackText}
+                    onChange={e => setFeedbackText(e.target.value)}
+                    rows={4}
+                    autoFocus
+                  />
+                  <div className="send-back-footer">
+                    <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(""); }}>Cancel</button>
+                    <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
+                      <Icon name="arrow_left" size={12} />{advancing ? "Working…" : "Send Back"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* STICKY BOTTOM — actions always visible */}
+            <div className="ws-right-sticky">
               <button
                 className={"btn btn-ghost btn-sm ws-sendback-btn" + (sendBackOpen ? " active" : "")}
                 onClick={() => setSendBackOpen(v => !v)}
@@ -641,47 +733,15 @@ function Workspace({ project, onBack, onNav }) {
                 <Icon name="arrow_left" size={12} />{sendBackLabel}
               </button>
               <button
-                className="btn btn-accent btn-sm"
+                className="btn btn-accent ws-approve-btn"
                 onClick={handleAdvance}
                 disabled={advancing || stageIdx >= STAGE_DEFS.length}
               >
                 {advancing ? "Working…" : advanceLabel}
-                {!advancing && stageIdx < 3 && <Icon name="chevron_right" size={12} />}
-                {!advancing && stageIdx === 3 && <Icon name="check" size={12} />}
+                {!advancing && stageIdx < 3 && <Icon name="chevron_right" size={14} />}
+                {!advancing && stageIdx === 3 && <Icon name="check" size={14} />}
               </button>
             </div>
-
-            {/* Send Back panel */}
-            {sendBackOpen && (
-              <div className="send-back-panel send-back-rail">
-                <div className="send-back-from-row" style={{ marginBottom: 8 }}>
-                  <span className="lbl">From</span>
-                  <button className={"from-pill" + (fromRole === "staff" ? " active" : "")} onClick={() => setFromRole("staff")}>BLN24 Staff</button>
-                  <button className={"from-pill" + (fromRole === "client" ? " active" : "")} onClick={() => setFromRole("client")}>Client</button>
-                </div>
-                <textarea
-                  className="send-back-input"
-                  placeholder="Describe the changes needed…"
-                  value={feedbackText}
-                  onChange={e => setFeedbackText(e.target.value)}
-                  rows={4}
-                  autoFocus
-                />
-                <div className="send-back-footer">
-                  <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(""); }}>Cancel</button>
-                  <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
-                    <Icon name="arrow_left" size={12} />{advancing ? "Working…" : "Send Back"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Revision history */}
-            <RevisionHistory
-              revisions={revisions}
-              open={historyOpen}
-              onToggle={() => setHistoryOpen(v => !v)}
-            />
           </aside>
         )}
       </div>
