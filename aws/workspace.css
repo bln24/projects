@@ -46,10 +46,14 @@
 
 /* ===== Cinematic Pipeline ===== */
 .pipeline {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 0;
-  padding: 0 40px;
+  padding: 0 24px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
   background:
     linear-gradient(180deg, var(--paper) 0%, var(--paper-elev) 100%);
   border-bottom: 1px solid var(--line);
@@ -151,15 +155,7 @@
 }
 
 /* Left: outline / sources rail */
-.ws-rail-left {
-  border-right: 1px solid var(--line);
-  background: var(--paper);
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  overflow-y: auto;
-}
+.ws-rail-left { display: none; }
 .rail-section h4 {
   font-family: var(--mono);
   font-size: 10.5px;
@@ -640,13 +636,7 @@
 }
 
 /* Right rail: chat / comments / activity */
-.ws-rail-right {
-  border-left: 1px solid var(--line);
-  background: var(--paper);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
+.ws-rail-right { display: none; }
 .rail-tabs { display: flex; border-bottom: 1px solid var(--line); }
 .rail-tab {
   flex: 1;

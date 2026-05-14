@@ -536,7 +536,7 @@ function Workspace({ project, onBack, onNav }) {
       </div>
 
       {/* Body */}
-      <div className="ws-body ws-body-shelf">
+      <div className="ws-body ws-body-shelf" style={{ display:"block", maxWidth:860, margin:"0 auto", width:"100%", padding:"0 24px", boxSizing:"border-box" }}>
         {/* Document Shelf — main content */}
         <main className="ws-editor ws-shelf-main">
           <div className="ws-shelf-header">
