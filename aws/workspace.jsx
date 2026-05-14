@@ -622,10 +622,11 @@ if (!document.getElementById('ws-doc-viewer-styles')) {
   s.id = 'ws-doc-viewer-styles';
   s.textContent = `
     .ws-file-card--active { border-color: var(--accent) !important; }
-    .ws-doc-viewer { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--paper-elev); }
+    .ws-doc-viewer { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--paper-elev); width: 100%; box-sizing: border-box; }
     .ws-doc-viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--paper-elev-2); }
     .ws-doc-viewer-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
-    .ws-doc-iframe { width: 100%; height: 70vh; display: block; border: none; }
+    .ws-doc-iframe { width: 100%; height: min(70vh, 600px); display: block; border: none; }
+    @media (max-width: 640px) { .ws-doc-iframe { height: 60vh; } }
   `;
   document.head.appendChild(s);
 }
