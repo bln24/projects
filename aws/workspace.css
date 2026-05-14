@@ -902,7 +902,7 @@
 
 /* ── Send-back feedback panel ── */
 .send-back-panel {
-  background: var(--paper-elev, var(--surface2, #1c1c27));
+  background: var(--paper-elev);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px 18px;
@@ -929,7 +929,7 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink, #e8e8f0);
+  color: var(--ink);
 }
 .send-back-from-row {
   display: flex;
@@ -958,10 +958,10 @@
 .from-pill:not(.active):hover { border-color: var(--accent); color: var(--ink); }
 .send-back-input {
   width: 100%;
-  background: var(--canvas, #0a0a0f);
+  background: var(--paper-elev-2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: var(--ink, #e8e8f0);
+  color: var(--ink);
   font-size: 13px;
   padding: 10px 14px;
   resize: vertical;
