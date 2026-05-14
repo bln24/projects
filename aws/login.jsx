@@ -25,21 +25,13 @@ function LoginScreen({ onSignIn }) {
           setTimeout(() => onSignIn(result.account), 400);
           return;
         }
-        // No redirect — check for a cached account and try silent token
+        // No redirect — if there's a cached account, sign in immediately.
+        // Don't gate the UI on a silent token refresh — API calls handle that lazily.
         const cached = window.msalInstance.getAllAccounts()[0];
         if (cached) {
+          window.msalInstance.setActiveAccount(cached);
           setStage("provision");
-          try {
-            await window.msalInstance.acquireTokenSilent({
-              scopes: ["openid", "profile", "email", "User.Read"],
-              account: cached,
-            });
-            window.msalInstance.setActiveAccount(cached);
-            if (!cancelled) onSignIn(cached);
-          } catch {
-            // Silent refresh failed — token truly expired, show login button
-            if (!cancelled) setStage("idle");
-          }
+          if (!cancelled) onSignIn(cached);
         }
       } catch (e) {
         if (!cancelled) setError(e.message || String(e));
