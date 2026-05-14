@@ -102,14 +102,28 @@ function FileCard({ file, onView, isViewing }) {
   );
 }
 
+// Detect iOS/iPadOS — Office Online iframes are blocked by Safari cross-origin restrictions
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 function DocViewer({ file, onClose }) {
-  const [mode, setMode] = React.useState("loading"); // loading | iframe | error
+  const [mode, setMode] = React.useState("loading"); // loading | iframe | ios | error
   const [embedUrl, setEmbedUrl] = React.useState(null);
+  const ios = React.useMemo(() => isIOS(), []);
 
   React.useEffect(() => {
     if (!file) return;
     setMode("loading");
     setEmbedUrl(null);
+
+    // On iOS/iPadOS, Office Online iframes are blocked by Safari's cross-origin
+    // restrictions. Skip the embed entirely and go straight to open-in-tab.
+    if (ios) {
+      setMode("ios");
+      return;
+    }
 
     (async () => {
       try {
@@ -118,7 +132,7 @@ function DocViewer({ file, onClose }) {
         const groupId = window.SP && SP.groupId;
         if (!groupId || !file.id) throw new Error("missing ids");
 
-        // Try Graph download URL first
+        // Try Graph download URL → Office Online viewer
         const res = await fetch(
           `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -133,7 +147,7 @@ function DocViewer({ file, onClose }) {
           }
         }
 
-        // Fallback: SharePoint embed URL (works if browser is logged in to SharePoint)
+        // Fallback: SharePoint embed URL
         if (file.webUrl) {
           const spEmbedUrl = file.webUrl.replace(/action=default/, "action=embedview") + "&wdAllowInteractivity=False";
           setEmbedUrl(spEmbedUrl);
@@ -147,7 +161,7 @@ function DocViewer({ file, onClose }) {
         setMode("error");
       }
     })();
-  }, [file?.id]);
+  }, [file?.id, ios]);
 
   if (!file) return (
     <div style={{
@@ -182,13 +196,37 @@ function DocViewer({ file, onClose }) {
           )}
         </div>
       </div>
+
       {mode === "loading" && (
-        <div style={{ padding: 32, textAlign: "center", color: "var(--muted)", fontSize: 13 }}>
-          <span>Loading preview…</span>
+        <div className="ws-doc-state">
+          <span className="muted">Loading preview…</span>
         </div>
       )}
+
+      {/* iOS/iPadOS — Safari blocks Office Online iframes. Open in new tab instead. */}
+      {mode === "ios" && (
+        <div className="ws-doc-state ws-doc-ios">
+          <Icon name="doc_text" size={32} />
+          <div className="ws-doc-ios-name">{file.name}</div>
+          <div className="ws-doc-ios-hint">
+            Inline document preview isn’t supported in Safari on iPad — tap below to open the full document.
+          </div>
+          {file.webUrl && (
+            <a
+              href={file.webUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-accent"
+              style={{ marginTop: 8 }}
+            >
+              <Icon name="arrow_up_right" size={14} />Open in Word Online
+            </a>
+          )}
+        </div>
+      )}
+
       {mode === "error" && (
-        <div style={{ padding: 32, textAlign: "center", fontSize: 13 }}>
+        <div className="ws-doc-state">
           <div className="muted" style={{ marginBottom: 12 }}>Inline preview unavailable.</div>
           {file.webUrl && (
             <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-sm">
@@ -197,6 +235,7 @@ function DocViewer({ file, onClose }) {
           )}
         </div>
       )}
+
       {mode === "iframe" && embedUrl && (
         <iframe src={embedUrl} className="ws-doc-iframe" title={file.name} frameBorder="0" allowFullScreen />
       )}
@@ -838,8 +877,12 @@ if (!document.getElementById('ws-doc-viewer-styles')) {
     .ws-doc-viewer { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--paper-elev); width: 100%; box-sizing: border-box; }
     .ws-doc-viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--paper-elev-2); }
     .ws-doc-viewer-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
-    .ws-doc-iframe { width: 100%; height: min(70vh, 600px); display: block; border: none; }
-    @media (max-width: 640px) { .ws-doc-iframe { height: 60vh; } }
+    .ws-doc-iframe { width: 100%; height: min(70vh, 700px); display: block; border: none; }
+    .ws-doc-state { padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+    .ws-doc-ios { padding: 48px 32px; gap: 16px; }
+    .ws-doc-ios-name { font-size: 15px; font-weight: 600; color: var(--ink); max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ws-doc-ios-hint { font-size: 13px; color: var(--muted); max-width: 300px; line-height: 1.55; }
+    @media (max-width: 900px) { .ws-doc-iframe { height: 55vh; min-height: 320px; } }
   `;
   document.head.appendChild(s);
 }
