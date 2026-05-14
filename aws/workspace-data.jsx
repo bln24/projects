@@ -148,7 +148,33 @@ async function spAdvanceStage(playId, newStageIndex, extraFields = {}) {
   const plays = data.plays || [];
   const idx = plays.findIndex(p => String(p.id) === String(playId));
   if (idx === -1) throw new Error(`Play ${playId} not found`);
-  plays[idx] = { ...plays[idx], stageIndex: newStageIndex, ...extraFields };
+
+  // Build revision entry — always append, never overwrite history
+  const { FeedbackFrom, FeedbackNotes, Status, ...otherFields } = extraFields;
+  const revisionEntry = {
+    id: `rev-${Date.now()}`,
+    at: new Date().toISOString(),
+    action: FeedbackNotes ? "send_back" : "approve",
+    fromStageIndex: plays[idx].stageIndex,
+    toStageIndex: newStageIndex,
+    stageName: (["Narrative","Arc","Storyboard","Deck"][plays[idx].stageIndex] || "Unknown"),
+    status: Status || (FeedbackNotes ? "Returned for revision" : "Approved"),
+    from: FeedbackFrom || null,
+    notes: FeedbackNotes || null,
+  };
+
+  const existingRevisions = Array.isArray(plays[idx].revisions) ? plays[idx].revisions : [];
+  plays[idx] = {
+    ...plays[idx],
+    stageIndex: newStageIndex,
+    revisions: [...existingRevisions, revisionEntry],
+    // Keep last-feedback fields for quick surface reads
+    lastFeedbackFrom: FeedbackFrom || plays[idx].lastFeedbackFrom || null,
+    lastFeedbackNotes: FeedbackNotes || plays[idx].lastFeedbackNotes || null,
+    lastStatus: Status || plays[idx].lastStatus || null,
+    ...otherFields,
+  };
+
   await writePlaysFile({ ...data, plays });
   return enrichPlay(plays[idx]);
 }

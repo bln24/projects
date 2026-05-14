@@ -995,3 +995,109 @@
   border-top: 1px solid var(--border, rgba(255,255,255,0.08));
   margin-top: 24px;
 }
+
+/* ── Revision History ── */
+.rev-history {
+  margin-top: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.rev-history-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--paper-elev);
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
+  transition: background 0.13s;
+}
+.rev-history-toggle:hover { background: var(--paper-elev-2); }
+.rev-badge {
+  background: var(--muted-2, rgba(255,255,255,0.1));
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-family: var(--mono);
+}
+.rev-badge-warn {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+}
+.rev-list {
+  border-top: 1px solid var(--border);
+  background: var(--paper);
+}
+.rev-empty {
+  padding: 20px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+.rev-entry {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  padding-left: 28px;
+}
+.rev-entry:last-child { border-bottom: none; }
+.rev-entry::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.rev-entry-approve::before { background: var(--success, #22c55e); }
+.rev-entry-sendback::before { background: #ef4444; }
+.rev-entry-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rev-action-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+}
+.rev-from-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--paper-elev-2);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.rev-at {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.rev-notes {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  padding: 8px 12px;
+  background: var(--paper-elev);
+  border-radius: 6px;
+  border-left: 2px solid #ef4444;
+}
+.rev-entry-approve .rev-notes { border-left-color: var(--success, #22c55e); }

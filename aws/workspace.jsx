@@ -412,6 +412,19 @@ function Workspace({ project, onBack, onNav }) {
   const [sendBackOpen, setSendBackOpen] = React.useState(false);
   const [fromRole, setFromRole] = React.useState('staff'); // 'staff' | 'client'
   const [feedbackText, setFeedbackText] = React.useState('');
+  const [revisions, setRevisions] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem(`revisions-${project?.id || ''}`) || '[]'); } catch { return []; }
+  });
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+
+  // Persist revisions locally as a fallback mirror of SharePoint
+  const appendRevision = React.useCallback((entry) => {
+    setRevisions(prev => {
+      const next = [...prev, entry];
+      try { localStorage.setItem(`revisions-${project?.id || ''}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, [project?.id]);
 
   // Sync stageIdx if project changes
   React.useEffect(() => {
@@ -440,16 +453,25 @@ function Workspace({ project, onBack, onNav }) {
       let extraFields = {};
 
       if (stageIdx === 2) {
-        // Stage 2 → 3: send to AWS / Vidya
         extraFields = { Status: "Sent to AWS · Awaiting Vidya", StatusKind: "review" };
       } else if (stageIdx === 3) {
-        // Stage 3 done: mark approved
         extraFields = { Done: true, Status: "Approved · Delivered", StatusKind: "approved" };
       }
 
       if (window.spAdvanceStage) {
         await spAdvanceStage(project.spItemId, newIdx, extraFields);
       }
+      appendRevision({
+        id: `rev-${Date.now()}`,
+        at: new Date().toISOString(),
+        action: stageIdx === 3 ? "approved_final" : "approve",
+        fromStageIndex: stageIdx,
+        toStageIndex: newIdx,
+        stageName: STAGE_DEFS[stageIdx]?.name || "Unknown",
+        status: extraFields.Status || "Approved",
+        from: null,
+        notes: null,
+      });
       setStageIdx(newIdx);
       setToast(stageIdx === 3 ? "Marked as approved by AWS." : `Advanced to ${STAGE_DEFS[newIdx]?.name || "next stage"}.`);
     } catch (e) {
@@ -488,6 +510,18 @@ function Workspace({ project, onBack, onNav }) {
         }
         setToast(`Revisions requested · ${sourceLabel} feedback logged.`);
       }
+      const revEntry = {
+        id: `rev-${Date.now()}`,
+        at: new Date().toISOString(),
+        action: stageIdx > 0 ? "send_back" : "revisions_requested",
+        fromStageIndex: stageIdx,
+        toStageIndex: stageIdx > 0 ? stageIdx - 1 : 0,
+        stageName: STAGE_DEFS[stageIdx]?.name || "Unknown",
+        status: stageIdx > 0 ? "Returned for revision" : "Revisions requested",
+        from: sourceLabel,
+        notes: feedbackText.trim(),
+      };
+      appendRevision(revEntry);
       setSendBackOpen(false);
       setFeedbackText('');
     } catch (e) {
@@ -650,8 +684,67 @@ function Workspace({ project, onBack, onNav }) {
               {stageIdx === 3 && <Icon name="check" size={13} />}
             </button>
           </div>
+
+          <RevisionHistory
+            revisions={revisions}
+            open={historyOpen}
+            onToggle={() => setHistoryOpen(v => !v)}
+          />
         </main>
       </div>
+    </div>
+  );
+}
+
+/* ---- Revision History ---- */
+function RevisionHistory({ revisions, open, onToggle }) {
+  const count = revisions.length;
+  const sendBacks = revisions.filter(r => r.action === "send_back" || r.action === "revisions_requested").length;
+
+  function formatAt(iso) {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · " +
+             d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    } catch { return iso; }
+  }
+
+  function actionLabel(r) {
+    if (r.action === "approve") return `Approved ${r.stageName} → ${STAGE_DEFS[r.toStageIndex]?.name || "Next"}`;
+    if (r.action === "approved_final") return "Approved · Delivered to AWS";
+    if (r.action === "send_back") return `Sent back · ${STAGE_DEFS[r.fromStageIndex]?.name || r.stageName} → ${STAGE_DEFS[r.toStageIndex]?.name || "Previous"}`;
+    if (r.action === "revisions_requested") return `Revisions requested · ${r.stageName}`;
+    return r.action;
+  }
+
+  return (
+    <div className="rev-history">
+      <button className="rev-history-toggle" onClick={onToggle}>
+        <Icon name="history" size={13} />
+        <span>Revision history</span>
+        {count > 0 && <span className="rev-badge">{count}</span>}
+        {sendBacks > 0 && <span className="rev-badge rev-badge-warn">{sendBacks} send-back{sendBacks > 1 ? "s" : ""}</span>}
+        <Icon name={open ? "chevron_up" : "chevron_down"} size={12} style={{ marginLeft: "auto" }} />
+      </button>
+
+      {open && (
+        <div className="rev-list">
+          {count === 0 ? (
+            <div className="rev-empty">No revisions yet. Approvals and send-backs will appear here.</div>
+          ) : (
+            [...revisions].reverse().map((r, i) => (
+              <div key={r.id || i} className={"rev-entry" + (r.action.includes("send_back") || r.action === "revisions_requested" ? " rev-entry-sendback" : " rev-entry-approve")}>
+                <div className="rev-entry-header">
+                  <span className="rev-action-label">{actionLabel(r)}</span>
+                  {r.from && <span className="rev-from-pill">{r.from}</span>}
+                  <span className="rev-at">{formatAt(r.at)}</span>
+                </div>
+                {r.notes && <div className="rev-notes">{r.notes}</div>}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
