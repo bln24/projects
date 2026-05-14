@@ -544,87 +544,68 @@ function Workspace({ project, onBack, onNav }) {
     return prev ? `Send back to ${prev.name}` : "Send back";
   })();
 
+  const [rightRailOpen, setRightRailOpen] = React.useState(true);
+
   return (
-    <div className="ws-page">
+    <div className="ws-page ws-3col">
 
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
-      {/* Header */}
-      <div className="ws-head">
+      {/* Header — slim, full-width */}
+      <div className="ws-head ws-head-3col">
         <div className="ws-crumbs">
           <a onClick={onBack} style={{ cursor: "pointer" }}>Plays</a>
           <Icon name="chevron_right" size={11} />
           <span style={{ color: "var(--ink)" }}>{project.persona} · {project.title}</span>
         </div>
-
-        <div className="ws-title-row">
-          <div className="ws-title-block">
-            <div className="ws-persona-mark" style={{ background: project.accent || "var(--accent)" }}>
-              {project.persona || "?"}
-            </div>
-            <div>
-              <span className="eyebrow">{project.industry}</span>
-              <span className="subtitle">{project.title}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                <StatusPill statusKind={project.statusKind} label={project.status} />
-                <span className="pill pill-ghost pill-sm">{stage.label} · {stage.name}</span>
-              </div>
-            </div>
-          </div>
-          <div className="ws-title-actions">
-            <TeamStrip team={project.team} />
-          </div>
+        <div className="ws-head-meta">
+          <StatusPill statusKind={project.statusKind} label={project.status} />
+          <TeamStrip team={project.team} />
+          <button
+            className={"btn btn-ghost btn-sm ws-rail-toggle" + (rightRailOpen ? " active" : "")}
+            onClick={() => setRightRailOpen(v => !v)}
+            title="Toggle feedback panel"
+          >
+            <Icon name="message" size={13} />
+            {revisions.length > 0 && <span className="btn-pip">{revisions.length}</span>}
+          </button>
         </div>
       </div>
 
-      {/* Stage Rail */}
-      <div className="pipeline">
-        {STAGE_DEFS.map((s, i) => {
-          const state = i < stageIdx ? "passed" : i === stageIdx ? "current" : "future";
-          return (
-            <button
-              key={s.id}
-              className={"pl-stage " + state}
-              onClick={() => setStageIdx(i)}
-            >
-              <span className="pl-stage-num">{s.short} · {s.label}</span>
-              <span className="pl-stage-name">
-                {state === "current" ? <em>{s.name}</em> : s.name}
-              </span>
-              <span className="pl-stage-status">
-                <span className="ico">
-                  {state === "passed" ? <Icon name="check" size={10} /> :
-                   state === "current" ? <Icon name="dot" size={10} /> :
-                   <Icon name="lock" size={10} />}
-                </span>
-                {state === "passed" ? "Completed" :
-                 state === "current" ? "In progress" :
-                 "Pending"}
-              </span>
-              <div className="pl-stage-meta">
-                <span className="muted" style={{ fontSize: 11 }}>
-                  Owner: {s.owner === "aws" ? "AWS" : (T24.people[s.owner]?.name || s.owner)}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      {/* Three-column body */}
+      <div className="ws-3col-body">
 
-      {/* Body */}
-      <div className="ws-body ws-body-shelf" style={{ display:"block", maxWidth:1180, margin:"0 auto", width:"100%", padding:"0 32px", boxSizing:"border-box" }}>
-        {/* Document Shelf — main content */}
-        <main className="ws-editor ws-shelf-main">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div>
-              <div className="eyebrow">{stage.label} · {stage.name}</div>
-            </div>
-            <span className="muted" style={{ fontSize: 12 }}>
-              Owner: <strong>{stage.owner === "aws" ? "AWS" : (T24.people[stage.owner]?.name || stage.owner)}</strong>
-            </span>
-          </div>
+        {/* LEFT RAIL — Stage navigation */}
+        <nav className="ws-left-rail">
+          <div className="ws-left-rail-label">Pipeline</div>
+          {STAGE_DEFS.map((s, i) => {
+            const state = i < stageIdx ? "passed" : i === stageIdx ? "current" : "future";
+            return (
+              <button
+                key={s.id}
+                className={"ws-stage-btn " + state}
+                onClick={() => setStageIdx(i)}
+              >
+                <span className="ws-stage-btn-num">{s.short}</span>
+                <span className="ws-stage-btn-body">
+                  <span className="ws-stage-btn-name">{s.name}</span>
+                  <span className="ws-stage-btn-meta">
+                    {state === "passed" ? "Completed" : state === "current" ? "In progress" : "Pending"}
+                    {" · "}{s.owner === "aws" ? "AWS" : (T24.people[s.owner]?.name || s.owner)}
+                  </span>
+                </span>
+                <span className="ws-stage-btn-ico">
+                  {state === "passed" ? <Icon name="check" size={11} /> :
+                   state === "current" ? <Icon name="dot" size={11} /> :
+                   <Icon name="lock" size={11} />}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
-          {/* File list top, document below */}
+        {/* CENTER — Document */}
+        <main className="ws-center">
           <DocumentShelf
             playSlug={playSlug}
             stageIdx={stageIdx}
@@ -632,65 +613,77 @@ function Workspace({ project, onBack, onNav }) {
             setViewingFile={setViewingFile}
           />
           {viewingFile && (
-            <div style={{ marginTop: 24 }}>
+            <div style={{ marginTop: 20 }}>
               <DocViewer file={viewingFile} onClose={null} />
             </div>
           )}
+        </main>
 
-          {/* Stage Progression */}
-          {sendBackOpen && (
-            <div className="send-back-panel">
-              <div className="send-back-head">
-                <div className="send-back-title"><Icon name="return" size={14} />Changes needed — {sendBackLabel}</div>
-                <div className="send-back-from-row">
+        {/* RIGHT RAIL — Feedback + Revision history */}
+        {rightRailOpen && (
+          <aside className="ws-right-rail">
+
+            {/* Stage label */}
+            <div className="ws-right-rail-label">
+              <span>{stage.label} · {stage.name}</span>
+              <span className="muted" style={{ fontSize: 11 }}>
+                {stage.owner === "aws" ? "AWS" : (T24.people[stage.owner]?.name || stage.owner)}
+              </span>
+            </div>
+
+            {/* Action buttons */}
+            <div className="ws-right-actions">
+              <button
+                className={"btn btn-ghost btn-sm ws-sendback-btn" + (sendBackOpen ? " active" : "")}
+                onClick={() => setSendBackOpen(v => !v)}
+                disabled={advancing}
+              >
+                <Icon name="arrow_left" size={12} />{sendBackLabel}
+              </button>
+              <button
+                className="btn btn-accent btn-sm"
+                onClick={handleAdvance}
+                disabled={advancing || stageIdx >= STAGE_DEFS.length}
+              >
+                {advancing ? "Working…" : advanceLabel}
+                {!advancing && stageIdx < 3 && <Icon name="chevron_right" size={12} />}
+                {!advancing && stageIdx === 3 && <Icon name="check" size={12} />}
+              </button>
+            </div>
+
+            {/* Send Back panel */}
+            {sendBackOpen && (
+              <div className="send-back-panel send-back-rail">
+                <div className="send-back-from-row" style={{ marginBottom: 8 }}>
                   <span className="lbl">From</span>
-                  <button className={"from-pill" + (fromRole === 'staff' ? ' active' : '')} onClick={() => setFromRole('staff')}>BLN24 Staff</button>
-                  <button className={"from-pill" + (fromRole === 'client' ? ' active' : '')} onClick={() => setFromRole('client')}>Client</button>
+                  <button className={"from-pill" + (fromRole === "staff" ? " active" : "")} onClick={() => setFromRole("staff")}>BLN24 Staff</button>
+                  <button className={"from-pill" + (fromRole === "client" ? " active" : "")} onClick={() => setFromRole("client")}>Client</button>
+                </div>
+                <textarea
+                  className="send-back-input"
+                  placeholder="Describe the changes needed…"
+                  value={feedbackText}
+                  onChange={e => setFeedbackText(e.target.value)}
+                  rows={4}
+                  autoFocus
+                />
+                <div className="send-back-footer">
+                  <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(""); }}>Cancel</button>
+                  <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
+                    <Icon name="arrow_left" size={12} />{advancing ? "Working…" : "Send Back"}
+                  </button>
                 </div>
               </div>
-              <textarea
-                className="send-back-input"
-                placeholder="Describe the changes needed…"
-                value={feedbackText}
-                onChange={e => setFeedbackText(e.target.value)}
-                rows={3}
-                autoFocus
-              />
-              <div className="send-back-footer">
-                <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(''); }}>Cancel</button>
-                <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
-                  <Icon name="arrow_left" size={12} />{advancing ? 'Working…' : sendBackLabel}
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="ws-stage-actions">
-            <button
-              className={"btn btn-ghost" + (sendBackOpen ? ' active' : '')}
-              onClick={() => setSendBackOpen(v => !v)}
-              disabled={advancing}
-            >
-              <Icon name="arrow_left" size={13} />
-              {sendBackLabel}
-            </button>
-            <button
-              className="btn btn-accent"
-              onClick={handleAdvance}
-              disabled={advancing || stageIdx >= STAGE_DEFS.length}
-            >
-              {advancing ? "Working…" : advanceLabel}
-              {stageIdx < 3 && <Icon name="chevron_right" size={13} />}
-              {stageIdx === 2 && <Icon name="send" size={13} />}
-              {stageIdx === 3 && <Icon name="check" size={13} />}
-            </button>
-          </div>
+            )}
 
-          <RevisionHistory
-            revisions={revisions}
-            open={historyOpen}
-            onToggle={() => setHistoryOpen(v => !v)}
-          />
-        </main>
+            {/* Revision history */}
+            <RevisionHistory
+              revisions={revisions}
+              open={historyOpen}
+              onToggle={() => setHistoryOpen(v => !v)}
+            />
+          </aside>
+        )}
       </div>
     </div>
   );
