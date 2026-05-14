@@ -409,6 +409,9 @@ function Workspace({ project, onBack, onNav }) {
   const [advancing, setAdvancing] = React.useState(false);
   const [toast, setToast] = React.useState(null);
   const [viewingFile, setViewingFile] = React.useState(null);
+  const [sendBackOpen, setSendBackOpen] = React.useState(false);
+  const [fromRole, setFromRole] = React.useState('staff'); // 'staff' | 'client'
+  const [feedbackText, setFeedbackText] = React.useState('');
 
   // Sync stageIdx if project changes
   React.useEffect(() => {
@@ -459,14 +462,24 @@ function Workspace({ project, onBack, onNav }) {
 
   const handleSendBack = async () => {
     if (advancing || stageIdx === 0) return;
+    if (!sendBackOpen) { setSendBackOpen(true); return; }
+    if (!feedbackText.trim()) return;
     setAdvancing(true);
     try {
       const newIdx = stageIdx - 1;
+      const sourceLabel = fromRole === 'client' ? 'Client' : 'BLN24 Staff';
+      const extraFields = {
+        Status: "Returned for revision",
+        FeedbackFrom: sourceLabel,
+        FeedbackNotes: feedbackText.trim(),
+      };
       if (window.spAdvanceStage) {
-        await spAdvanceStage(project.spItemId, newIdx, { Status: "Returned for revision" });
+        await spAdvanceStage(project.spItemId, newIdx, extraFields);
       }
       setStageIdx(newIdx);
-      setToast(`Sent back to ${STAGE_DEFS[newIdx]?.name || "previous stage"}.`);
+      setSendBackOpen(false);
+      setFeedbackText('');
+      setToast(`Sent back to ${STAGE_DEFS[newIdx]?.name || "previous stage"} · ${sourceLabel} feedback logged.`);
     } catch (e) {
       console.error("Send back failed:", e);
       setToast("Error: " + (e.message || "Could not send back."));
@@ -581,10 +594,36 @@ function Workspace({ project, onBack, onNav }) {
           )}
 
           {/* Stage Progression */}
+          {sendBackOpen && stageIdx > 0 && (
+            <div className="send-back-panel">
+              <div className="send-back-head">
+                <div className="send-back-title"><Icon name="undo" size={14} />Changes needed — {sendBackLabel}</div>
+                <div className="send-back-from-row">
+                  <span className="lbl">From</span>
+                  <button className={"from-pill" + (fromRole === 'staff' ? ' active' : '')} onClick={() => setFromRole('staff')}>BLN24 Staff</button>
+                  <button className={"from-pill" + (fromRole === 'client' ? ' active' : '')} onClick={() => setFromRole('client')}>Client</button>
+                </div>
+              </div>
+              <textarea
+                className="send-back-input"
+                placeholder="Describe the changes needed…"
+                value={feedbackText}
+                onChange={e => setFeedbackText(e.target.value)}
+                rows={3}
+                autoFocus
+              />
+              <div className="send-back-footer">
+                <button className="btn btn-quiet btn-sm" onClick={() => { setSendBackOpen(false); setFeedbackText(''); }}>Cancel</button>
+                <button className="btn btn-send-back btn-sm" onClick={handleSendBack} disabled={advancing || !feedbackText.trim()}>
+                  <Icon name="chevron_left" size={12} />{advancing ? 'Working…' : sendBackLabel}
+                </button>
+              </div>
+            </div>
+          )}
           <div className="ws-stage-actions">
             <button
-              className="btn btn-ghost"
-              onClick={handleSendBack}
+              className={"btn btn-ghost" + (sendBackOpen ? ' active' : '')}
+              onClick={() => { if (stageIdx > 0) setSendBackOpen(v => !v); }}
               disabled={advancing || stageIdx === 0}
               style={{ opacity: stageIdx === 0 ? 0.3 : 1 }}
             >

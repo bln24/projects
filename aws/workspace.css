@@ -899,3 +899,88 @@
 .inbox-item-body .txt { font-size: 13px; color: var(--ink); line-height: 1.45; }
 .inbox-item-body .txt strong { font-weight: 600; }
 .inbox-item-body .meta { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+
+/* ── Send-back feedback panel ── */
+.send-back-panel {
+  background: var(--paper-elev, var(--surface2, #1c1c27));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: sb-in 0.15s ease;
+}
+@keyframes sb-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.send-back-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.send-back-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink, #e8e8f0);
+}
+.send-back-from-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.send-back-from-row .lbl {
+  font-family: var(--mono, monospace);
+  font-size: 10.5px;
+  color: var(--muted, #7a7a99);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.from-pill {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #7a7a99);
+  cursor: pointer;
+  transition: all 0.14s;
+}
+.from-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.from-pill:not(.active):hover { border-color: var(--accent); color: var(--ink); }
+.send-back-input {
+  width: 100%;
+  background: var(--canvas, #0a0a0f);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink, #e8e8f0);
+  font-size: 13px;
+  padding: 10px 14px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.55;
+  min-height: 72px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.send-back-input:focus { outline: none; border-color: var(--accent); }
+.send-back-input::placeholder { color: var(--muted, #7a7a99); }
+.send-back-footer { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-send-back {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-send-back:hover:not(:disabled) { background: #dc2626; }
+.btn-send-back:disabled { opacity: 0.45; cursor: not-allowed; }
