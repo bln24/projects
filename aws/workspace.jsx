@@ -169,35 +169,36 @@ function DocViewer({ file, onClose }) {
 
     (async () => {
       try {
-        if (!window.spGetUserToken) throw new Error("auth not ready");
-        const token = await spGetUserToken();
-        const groupId = window.SP && SP.groupId;
-        if (!groupId || !file.id) throw new Error("missing ids");
+        // SP is a const in the inline script — accessible directly, not via window.SP
+        const groupId = (typeof SP !== "undefined" && SP.groupId) || null;
 
-        // Try Graph download URL → Office Online viewer
-        const res = await fetch(
-          `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          const dlUrl = data["@microsoft.graph.downloadUrl"];
-          if (dlUrl) {
-            setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
-            setMode("iframe");
-            return;
+        if (groupId && file.id && window.spGetUserToken) {
+          // Path 1: Graph download URL → Office Online viewer (no X-Frame-Options issues)
+          try {
+            const token = await spGetUserToken();
+            const res = await fetch(
+              `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (res.ok) {
+              const data = await res.json();
+              const dlUrl = data["@microsoft.graph.downloadUrl"];
+              if (dlUrl) {
+                setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
+                setMode("iframe");
+                return;
+              }
+            }
+          } catch (innerErr) {
+            console.warn("[DocViewer] Graph download URL failed:", innerErr.message);
           }
         }
 
-        // Fallback: SharePoint embed URL
-        // PPTX uses action=interactivepreview; DOCX/XLSX use action=embedview
+        // Path 2: Office Online viewer via webUrl (avoids SharePoint X-Frame-Options)
+        // Convert SharePoint file URL to Office Online embed URL directly
         if (file.webUrl) {
-          const ext = (file.name || "").split(".").pop().toLowerCase();
-          const isPptx = ext === "pptx" || ext === "ppt";
-          const spEmbedUrl = isPptx
-            ? file.webUrl.replace(/action=default(&|$)/, "action=interactivepreview$1")
-            : file.webUrl.replace(/action=default/, "action=embedview") + "&wdAllowInteractivity=False";
-          setEmbedUrl(spEmbedUrl);
+          const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(file.webUrl)}`;
+          setEmbedUrl(officeUrl);
           setMode("iframe");
           return;
         }
