@@ -334,15 +334,8 @@ function DeckSubmitPanel({ playSlug, persona, onUploaded, onPipelineQueued, pipe
     }
   };
 
-  if (pipelineRunning || queued) return (
-    <div style={{ padding: "20px 16px", border: "1px solid var(--accent)", borderRadius: "var(--r-sm)", background: "rgba(var(--accent-rgb,244,183,63),.06)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-        <Icon name="check" size={16} style={{ color: "var(--accent)" }} />
-        <span style={{ fontWeight: 600, fontSize: 13 }}>Pipeline queued</span>
-      </div>
-      <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>The {persona} Elevate pipeline will run automatically. Narrative, Arc, and Storyboard will appear in the earlier stages when it’s done. The fixed deck will appear here.</p>
-    </div>
-  );
+  const [queuedAt] = React.useState(() => Date.now());
+  if (pipelineRunning || queued) return <PipelineProgress action="generate-deck" startedAt={queuedAt} />;
 
   if (uploadedFile) return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -482,25 +475,60 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
   );
 }
 
-// ─── PipelineStagePanel ──────────────────────────────────────────────────
-// Shown at stages 0–2 when no SharePoint files exist yet.
-// If pipeline is generating, shows progress state. Otherwise shows upload.
-const STAGE_GENERATING_COPY = {
-  0: { title: "Generating Arc…",        body: "The pipeline is building the Arc from the approved Narrative. It will appear here automatically when done." },
-  1: { title: "Generating Storyboard…", body: "The pipeline is building the Storyboard from the approved Arc. It will appear here automatically when done." },
-  2: { title: "Generating Deck…",        body: "The pipeline is building your PPTX from the approved Storyboard. It will appear in Stage 4 when done." },
+// ─── PipelineProgress ─────────────────────────────────────────────────────
+const PIPELINE_STEPS = {
+  "generate-arc":        ["Read approved Narrative", "Extract 7 moves", "Generate Arc document", "Upload to Stage 2", "Update webapp"],
+  "generate-storyboard": ["Read approved Arc", "Map moves to slides", "Generate Storyboard document", "Upload to Stage 3", "Update webapp"],
+  "generate-deck":       ["Read approved Storyboard", "Build slide structure", "Apply visual template", "Generate PPTX", "Upload to Stage 4"],
+  "pipeline-request":    ["Extract deck content", "QA — 5 bug categories", "Reverse-engineer documents", "Generate Word docs", "Update webapp", "Commit + push"],
 };
-function PipelineStagePanel({ playSlug, stageIdx, pipelineRunning, onUploaded }) {
-  const gen = STAGE_GENERATING_COPY[stageIdx];
-  if (pipelineRunning && gen) return (
-    <div style={{ padding: "20px 16px", border: "1px solid var(--accent)", borderRadius: "var(--r-sm)", background: "rgba(var(--accent-rgb,244,183,63),.06)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-        <span style={{ fontSize: 16 }}>&#9654;</span>
-        <span style={{ fontWeight: 600, fontSize: 13 }}>{gen.title}</span>
+
+function PipelineProgress({ action, startedAt }) {
+  const steps = PIPELINE_STEPS[action] || PIPELINE_STEPS["generate-deck"];
+  const [elapsed, setElapsed] = React.useState(0);
+  const [activeStep, setActiveStep] = React.useState(0);
+
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      const secs = Math.floor((Date.now() - (startedAt || Date.now())) / 1000);
+      setElapsed(secs);
+      // Advance step every ~(total_time / steps) seconds — purely cosmetic pacing
+      const approxTotalSecs = steps.length === 6 ? 240 : 180;
+      const stepDuration = approxTotalSecs / steps.length;
+      setActiveStep(Math.min(Math.floor(secs / stepDuration), steps.length - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [startedAt, steps.length]);
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
+  return (
+    <div className="pipeline-progress">
+      <div className="pipeline-progress-header">
+        <div className="pipeline-progress-title">
+          <span>&#9654;</span>
+          Pipeline running
+        </div>
+        <span className="pipeline-progress-elapsed">{mm}:{ss}</span>
       </div>
-      <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>{gen.body}</p>
+      <div className="pipeline-bar-track"><div className="pipeline-bar-fill" /></div>
+      <div className="pipeline-steps">
+        {steps.map((s, i) => (
+          <div key={i} className={"pipeline-step" + (i < activeStep ? " done" : i === activeStep ? " active" : "")}>
+            <div className="pipeline-step-dot" />
+            {s}
+          </div>
+        ))}
+      </div>
     </div>
   );
+}
+
+// ─── PipelineStagePanel ─────────────────────────────────────────────────────
+const STAGE_PIPELINE_ACTION = { 0: "generate-arc", 1: "generate-storyboard", 2: "generate-storyboard" };
+function PipelineStagePanel({ playSlug, stageIdx, pipelineRunning, pipelineStartedAt, onUploaded }) {
+  if (pipelineRunning) return <PipelineProgress action={STAGE_PIPELINE_ACTION[stageIdx] || "generate-arc"} startedAt={pipelineStartedAt} />;
   const stageFolderMap = { 0: "narrative", 1: "arc", 2: "storyboard" };
   return <UploadPanel playSlug={playSlug} stageKey={stageFolderMap[stageIdx] || "sources"} onUploaded={onUploaded} compact />;
 }
@@ -728,6 +756,7 @@ function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, person
                 playSlug={playSlug}
                 stageIdx={stageIdx}
                 pipelineRunning={pipelineRunning}
+                pipelineStartedAt={pipelineRunning ? Date.now() : null}
                 onUploaded={() => setTick(t => t + 1)}
               />
           }

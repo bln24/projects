@@ -1368,3 +1368,83 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+/* ── Pipeline progress bar ─────────────────────────────────────────── */
+.pipeline-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: rgba(var(--accent-rgb,244,183,63),.04);
+}
+.pipeline-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pipeline-progress-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pipeline-progress-elapsed {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.pipeline-bar-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+  position: relative;
+}
+.pipeline-bar-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: pipeline-sweep 2s ease-in-out infinite;
+  transform-origin: left;
+}
+@keyframes pipeline-sweep {
+  0%   { left: -60%; width: 60%; }
+  50%  { left: 40%;  width: 60%; }
+  100% { left: 100%; width: 60%; }
+}
+.pipeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.pipeline-step.done   { color: var(--ink); }
+.pipeline-step.active { color: var(--accent); font-weight: 500; }
+.pipeline-step-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+}
+.pipeline-step.done   .pipeline-step-dot { background: var(--accent); }
+.pipeline-step.active .pipeline-step-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,244,183,63),.25);
+  animation: pipeline-pulse 1.2s ease-in-out infinite;
+}
+@keyframes pipeline-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(var(--accent-rgb,244,183,63),.3); }
+  50%       { box-shadow: 0 0 0 5px rgba(var(--accent-rgb,244,183,63),.1); }
+}
