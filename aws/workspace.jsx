@@ -5,6 +5,19 @@
    No placeholders. No hardcoded content. Real SharePoint data.
    ============================================================ */
 
+// Native documents — rendered JSX, always present for this persona+stage, no upload needed.
+const NATIVE_DOCS = {
+  CAIO: {
+    0: [{ id: "native-narrative", name: "CAIO Elevate Narrative · v3", native: true, view: "NarrativePaper", badge: "NARRATIVE" }],
+    1: [{ id: "native-arc",       name: "CAIO Elevate Arc · v3",       native: true, view: "NarrativeArc",   badge: "ARC"       }],
+    2: [{ id: "native-storyboard",name: "CAIO Elevate Storyboard · v3",native: true, view: "Storyboard",    badge: "STORYBOARD"}],
+  },
+};
+
+function getNativeDocs(persona, stageIdx) {
+  return ((NATIVE_DOCS[persona] || {})[stageIdx]) || [];
+}
+
 const STAGE_DEFS = [
   { id: "narrative",  name: "Narrative",  short: "I",   owner: "angie",   label: "Stage 1" },
   { id: "arc",        name: "Arc",        short: "II",  owner: "angie",   label: "Stage 2" },
@@ -108,7 +121,30 @@ function isIOS() {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
+function NativeDocViewer({ doc, onClose }) {
+  const View = window[doc.view];
+  if (!View) return (
+    <div className="ws-doc-state"><span className="muted">Content not loaded yet — refresh the page.</span></div>
+  );
+  return (
+    <div className="ws-doc-viewer">
+      <div className="ws-doc-viewer-header">
+        <div className="ws-doc-viewer-title">
+          <Icon name="doc_text" size={14} />
+          <span>{doc.name}</span>
+          <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--accent)", background: "rgba(var(--accent-rgb,244,183,63),.12)", padding: "2px 6px", borderRadius: 4 }}>{doc.badge}</span>
+        </div>
+        {onClose && <button className="btn btn-quiet btn-sm" onClick={onClose}><Icon name="close" size={12} />Close</button>}
+      </div>
+      <div style={{ overflowY: "auto", height: "calc(100% - 44px)", padding: "0 0 48px" }}>
+        <View />
+      </div>
+    </div>
+  );
+}
+
 function DocViewer({ file, onClose }) {
+  if (file && file.native) return <NativeDocViewer doc={file} onClose={onClose} />;
   const [mode, setMode] = React.useState("loading"); // loading | iframe | ios | error
   const [embedUrl, setEmbedUrl] = React.useState(null);
   const ios = React.useMemo(() => isIOS(), []);
@@ -334,12 +370,49 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
   );
 }
 
-function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setViewingFile }) {
+function NativeDocCard({ doc, onView, isViewing }) {
+  return (
+    <div
+      onClick={() => onView(isViewing ? null : doc)}
+      style={{
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "12px 16px",
+        border: `1px solid ${isViewing ? "var(--accent)" : "var(--line)"}`,
+        borderRadius: "var(--r-sm)",
+        background: isViewing ? "rgba(var(--accent-rgb,244,183,63),.06)" : "var(--paper-elev)",
+        cursor: "pointer",
+        transition: "border-color .15s, background .15s",
+      }}
+    >
+      <div style={{ width: 40, height: 44, borderRadius: "var(--r-xs)", background: "var(--paper-elev-2)", border: "1px solid var(--line)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0, gap: 2 }}>
+        <Icon name="doc_text" size={16} className="muted" />
+        <span style={{ fontFamily: "var(--mono)", fontSize: 8, letterSpacing: ".08em", color: "var(--accent)", textTransform: "uppercase" }}>{doc.badge}</span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{doc.name}</div>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--muted)", marginTop: 2, letterSpacing: ".04em" }}>Built-in · always current</div>
+      </div>
+      <button className={"btn btn-sm btn-ghost"} style={isViewing ? { color: "var(--accent)", borderColor: "var(--accent)" } : {}} onClick={e => { e.stopPropagation(); onView(isViewing ? null : doc); }}>
+        <Icon name={isViewing ? "close" : "eye"} size={12} />{isViewing ? "Close" : "View"}
+      </button>
+    </div>
+  );
+}
+
+function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setViewingFile, persona }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
   const [filesByFolder, setFilesByFolder] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [sourcesExpanded, setSourcesExpanded] = React.useState(false);
   const [refreshTick, setRefreshTick] = React.useState(0);
+  const nativeDocs = getNativeDocs(persona, stageIdx);
+
+  // Auto-open first native doc if no SharePoint file is selected yet
+  React.useEffect(() => {
+    if (nativeDocs.length > 0 && setViewingFile) {
+      setViewingFile(prev => prev || nativeDocs[0]);
+    }
+  }, [stageIdx, persona]);
 
   React.useEffect(() => {
     if (!playSlug) return;
@@ -369,7 +442,16 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
   const handleUploaded = () => setRefreshTick(t => t + 1);
 
   if (loading) {
-    return <div className="ws-shelf-loading muted">Loading files…</div>;
+    return (
+      <div className="ws-shelf">
+        {nativeDocs.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+            {nativeDocs.map(doc => <NativeDocCard key={doc.id} doc={doc} onView={setViewingFile} isViewing={viewingFile?.id === doc.id} />)}
+          </div>
+        )}
+        <div className="ws-shelf-loading muted">Loading files…</div>
+      </div>
+    );
   }
 
   // Primary folders for this stage (excluding sources which goes to the bottom)
@@ -381,6 +463,12 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
 
   return (
     <div className="ws-shelf">
+      {/* Native docs — always present, no upload needed */}
+      {nativeDocs.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: primaryFiles.length > 0 ? 16 : 0 }}>
+          {nativeDocs.map(doc => <NativeDocCard key={doc.id} doc={doc} onView={setViewingFile} isViewing={viewingFile?.id === doc.id} />)}
+        </div>
+      )}
       {/* Main stage files */}
       {primaryFolders.length > 0 && (
         <div className="ws-shelf-section">
@@ -430,12 +518,20 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
 }
 
 /* ---- Left Rail File List ---- */
-function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile }) {
+function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, persona }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
   const primaryFolders = stageFolders.filter(f => f !== "sources");
   const [files, setFiles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [tick, setTick] = React.useState(0);
+  const nativeDocs = getNativeDocs(persona, stageIdx);
+
+  React.useEffect(() => {
+    // Auto-open first native doc when switching stages (if no SP file selected)
+    if (nativeDocs.length > 0 && setViewingFile) {
+      setViewingFile(prev => (prev && !prev.native) ? prev : nativeDocs[0]);
+    }
+  }, [stageIdx, persona]);
 
   React.useEffect(() => {
     if (!playSlug) return;
@@ -449,21 +545,45 @@ function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile }) {
       const all = results.flat();
       setFiles(all);
       setLoading(false);
-      // Auto-select first file
-      if (all.length > 0) setViewingFile(prev => prev || all[0]);
+      // Auto-select first SP file only if no native doc is showing
+      if (all.length > 0 && nativeDocs.length === 0) setViewingFile(prev => prev || all[0]);
     });
   }, [playSlug, stageIdx, tick]);
 
-  if (loading) return <div className="lrf-loading muted">Loading…</div>;
-
-  if (files.length === 0) return (
-    <div className="lrf-empty">
-      <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+  if (loading) return (
+    <div className="lrf-list">
+      {nativeDocs.map(doc => {
+        const isActive = viewingFile?.id === doc.id;
+        return (
+          <button key={doc.id} className={"lrf-file" + (isActive ? " active" : "")} onClick={() => setViewingFile(isActive ? null : doc)} title={doc.name}>
+            <Icon name="doc_text" size={13} />
+            <span className="lrf-name">{doc.name}</span>
+            {isActive && <span className="lrf-active-dot" />}
+          </button>
+        );
+      })}
+      <div className="lrf-loading muted">Loading…</div>
     </div>
   );
 
   return (
     <div className="lrf-list">
+      {/* Native docs always at top */}
+      {nativeDocs.map(doc => {
+        const isActive = viewingFile?.id === doc.id;
+        return (
+          <button key={doc.id} className={"lrf-file" + (isActive ? " active" : "")} onClick={() => setViewingFile(isActive ? null : doc)} title={doc.name}>
+            <Icon name="doc_text" size={13} />
+            <span className="lrf-name">{doc.name}</span>
+            {isActive && <span className="lrf-active-dot" />}
+          </button>
+        );
+      })}
+      {files.length === 0 && nativeDocs.length === 0 && (
+        <div className="lrf-empty">
+          <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+        </div>
+      )}
       {files.map(f => {
         const ext = (f.name || "").split(".").pop().toLowerCase();
         const viewable = ["docx","doc","pptx","ppt","xlsx","xls","pdf"].includes(ext);
@@ -702,6 +822,7 @@ function Workspace({ project, onBack, onNav }) {
             stageIdx={stageIdx}
             viewingFile={viewingFile}
             setViewingFile={setViewingFile}
+            persona={project?.persona}
           />
         </nav>
 
