@@ -869,9 +869,9 @@ function Workspace({ project, onBack, onNav }) {
       if (pipe) {
         // Fire pipeline and set status before advancing
         await writePipelineRequest(pipe.action);
-        extraFields = { Status: pipe.status, StatusKind: pipe.statusKind };
+        extraFields = { status: pipe.status, statusKind: pipe.statusKind };
       } else if (stageIdx === 3) {
-        extraFields = { Done: true, Status: "Approved · Delivered to AWS", StatusKind: "approved" };
+        extraFields = { done: true, status: "Approved · Delivered to AWS", statusKind: "approved" };
       }
 
       if (window.spAdvanceStage) {
@@ -913,7 +913,7 @@ function Workspace({ project, onBack, onNav }) {
         const newIdx = stageIdx - 1;
         if (window.spAdvanceStage) {
           await spAdvanceStage(project.spItemId, newIdx, {
-            Status: "Returned for revision",
+            status: "Returned for revision",
             FeedbackFrom: sourceLabel,
             FeedbackNotes: feedbackText.trim(),
           });
@@ -923,7 +923,7 @@ function Workspace({ project, onBack, onNav }) {
       } else {
         if (window.spAdvanceStage) {
           await spAdvanceStage(project.spItemId, 0, {
-            Status: "Revisions requested",
+            status: "Revisions requested",
             FeedbackFrom: sourceLabel,
             FeedbackNotes: feedbackText.trim(),
           });
