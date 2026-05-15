@@ -26,10 +26,50 @@ class ErrorBoundary extends React.Component {
 }
 window.ErrorBoundary = ErrorBoundary;
 
+// Global notification toast — listens for t24:notification and shows a
+// dismissible banner at the top of the screen for 8 seconds.
+function NotificationToast() {
+  const [notif, setNotif] = React.useState(null);
+  React.useEffect(() => {
+    const handler = (e) => {
+      setNotif(e.detail);
+      setTimeout(() => setNotif(null), 8000);
+    };
+    window.addEventListener("t24:notification", handler);
+    return () => window.removeEventListener("t24:notification", handler);
+  }, []);
+  if (!notif) return null;
+  return (
+    <div style={{
+      position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)",
+      zIndex: 999, display: "flex", alignItems: "center", gap: 12,
+      background: "var(--paper-elev-2)", border: "1px solid var(--accent)",
+      borderRadius: "var(--r-sm)", padding: "12px 16px", boxShadow: "0 8px 32px rgba(0,0,0,.25)",
+      maxWidth: 400, minWidth: 280,
+      animation: "slide-in-top .2s ease",
+    }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(var(--accent-rgb,244,183,63),.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon name="check" size={16} style={{ color: "var(--accent)" }} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{notif.title}</div>
+        <div style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 2 }}>{notif.body}</div>
+      </div>
+      <button className="btn-icon" onClick={() => setNotif(null)} style={{ flexShrink: 0, color: "var(--muted)" }}>
+        <Icon name="close" size={14} />
+      </button>
+    </div>
+  );
+}
+window.NotificationToast = NotificationToast;
+
 function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
   const [tab, setTab] = React.useState("active");
   const [view, setView] = React.useState("grid");
   const { loading, plays, error } = useLivePlays();
+
+  // Watch for pipeline generating → done transitions and fire notifications
+  if (window.usePipelineNotifications) window.usePipelineNotifications(plays);
 
   React.useEffect(() => {
     if (!loading && plays.length > 0 && onPlaysLoaded) onPlaysLoaded(plays);

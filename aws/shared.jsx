@@ -292,7 +292,7 @@ function Topbar({ activeProject, onNav, current = "dashboard", onOpenSearch, onO
         </button>
         <button className="btn-icon" onClick={onOpenInbox} title="Inbox" style={{ position: "relative" }}>
           <Icon name="bell" size={16} />
-          <span className="bell-dot" />
+          <InboxBadge />
         </button>
         <button className="btn-icon" onClick={onOpenQuestions} title="Open questions from agents" style={{ position: "relative" }}>
           <Icon name="alert" size={16} />
@@ -310,6 +310,22 @@ function Topbar({ activeProject, onNav, current = "dashboard", onOpenSearch, onO
   );
 }
 window.Topbar = Topbar;
+
+function InboxBadge() {
+  const count = window.useUnreadCount ? window.useUnreadCount() : 0;
+  if (!count) return null;
+  return (
+    <span style={{
+      position: "absolute", top: 4, right: 4,
+      minWidth: 16, height: 16, borderRadius: 8,
+      background: "var(--accent)", color: "#0c0b08",
+      fontSize: 9, fontWeight: 700, fontFamily: "var(--mono)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "0 4px", lineHeight: 1,
+    }}>{count}</span>
+  );
+}
+window.InboxBadge = InboxBadge;
 
 function OQBadge() {
   const count = window.useOpenQuestionCount ? window.useOpenQuestionCount() : null;

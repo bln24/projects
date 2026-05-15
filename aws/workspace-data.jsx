@@ -183,6 +183,54 @@ async function spListStageFiles(playSlug, stage) {
   return window.spListFiles ? spListFiles(playSlug, stage) : [];
 }
 
+// ─── Pipeline notifications ───────────────────────────────────────────────
+// Stored in localStorage. Inbox + bell badge + auto-toast read from here.
+const NOTIF_KEY = "t24-pipeline-notifications";
+
+function loadNotifications() {
+  try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || "[]"); } catch { return []; }
+}
+function saveNotifications(items) {
+  try { localStorage.setItem(NOTIF_KEY, JSON.stringify(items)); } catch {}
+}
+function addNotification(notif) {
+  const items = loadNotifications();
+  items.unshift({ ...notif, id: `notif-${Date.now()}`, read: false, at: new Date().toISOString() });
+  saveNotifications(items.slice(0, 50)); // cap at 50
+  window.dispatchEvent(new CustomEvent("t24:notification", { detail: notif }));
+}
+function markAllRead() {
+  saveNotifications(loadNotifications().map(n => ({ ...n, read: true })));
+  window.dispatchEvent(new CustomEvent("t24:notifications-read"));
+}
+
+// Watches livePlays for generating → done transitions and fires notifications
+function usePipelineNotifications(plays) {
+  const prev = React.useRef({});
+  React.useEffect(() => {
+    plays.forEach(p => {
+      const wasGenerating = prev.current[p.id] === "generating";
+      const isDone = p.statusKind !== "generating";
+      if (wasGenerating && isDone) {
+        const actionMap = { "generate-arc": "Arc", "generate-storyboard": "Storyboard", "generate-deck": "Deck", "pipeline-request": "documents" };
+        addNotification({
+          type: "pipeline_complete",
+          playId: p.id,
+          playSlug: p.slug,
+          persona: p.persona,
+          title: `${p.persona} Elevate — pipeline complete`,
+          body: `Your ${p.status && p.status.toLowerCase().includes("deck") ? "deck" : "documents"} are ready in the webapp.`,
+          statusKind: p.statusKind,
+        });
+      }
+      prev.current[p.id] = p.statusKind;
+    });
+  }, [plays]);
+}
+
+window.loadNotifications    = loadNotifications;
+window.markAllRead          = markAllRead;
+window.usePipelineNotifications = usePipelineNotifications;
 window.useLivePlays = useLivePlays;
 window.spGetUserToken = spGetUserToken;
 window.spCreatePlay = spCreatePlay;

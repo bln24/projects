@@ -160,9 +160,46 @@ function Templates() {
   );
 }
 
+function useNotifications() {
+  const [items, setItems] = React.useState(() => window.loadNotifications ? window.loadNotifications() : []);
+  React.useEffect(() => {
+    const refresh = () => setItems(window.loadNotifications ? window.loadNotifications() : []);
+    window.addEventListener("t24:notification", refresh);
+    window.addEventListener("t24:notifications-read", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("t24:notification", refresh);
+      window.removeEventListener("t24:notifications-read", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
+  return items;
+}
+window.useNotifications = useNotifications;
+
+function useUnreadCount() {
+  const items = useNotifications();
+  return items.filter(n => !n.read).length;
+}
+window.useUnreadCount = useUnreadCount;
+
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60)   return "just now";
+  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+  if (diff < 86400)return Math.floor(diff / 3600) + "h ago";
+  return Math.floor(diff / 86400) + "d ago";
+}
+
 function Inbox({ open, onClose, onNav }) {
+  const items = useNotifications();
+  const unread = items.filter(n => !n.read).length;
+
+  const handleMarkRead = () => {
+    if (window.markAllRead) window.markAllRead();
+  };
+
   if (!open) return null;
-  const items = [];
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 70 }} />
@@ -170,9 +207,9 @@ function Inbox({ open, onClose, onNav }) {
         <div className="inbox-head">
           <div>
             <div style={{ fontFamily: "var(--display)", fontSize: 20 }}>Inbox</div>
-            <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{items.filter(i => i.unread).length > 0 ? items.filter(i => i.unread).length + " new" : "Up to date"}</div>
+            <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{unread > 0 ? unread + " new" : "Up to date"}</div>
           </div>
-          <button className="btn-quiet btn-sm">Mark all read</button>
+          {unread > 0 && <button className="btn btn-quiet btn-sm" onClick={handleMarkRead}>Mark all read</button>}
         </div>
         <div className="inbox-list">
           {items.length === 0 ? (
@@ -180,20 +217,23 @@ function Inbox({ open, onClose, onNav }) {
               <div style={{ fontFamily: "var(--display)", fontSize: 20, marginBottom: 8 }}>All clear.</div>
               <div style={{ fontSize: 13 }}>No notifications yet.</div>
             </div>
-          ) : items.map((it, i) => {
-            const person = T24.people[it.who];
-            return (
-              <div key={i} className={"inbox-item " + (it.unread ? "unread" : "")}>
-                <span className="avatar avatar-sm" style={{ background: person.color, color: "#0c0b08" }}>{person.initials}</span>
-                <div className="inbox-item-body">
-                  <div className="txt">
-                    <strong>{person.name}</strong> {it.text} on <span className="amber">{it.target}</span>
-                  </div>
-                  <div className="meta">{it.time} ago</div>
-                </div>
+          ) : items.map((it) => (
+            <div
+              key={it.id}
+              className={"inbox-item " + (!it.read ? "unread" : "")}
+              style={{ cursor: it.playId ? "pointer" : "default" }}
+              onClick={() => { if (it.playId && onNav) { onNav("workspace", it.playId); onClose(); } }}
+            >
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(var(--accent-rgb,244,183,63),.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon name="check" size={16} style={{ color: "var(--accent)" }} />
               </div>
-            );
-          })}
+              <div className="inbox-item-body">
+                <div className="txt" style={{ fontWeight: !it.read ? 600 : 400 }}>{it.title}</div>
+                <div className="meta" style={{ marginTop: 2 }}>{it.body}</div>
+                <div className="meta" style={{ marginTop: 3, opacity: 0.6 }}>{timeAgo(it.at)}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>
