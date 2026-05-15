@@ -1,5 +1,31 @@
 /* global React, Icon, T24, StatusPill, useLivePlays */
 
+/* Error boundary — catches any async/render error in a subtree and shows
+   a plain fallback instead of crashing the whole app. */
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, msg: "" };
+  }
+  static getDerivedStateFromError(err) {
+    return { hasError: true, msg: err && err.message ? err.message : String(err) };
+  }
+  componentDidCatch(err, info) {
+    console.warn("[ErrorBoundary] caught:", err.message, info.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div style={{ padding: "16px 20px", background: "var(--paper-elev)", borderRadius: "var(--r-sm)", border: "1px solid var(--line)", color: "var(--muted)", fontSize: 12 }}>
+          {this.props.label || "Section unavailable"}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+window.ErrorBoundary = ErrorBoundary;
+
 function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
   const [tab, setTab] = React.useState("active");
   const [view, setView] = React.useState("grid");
@@ -82,7 +108,11 @@ function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
         </div>
       </div>
 
-      {tab === "active" && featured && <FeaturedPlay project={featured} onOpen={() => onOpenProject(featured.id)} />}
+      {tab === "active" && featured && (
+        <ErrorBoundary label="Featured play unavailable">
+          <FeaturedPlay project={featured} onOpen={() => onOpenProject(featured.id)} />
+        </ErrorBoundary>
+      )}
       {tab === "active" && !featured && active.length === 0 && (
         <div style={{ textAlign: "center", padding: "64px 24px", color: "var(--muted)" }}>
           <div style={{ fontFamily: "var(--display)", fontSize: 32, marginBottom: 8 }}>No active plays</div>
