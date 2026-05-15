@@ -244,5 +244,19 @@ const STORYBOARD = {
   ],
 };
 
-window.NARRATIVE = NARRATIVE;
-window.STORYBOARD = STORYBOARD;
+// ── Persona registry ──────────────────────────────────────────────────────
+// Add new CXO personas here. The webapp reads this to auto-show built-in
+// documents for any persona that has content — no code changes needed.
+// Format: { PERSONA_KEY: { narrative: NARRATIVE_OBJ, storyboard: STORYBOARD_OBJ } }
+const PERSONA_REGISTRY = {
+  CAIO: { narrative: NARRATIVE, storyboard: STORYBOARD },
+  // CMO:  { narrative: CMO_NARRATIVE, storyboard: CMO_STORYBOARD },
+  // COO:  { narrative: COO_NARRATIVE, storyboard: COO_STORYBOARD },
+  // CIO:  { narrative: CIO_NARRATIVE, storyboard: CIO_STORYBOARD },
+  // CFO:  { narrative: CFO_NARRATIVE, storyboard: CFO_STORYBOARD },
+  // CTO:  { narrative: CTO_NARRATIVE, storyboard: CTO_STORYBOARD },
+};
+
+window.NARRATIVE        = NARRATIVE;
+window.STORYBOARD       = STORYBOARD;
+window.PERSONA_REGISTRY = PERSONA_REGISTRY;

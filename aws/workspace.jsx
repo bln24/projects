@@ -5,17 +5,20 @@
    No placeholders. No hardcoded content. Real SharePoint data.
    ============================================================ */
 
-// Native documents — rendered JSX, always present for this persona+stage, no upload needed.
-const NATIVE_DOCS = {
-  CAIO: {
-    0: [{ id: "native-narrative", name: "CAIO Elevate Narrative · v3", native: true, view: "NarrativePaper", badge: "NARRATIVE" }],
-    1: [{ id: "native-arc",       name: "CAIO Elevate Arc · v3",       native: true, view: "NarrativeArc",   badge: "ARC"       }],
-    2: [{ id: "native-storyboard",name: "CAIO Elevate Storyboard · v3",native: true, view: "Storyboard",    badge: "STORYBOARD"}],
-  },
-};
-
+// Native documents — driven by PERSONA_REGISTRY in narrative-content.jsx.
+// Any persona with content in the registry auto-gets built-in documents
+// at stages 0 (Narrative), 1 (Arc), 2 (Storyboard). No code change needed
+// to add a new persona — just add it to PERSONA_REGISTRY.
 function getNativeDocs(persona, stageIdx) {
-  return ((NATIVE_DOCS[persona] || {})[stageIdx]) || [];
+  if (!persona) return [];
+  const registry = window.PERSONA_REGISTRY || {};
+  if (!registry[persona]) return [];
+  const MAP = {
+    0: { id: `native-narrative-${persona}`, name: `${persona} Elevate Narrative · v3`, native: true, view: "NarrativePaper", badge: "NARRATIVE", persona },
+    1: { id: `native-arc-${persona}`,       name: `${persona} Elevate Arc · v3`,       native: true, view: "NarrativeArc",   badge: "ARC",       persona },
+    2: { id: `native-storyboard-${persona}`,name: `${persona} Elevate Storyboard · v3`,native: true, view: "Storyboard",    badge: "STORYBOARD", persona },
+  };
+  return MAP[stageIdx] ? [MAP[stageIdx]] : [];
 }
 
 const STAGE_DEFS = [
@@ -123,7 +126,10 @@ function isIOS() {
 
 function NativeDocViewer({ doc, onClose }) {
   const View = window[doc.view];
-  if (!View) return (
+  const registry = window.PERSONA_REGISTRY || {};
+  const content  = registry[doc.persona] || {};
+  const data     = doc.view === "Storyboard" ? content.storyboard : content.narrative;
+  if (!View || !data) return (
     <div className="ws-doc-state"><span className="muted">Content not loaded yet — refresh the page.</span></div>
   );
   return (
@@ -137,7 +143,7 @@ function NativeDocViewer({ doc, onClose }) {
         {onClose && <button className="btn btn-quiet btn-sm" onClick={onClose}><Icon name="close" size={12} />Close</button>}
       </div>
       <div style={{ overflowY: "auto", height: "calc(100% - 44px)", padding: "0 0 48px" }}>
-        <View />
+        <View data={data} />
       </div>
     </div>
   );
