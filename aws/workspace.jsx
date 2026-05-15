@@ -285,6 +285,112 @@ function DocViewer({ file, onClose }) {
   );
 }
 
+// ─── DeckSubmitPanel ─────────────────────────────────────────────────────────
+// Shown at Stage 4 (Deck). Replaces the generic upload panel.
+// Stephen uploads a PPTX here; the pipeline runs automatically.
+function DeckSubmitPanel({ playSlug, persona, onUploaded, onPipelineQueued }) {
+  const [dragging, setDragging]     = React.useState(false);
+  const [uploading, setUploading]   = React.useState(false);
+  const [queuing, setQueuing]       = React.useState(false);
+  const [queued, setQueued]         = React.useState(false);
+  const [uploadedFile, setUploadedFile] = React.useState(null);
+  const inputRef = React.useRef();
+
+  const handleFiles = async (files) => {
+    if (!files || !files.length) return;
+    const pptx = Array.from(files).find(f => /\.pptx?$/i.test(f.name));
+    if (!pptx) { alert("Please upload a .pptx file."); return; }
+    setUploading(true);
+    try {
+      if (window.spUpload) await spUpload(pptx, playSlug, "deck");
+      setUploadedFile(pptx.name);
+      if (onUploaded) onUploaded();
+    } catch (e) {
+      console.error("Deck upload failed:", e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleQueuePipeline = async () => {
+    setQueuing(true);
+    try {
+      // Write a pipeline-request marker to SharePoint so the cron agent picks it up
+      const marker = JSON.stringify({
+        persona,
+        playSlug,
+        deckFile: uploadedFile,
+        requestedAt: new Date().toISOString(),
+        status: "pending",
+      }, null, 2);
+      const blob = new File([marker], "pipeline-request.json", { type: "application/json" });
+      if (window.spUpload) await spUpload(blob, playSlug, "sources");
+      setQueued(true);
+      if (onPipelineQueued) onPipelineQueued();
+    } catch (e) {
+      console.error("Pipeline queue failed:", e);
+    } finally {
+      setQueuing(false);
+    }
+  };
+
+  if (queued) return (
+    <div style={{ padding: "20px 16px", border: "1px solid var(--accent)", borderRadius: "var(--r-sm)", background: "rgba(var(--accent-rgb,244,183,63),.06)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <Icon name="check" size={16} style={{ color: "var(--accent)" }} />
+        <span style={{ fontWeight: 600, fontSize: 13 }}>Pipeline queued</span>
+      </div>
+      <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>The {persona} Elevate pipeline will run automatically. Narrative, Arc, and Storyboard will appear in the earlier stages when it’s done. The fixed deck will appear here.</p>
+    </div>
+  );
+
+  if (uploadedFile) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--paper-elev)" }}>
+        <Icon name="presentation" size={16} className="muted" />
+        <span style={{ fontSize: 13, fontWeight: 500, flex: 1 }}>{uploadedFile}</span>
+        <span style={{ fontSize: 11, color: "var(--muted)" }}>Uploaded</span>
+      </div>
+      <button
+        className="btn btn-accent"
+        onClick={handleQueuePipeline}
+        disabled={queuing}
+        style={{ width: "100%" }}
+      >
+        <Icon name="play" size={14} />
+        {queuing ? "Queuing pipeline…" : "Run Pipeline"}
+      </button>
+      <p style={{ fontSize: 11, color: "var(--muted)", margin: 0, textAlign: "center" }}>Generates Narrative, Arc, Storyboard · fixes bugs · updates this page automatically</p>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div
+        style={{
+          border: `2px dashed ${dragging ? "var(--accent)" : "var(--line)"}`,
+          borderRadius: "var(--r-sm)",
+          padding: "28px 20px",
+          textAlign: "center",
+          cursor: "pointer",
+          background: dragging ? "rgba(var(--accent-rgb,244,183,63),.04)" : "transparent",
+          transition: "all .15s",
+        }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
+        onClick={() => inputRef.current && inputRef.current.click()}
+      >
+        <Icon name="presentation" size={28} className="muted" style={{ marginBottom: 8, display: "block", margin: "0 auto 8px" }} />
+        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{uploading ? "Uploading…" : "Drop your deck here"}</div>
+        <div style={{ fontSize: 11, color: "var(--muted)" }}>.pptx · drag and drop or click to browse</div>
+        <input ref={inputRef} type="file" accept=".pptx,.ppt" style={{ display: "none" }} onChange={e => handleFiles(e.target.files)} />
+      </div>
+      <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>Upload the approved deck. The pipeline will reverse-engineer it into Narrative, Arc, and Storyboard — fixing any bugs along the way.</p>
+    </div>
+  );
+}
+
 function UploadPanel({ playSlug, stageKey, onUploaded }) {
   const [dragging, setDragging] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
@@ -587,7 +693,10 @@ function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, person
       })}
       {files.length === 0 && nativeDocs.length === 0 && (
         <div className="lrf-empty">
-          <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+          {stageIdx === 3
+            ? <DeckSubmitPanel playSlug={playSlug} persona={persona} onUploaded={() => setTick(t => t + 1)} onPipelineQueued={() => setTick(t => t + 1)} />
+            : <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+          }
         </div>
       )}
       {files.map(f => {
