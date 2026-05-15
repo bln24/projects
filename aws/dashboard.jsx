@@ -183,7 +183,7 @@ function FeaturedPlay({ project, onOpen }) {
         </div>
       </div>
       <div className="featured-body">
-        <div className="eyebrow">Stage {project.stageIndex + 1} of 4 · {T24.stages[project.stageIndex].name}</div>
+        <div className="eyebrow">Stage {(project.stageIndex || 0) + 1} of 4 · {(T24.stages[project.stageIndex] || T24.stages[0]).name}</div>
         <h2>{project.title}</h2>
         <div className="pcard-stages">
           {T24.stages.map((s, i) => (
@@ -304,14 +304,15 @@ function PlayListView({ projects, onOpen }) {
           </span>
           <span style={{ flex: 1 }}>
             <span className={"stage-chip " + (!p.done ? "stage-active" : "")}>
-              <span className="stage-num mono">{T24.stages[p.stageIndex].short}</span>
-              <span>{T24.stages[p.stageIndex].name}</span>
+              <span className="stage-num mono">{(T24.stages[p.stageIndex] || T24.stages[0]).short}</span>
+              <span>{(T24.stages[p.stageIndex] || T24.stages[0]).name}</span>
             </span>
           </span>
           <span style={{ width: 110 }} className="muted mono">{p.done ? "delivered" : p.due}</span>
           <span style={{ width: 110 }} className="avatar-stack avatar-stack-sm">
             {p.team.slice(0,3).map(t => {
               const person = T24.people[t];
+              if (!person) return null;
               return <span key={t} className="avatar avatar-sm" style={{ background: person.color, color: "#0c0b08" }}>{person.initials}</span>;
             })}
           </span>
