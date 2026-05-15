@@ -183,7 +183,7 @@ function FeaturedPlay({ project, onOpen }) {
         </div>
       </div>
       <div className="featured-body">
-        <div className="eyebrow">Stage {(project.stageIndex || 0) + 1} of 4 · {(T24.stages[project.stageIndex] || T24.stages[0]).name}</div>
+        {(() => { const si = Math.min(project.stageIndex || 0, T24.stages.length - 1); return <div className="eyebrow">Stage {si + 1} of 4 · {T24.stages[si].name}</div>; })()}
         <h2>{project.title}</h2>
         <div className="pcard-stages">
           {T24.stages.map((s, i) => (
