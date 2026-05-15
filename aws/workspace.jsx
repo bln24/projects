@@ -288,7 +288,7 @@ function DocViewer({ file, onClose }) {
 // ─── DeckSubmitPanel ─────────────────────────────────────────────────────────
 // Shown at Stage 4 (Deck). Replaces the generic upload panel.
 // Stephen uploads a PPTX here; the pipeline runs automatically.
-function DeckSubmitPanel({ playSlug, persona, onUploaded, onPipelineQueued }) {
+function DeckSubmitPanel({ playSlug, persona, onUploaded, onPipelineQueued, pipelineRunning }) {
   const [dragging, setDragging]     = React.useState(false);
   const [uploading, setUploading]   = React.useState(false);
   const [queuing, setQueuing]       = React.useState(false);
@@ -334,7 +334,7 @@ function DeckSubmitPanel({ playSlug, persona, onUploaded, onPipelineQueued }) {
     }
   };
 
-  if (queued) return (
+  if (pipelineRunning || queued) return (
     <div style={{ padding: "20px 16px", border: "1px solid var(--accent)", borderRadius: "var(--r-sm)", background: "rgba(var(--accent-rgb,244,183,63),.06)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
         <Icon name="check" size={16} style={{ color: "var(--accent)" }} />
@@ -480,6 +480,29 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
       </div>
     </div>
   );
+}
+
+// ─── PipelineStagePanel ──────────────────────────────────────────────────
+// Shown at stages 0–2 when no SharePoint files exist yet.
+// If pipeline is generating, shows progress state. Otherwise shows upload.
+const STAGE_GENERATING_COPY = {
+  0: { title: "Generating Arc…",        body: "The pipeline is building the Arc from the approved Narrative. It will appear here automatically when done." },
+  1: { title: "Generating Storyboard…", body: "The pipeline is building the Storyboard from the approved Arc. It will appear here automatically when done." },
+  2: { title: "Generating Deck…",        body: "The pipeline is building your PPTX from the approved Storyboard. It will appear in Stage 4 when done." },
+};
+function PipelineStagePanel({ playSlug, stageIdx, pipelineRunning, onUploaded }) {
+  const gen = STAGE_GENERATING_COPY[stageIdx];
+  if (pipelineRunning && gen) return (
+    <div style={{ padding: "20px 16px", border: "1px solid var(--accent)", borderRadius: "var(--r-sm)", background: "rgba(var(--accent-rgb,244,183,63),.06)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <span style={{ fontSize: 16 }}>&#9654;</span>
+        <span style={{ fontWeight: 600, fontSize: 13 }}>{gen.title}</span>
+      </div>
+      <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>{gen.body}</p>
+    </div>
+  );
+  const stageFolderMap = { 0: "narrative", 1: "arc", 2: "storyboard" };
+  return <UploadPanel playSlug={playSlug} stageKey={stageFolderMap[stageIdx] || "sources"} onUploaded={onUploaded} compact />;
 }
 
 function NativeDocCard({ doc, onView, isViewing }) {
@@ -630,7 +653,7 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
 }
 
 /* ---- Left Rail File List ---- */
-function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, persona }) {
+function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, persona, pipelineRunning }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
   const primaryFolders = stageFolders.filter(f => f !== "sources");
   const [files, setFiles] = React.useState([]);
@@ -694,8 +717,19 @@ function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, person
       {files.length === 0 && nativeDocs.length === 0 && (
         <div className="lrf-empty">
           {stageIdx === 3
-            ? <DeckSubmitPanel playSlug={playSlug} persona={persona} onUploaded={() => setTick(t => t + 1)} onPipelineQueued={() => setTick(t => t + 1)} />
-            : <UploadPanel playSlug={playSlug} stageKey={primaryFolders[0] || "sources"} onUploaded={() => setTick(t => t + 1)} compact />
+            ? <DeckSubmitPanel
+                playSlug={playSlug}
+                persona={persona}
+                pipelineRunning={pipelineRunning}
+                onUploaded={() => setTick(t => t + 1)}
+                onPipelineQueued={() => setTick(t => t + 1)}
+              />
+            : <PipelineStagePanel
+                playSlug={playSlug}
+                stageIdx={stageIdx}
+                pipelineRunning={pipelineRunning}
+                onUploaded={() => setTick(t => t + 1)}
+              />
           }
         </div>
       )}
@@ -775,17 +809,40 @@ function Workspace({ project, onBack, onNav }) {
   const stage = STAGE_DEFS[stageIdx] || STAGE_DEFS[0];
   const playSlug = project.slug || project.id || "";
 
+  // Pipeline actions fired on each stage approval
+  const STAGE_PIPELINE = {
+    0: { action: "generate-arc",        label: "Arc",        status: "Arc generation queued · pipeline running",        statusKind: "generating" },
+    1: { action: "generate-storyboard", label: "Storyboard", status: "Storyboard generation queued · pipeline running", statusKind: "generating" },
+    2: { action: "generate-deck",       label: "Deck",       status: "Deck generation queued · pipeline running",       statusKind: "generating" },
+  };
+
+  const writePipelineRequest = async (action) => {
+    const marker = JSON.stringify({
+      action,
+      persona:   project.persona,
+      playSlug,
+      playId:    project.spItemId,
+      requestedAt: new Date().toISOString(),
+      status:    "pending",
+    }, null, 2);
+    const blob = new File([marker], "pipeline-request.json", { type: "application/json" });
+    if (window.spUpload) await spUpload(blob, playSlug, "sources");
+  };
+
   const handleAdvance = async () => {
     if (advancing) return;
     setAdvancing(true);
     try {
-      const newIdx = stageIdx + 1;
+      const newIdx  = Math.min(stageIdx + 1, STAGE_DEFS.length - 1);
+      const pipe    = STAGE_PIPELINE[stageIdx];
       let extraFields = {};
 
-      if (stageIdx === 2) {
-        extraFields = { Status: "Sent to AWS · Awaiting Vidya", StatusKind: "review" };
+      if (pipe) {
+        // Fire pipeline and set status before advancing
+        await writePipelineRequest(pipe.action);
+        extraFields = { Status: pipe.status, StatusKind: pipe.statusKind };
       } else if (stageIdx === 3) {
-        extraFields = { Done: true, Status: "Approved · Delivered", StatusKind: "approved" };
+        extraFields = { Done: true, Status: "Approved · Delivered to AWS", StatusKind: "approved" };
       }
 
       if (window.spAdvanceStage) {
@@ -793,17 +850,21 @@ function Workspace({ project, onBack, onNav }) {
       }
       appendRevision({
         id: `rev-${Date.now()}`,
-        at: new Date().toISOString(),
+        at:   new Date().toISOString(),
         action: stageIdx === 3 ? "approved_final" : "approve",
         fromStageIndex: stageIdx,
-        toStageIndex: newIdx,
+        toStageIndex:   newIdx,
         stageName: STAGE_DEFS[stageIdx]?.name || "Unknown",
         status: extraFields.Status || "Approved",
-        from: null,
-        notes: null,
+        from:  null,
+        notes: pipe ? `Pipeline queued: ${pipe.action}` : null,
       });
       setStageIdx(newIdx);
-      setToast(stageIdx === 3 ? "Marked as approved by AWS." : `Advanced to ${STAGE_DEFS[newIdx]?.name || "next stage"}.`);
+      if (onRefresh) onRefresh({ ...project, stageIndex: newIdx });
+      setToast(pipe
+        ? `✓ ${STAGE_DEFS[stageIdx]?.name} approved · ${pipe.label} generation started`
+        : stageIdx === 3 ? "Marked as delivered to AWS." : `Advanced to ${STAGE_DEFS[newIdx]?.name}.`
+      );
     } catch (e) {
       console.error("Advance failed:", e);
       setToast("Error: " + (e.message || "Could not advance stage."));
@@ -863,10 +924,11 @@ function Workspace({ project, onBack, onNav }) {
   };
 
   const advanceLabel = (() => {
-    if (stageIdx === 2) return "Send to Vidya";
-    if (stageIdx === 3) return "Mark as Approved by AWS";
+    const pipe = STAGE_PIPELINE[stageIdx];
+    if (pipe)       return `Approve → Generate ${pipe.label}`;
+    if (stageIdx === 3) return "Mark as Delivered to AWS";
     const next = STAGE_DEFS[stageIdx + 1];
-    return next ? `Approve · Advance to ${next.name}` : "Approve";
+    return next ? `Approve → ${next.name}` : "Approve";
   })();
 
   const sendBackLabel = (() => {
@@ -938,6 +1000,7 @@ function Workspace({ project, onBack, onNav }) {
             viewingFile={viewingFile}
             setViewingFile={setViewingFile}
             persona={project?.persona}
+            pipelineRunning={project?.statusKind === "generating"}
           />
         </nav>
 
