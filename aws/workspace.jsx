@@ -190,8 +190,13 @@ function DocViewer({ file, onClose }) {
         }
 
         // Fallback: SharePoint embed URL
+        // PPTX uses action=interactivepreview; DOCX/XLSX use action=embedview
         if (file.webUrl) {
-          const spEmbedUrl = file.webUrl.replace(/action=default/, "action=embedview") + "&wdAllowInteractivity=False";
+          const ext = (file.name || "").split(".").pop().toLowerCase();
+          const isPptx = ext === "pptx" || ext === "ppt";
+          const spEmbedUrl = isPptx
+            ? file.webUrl.replace(/action=default(&|$)/, "action=interactivepreview$1")
+            : file.webUrl.replace(/action=default/, "action=embedview") + "&wdAllowInteractivity=False";
           setEmbedUrl(spEmbedUrl);
           setMode("iframe");
           return;
@@ -228,7 +233,7 @@ function DocViewer({ file, onClose }) {
         <div style={{ display: "flex", gap: 8 }}>
           {file.webUrl && (
             <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-              <Icon name="arrow_up_right" size={12} />Open in Word
+              <Icon name="arrow_up_right" size={12} />Open in {/\.pptx?$/i.test(file.name) ? "PowerPoint" : /\.xlsx?$/i.test(file.name) ? "Excel" : "Word"}
             </a>
           )}
           {onClose && (
@@ -261,7 +266,7 @@ function DocViewer({ file, onClose }) {
               className="btn btn-accent"
               style={{ marginTop: 8 }}
             >
-              <Icon name="arrow_up_right" size={14} />Open in Word Online
+              <Icon name="arrow_up_right" size={14} />Open in {/\.pptx?$/i.test(file.name) ? "PowerPoint" : "Word"} Online
             </a>
           )}
         </div>
@@ -272,7 +277,7 @@ function DocViewer({ file, onClose }) {
           <div className="muted" style={{ marginBottom: 12 }}>Inline preview unavailable.</div>
           {file.webUrl && (
             <a href={file.webUrl} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-sm">
-              <Icon name="arrow_up_right" size={12} />Open in Word Online
+              <Icon name="arrow_up_right" size={12} />Open in {/\.pptx?$/i.test(file.name) ? "PowerPoint" : "Word"} Online
             </a>
           )}
         </div>
