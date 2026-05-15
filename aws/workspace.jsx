@@ -169,41 +169,34 @@ function DocViewer({ file, onClose }) {
 
     (async () => {
       try {
-        // SP is a const in the inline script — accessible directly, not via window.SP
+        if (!window.spGetUserToken) throw new Error("auth not ready");
+        const token = await spGetUserToken();
+        // SP is a const in the inline script — accessible directly, not as window.SP
         const groupId = (typeof SP !== "undefined" && SP.groupId) || null;
 
-        if (groupId && file.id && window.spGetUserToken) {
-          // Path 1: Graph download URL → Office Online viewer (no X-Frame-Options issues)
-          try {
-            const token = await spGetUserToken();
-            const res = await fetch(
-              `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}?$select=id,@microsoft.graph.downloadUrl`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (res.ok) {
-              const data = await res.json();
-              const dlUrl = data["@microsoft.graph.downloadUrl"];
-              if (dlUrl) {
-                setEmbedUrl(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(dlUrl)}`);
-                setMode("iframe");
-                return;
-              }
+        if (groupId && file.id) {
+          // Microsoft Graph /preview endpoint — returns an iframe-embeddable URL
+          // with no X-Frame-Options restrictions. This is the correct approach for
+          // SharePoint group drive files.
+          const previewRes = await fetch(
+            `https://graph.microsoft.com/v1.0/groups/${groupId}/drive/items/${file.id}/preview`,
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+              body: JSON.stringify({}),
             }
-          } catch (innerErr) {
-            console.warn("[DocViewer] Graph download URL failed:", innerErr.message);
+          );
+          if (previewRes.ok) {
+            const preview = await previewRes.json();
+            if (preview.getUrl) {
+              setEmbedUrl(preview.getUrl);
+              setMode("iframe");
+              return;
+            }
           }
         }
 
-        // Path 2: Office Online viewer via webUrl (avoids SharePoint X-Frame-Options)
-        // Convert SharePoint file URL to Office Online embed URL directly
-        if (file.webUrl) {
-          const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(file.webUrl)}`;
-          setEmbedUrl(officeUrl);
-          setMode("iframe");
-          return;
-        }
-
-        throw new Error("No preview URL available");
+        throw new Error("Preview unavailable");
       } catch (e) {
         console.error("[DocViewer]", e.message);
         setMode("error");
