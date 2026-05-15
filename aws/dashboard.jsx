@@ -200,6 +200,7 @@ function FeaturedPlay({ project, onOpen }) {
             <div className="avatar-stack">
               {project.team.map(p => {
                 const person = T24.people[p];
+                if (!person) return null;
                 return <span key={p} className="avatar avatar-sm" style={{ background: person.color, color: "#0c0b08" }}>{person.initials}</span>;
               })}
             </div>
@@ -249,6 +250,7 @@ function PlayCard({ project, onOpen }) {
           <div className="avatar-stack avatar-stack-sm">
             {project.team.slice(0, 3).map(p => {
               const person = T24.people[p];
+              if (!person) return null;
               return <span key={p} className="avatar avatar-sm" style={{ background: person.color, color: "#0c0b08" }}>{person.initials}</span>;
             })}
           </div>
