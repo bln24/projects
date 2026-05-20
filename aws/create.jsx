@@ -51,6 +51,10 @@ function CreatePlay({ onCancel, onCreated }) {
           persona: personaId,
           personaFull,
           title: title || `${personaFull} play`,
+          status: "Narrative draft queued · pipeline running",
+          statusKind: "generating",
+          pipelineStartedAt: new Date().toISOString(),
+          lastActivity: "Narrative draft queued",
         }).catch(e => { console.error("spCreatePlay:", e); throw e; });
       }
 

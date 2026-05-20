@@ -79,6 +79,7 @@ function enrichPlay(raw) {
     progress: [25, 50, 75, 100][stageIndex] || 25,
     status: raw.status || "In progress",
     statusKind: raw.statusKind || "live",
+    pipelineStartedAt: raw.pipelineStartedAt || null,
     due: dueLabel,
     dueIn,
     lead: raw.lead || "angie",
@@ -101,17 +102,26 @@ function useLivePlays() {
 
   React.useEffect(() => {
     let cancelled = false;
-    (async () => {
+    let timer = null;
+
+    const tick = async () => {
       try {
         const data = await readPlaysFile();
         if (cancelled) return;
         const plays = (data.plays || []).map(enrichPlay);
         setState({ loading: false, plays, error: null });
+        // Keep polling only while at least one play is mid-pipeline.
+        const anyGenerating = plays.some(p => p.statusKind === "generating");
+        if (anyGenerating && !cancelled) {
+          timer = setTimeout(tick, 15000);
+        }
       } catch (e) {
         if (!cancelled) setState({ loading: false, plays: [], error: e.message });
       }
-    })();
-    return () => { cancelled = true; };
+    };
+
+    tick();
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
   }, []);
 
   return state;
@@ -131,10 +141,11 @@ async function spCreatePlay(fields) {
     team: JSON.stringify(fields.team || ["angie", "stephen"]),
     lead: fields.lead || "angie",
     stageIndex: 0,
-    status: "Awaiting first draft",
-    statusKind: "idle",
+    status: fields.status || "Awaiting first draft",
+    statusKind: fields.statusKind || "idle",
+    pipelineStartedAt: fields.pipelineStartedAt || null,
     done: false,
-    lastActivity: "Play created",
+    lastActivity: fields.lastActivity || "Play created",
     cover: fields.cover || "linear-gradient(135deg,#1a3a5c 0%,#2d5a8c 100%)",
     accent: fields.accent || "#7aa7ff",
   };
@@ -236,4 +247,5 @@ window.spGetUserToken = spGetUserToken;
 window.spCreatePlay = spCreatePlay;
 window.spAdvanceStage = spAdvanceStage;
 window.spListStageFiles = spListStageFiles;
+window.enrichPlay = enrichPlay;
 window.SP_DRIVE_ID = SP_DRIVE_ID;

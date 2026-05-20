@@ -476,6 +476,7 @@ function UploadPanel({ playSlug, stageKey, onUploaded }) {
 
 // ─── PipelineProgress ─────────────────────────────────────────────────────
 const PIPELINE_STEPS = {
+  "generate-narrative":  ["Read source materials", "Calibrate against exemplars", "Draft 7-move arc", "Generate Narrative document", "Upload to Stage 1", "Update webapp"],
   "generate-arc":        ["Read approved Narrative", "Extract 7 moves", "Generate Arc document", "Upload to Stage 2", "Update webapp"],
   "generate-storyboard": ["Read approved Arc", "Map moves to slides", "Generate Storyboard document", "Upload to Stage 3", "Update webapp"],
   "generate-deck":       ["Read approved Storyboard", "Build slide structure", "Apply visual template", "Generate PPTX", "Upload to Stage 4"],
@@ -525,7 +526,7 @@ function PipelineProgress({ action, startedAt }) {
 }
 
 // ─── PipelineStagePanel ─────────────────────────────────────────────────────
-const STAGE_PIPELINE_ACTION = { 0: "generate-arc", 1: "generate-storyboard", 2: "generate-storyboard" };
+const STAGE_PIPELINE_ACTION = { 0: "generate-narrative", 1: "generate-arc", 2: "generate-storyboard" };
 function PipelineStagePanel({ playSlug, stageIdx, pipelineRunning, pipelineStartedAt, onUploaded }) {
   if (pipelineRunning) return <PipelineProgress action={STAGE_PIPELINE_ACTION[stageIdx] || "generate-arc"} startedAt={pipelineStartedAt} />;
   const stageFolderMap = { 0: "narrative", 1: "arc", 2: "storyboard" };
@@ -680,7 +681,7 @@ function DocumentShelf({ playSlug, stageIdx, onFilesChange, viewingFile, setView
 }
 
 /* ---- Left Rail File List ---- */
-function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, persona, pipelineRunning }) {
+function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, persona, pipelineRunning, pipelineStartedAt }) {
   const stageFolders = STAGE_FOLDERS[stageIdx] || ["sources"];
   const primaryFolders = stageFolders.filter(f => f !== "sources");
   const [files, setFiles] = React.useState([]);
@@ -755,7 +756,7 @@ function LeftRailFiles({ playSlug, stageIdx, viewingFile, setViewingFile, person
                 playSlug={playSlug}
                 stageIdx={stageIdx}
                 pipelineRunning={pipelineRunning}
-                pipelineStartedAt={pipelineRunning ? Date.now() : null}
+                pipelineStartedAt={pipelineStartedAt}
                 onUploaded={() => setTick(t => t + 1)}
               />
           }
@@ -796,8 +797,37 @@ function Toast({ message, onDone }) {
 }
 
 /* ---- Main Workspace ---- */
-function Workspace({ project, onBack, onNav }) {
+function Workspace({ project, onBack, onNav, onRefresh }) {
   const [stageIdx, setStageIdx] = React.useState(project ? (project.stageIndex || 0) : 0);
+
+  // While the pipeline is running for this play, poll T24-Plays.json every 15s
+  // so the user sees the bar disappear / status flip the moment hg-proxy is done.
+  React.useEffect(() => {
+    if (!project || project.statusKind !== "generating") return;
+    let cancelled = false;
+    let timer = null;
+    const poll = async () => {
+      try {
+        if (!window.spGetUserToken || !window.SP_DRIVE_ID) return;
+        const token = await window.spGetUserToken();
+        const url = `https://graph.microsoft.com/v1.0/drives/${window.SP_DRIVE_ID}/root:/AWS T24/T24-Plays.json:/content`
+          .replace(/ /g, "%20");
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        const raw = (data.plays || []).find(p => String(p.id) === String(project.id));
+        if (raw && !cancelled && onRefresh) {
+          const enriched = window.enrichPlay ? window.enrichPlay(raw) : null;
+          if (enriched) onRefresh(enriched);
+          if (raw.statusKind === "generating" && !cancelled) timer = setTimeout(poll, 15000);
+        } else if (!cancelled) {
+          timer = setTimeout(poll, 15000);
+        }
+      } catch {}
+    };
+    timer = setTimeout(poll, 15000);
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
+  }, [project?.id, project?.statusKind]);
   const [advancing, setAdvancing] = React.useState(false);
   const [toast, setToast] = React.useState(null);
   const [viewingFile, setViewingFile] = React.useState(null);
@@ -1029,6 +1059,7 @@ function Workspace({ project, onBack, onNav }) {
             setViewingFile={setViewingFile}
             persona={project?.persona}
             pipelineRunning={project?.statusKind === "generating"}
+            pipelineStartedAt={project?.pipelineStartedAt ? new Date(project.pipelineStartedAt).getTime() : null}
           />
         </nav>
 
