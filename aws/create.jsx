@@ -15,12 +15,13 @@ function CreatePlay({ onCancel, onCreated }) {
 
   const steps = ["Persona", "Brief", "Sources", "Review"];
 
+  const personaId = persona === "__custom" ? customPersona.toUpperCase().slice(0, 6) : persona;
+  const playSlug = personaId ? ((window.SP?.playFolderName?.[personaId]) || `${personaId} Elevate`) : "";
+  const personaFull = persona === "__custom" ? customPersona : (T24.personaCatalog.find(p => p.id === personaId)?.full || personaId || "");
+
   const submit = async () => {
     setGenerating(true);
     setGenError(null);
-    const personaId = persona === "__custom" ? customPersona.toUpperCase().slice(0, 6) : persona;
-    const playSlug = (window.SP?.playFolderName?.[personaId]) || `${personaId} Elevate`;
-    const personaFull = persona === "__custom" ? customPersona : (T24.personaCatalog.find(p => p.id === personaId)?.full || personaId);
 
     try {
       // Phase 1: Ensure SharePoint folders
@@ -73,8 +74,8 @@ function CreatePlay({ onCancel, onCreated }) {
       setGenStep(5);
       setTimeout(() => { if (onCreated) onCreated(newPlay); }, 600);
     } catch (e) {
-      setGenError(e.message);
-      setGenerating(false);
+      console.error("CreatePlay submit failed:", e);
+      setGenError(e?.message || String(e));
     }
   };
 
@@ -103,7 +104,7 @@ function CreatePlay({ onCancel, onCreated }) {
         <div style={{ maxWidth: 540, textAlign: "center" }}>
           <div className="eyebrow amber">Creating your play</div>
           <h1 className="display" style={{ fontSize: 48, marginTop: 18, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Setting up the<br/><em style={{ fontStyle: "italic" }}>CAIO Elevate</em> play.
+            Setting up the<br/><em style={{ fontStyle: "italic" }}>{playSlug}</em> play.
           </h1>
           <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
             {phases.map((p, i) => (
@@ -122,6 +123,30 @@ function CreatePlay({ onCancel, onCreated }) {
               }}>
                 Open play <Icon name="arrow_right" size={12} />
               </button>
+            </div>
+          )}
+          {genError && (
+            <div style={{ marginTop: 24, padding: 16, background: "rgba(220,80,60,.08)", border: "1px solid rgba(220,80,60,.4)", borderRadius: "var(--r-sm)", textAlign: "left" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Icon name="alert" size={14} />
+                <span style={{ fontWeight: 600, fontSize: 13 }}>
+                  Stalled at step {genStep} — {["", "Folder setup", "File upload", "Register play", "Queue narrative"][genStep] || "Submit"}
+                </span>
+              </div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-soft)", fontFamily: "var(--mono)", lineHeight: 1.5, marginBottom: 12, wordBreak: "break-word" }}>
+                {genError}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn btn-accent btn-sm" onClick={() => { setGenError(null); setGenStep(0); submit(); }}>
+                  Retry <Icon name="arrow_right" size={12} />
+                </button>
+                <button className="btn btn-ghost btn-sm" onClick={() => { setGenerating(false); setGenError(null); setGenStep(0); }}>
+                  Back to Review
+                </button>
+              </div>
+              <div className="muted" style={{ fontSize: 11, marginTop: 10 }}>
+                Full trace is in the browser console (⌥⌘I → Console).
+              </div>
             </div>
           )}
           <style>{`
