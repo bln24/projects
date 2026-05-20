@@ -160,15 +160,32 @@ function CreatePlay({ onCancel, onCreated }) {
             <input className="big-input" placeholder={`Working title for the ${persona || ""} play…`} value={title} onChange={e => setTitle(e.target.value)} autoFocus />
 
             <div className="template-row">
-              <span className="eyebrow" style={{ marginBottom: 12, display: "block" }}>Reference exemplar</span>
-              <div style={{ padding: "16px 18px", background: "var(--paper-elev)", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <Icon name="doc_text" size={18} className="amber" style={{ marginTop: 2 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>CXO Elevate First Call Deck</div>
-                  <div className="muted" style={{ fontSize: 12.5, marginTop: 4, lineHeight: 1.5 }}>
-                    T24 calibrates every play against the approved CAIO Elevate FCD narrative + storyboard exemplars. One canonical shape: 7 moves, 5 enablers, peer-conversation framing, CAIO/CIO/Head-of-AI proof points. Your persona, your industry, your sources — same structural skeleton.
+              <span className="eyebrow" style={{ marginBottom: 12, display: "block" }}>Reference exemplars · forward chain</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { n: "01", name: "Narrative working paper", file: "CAIO_Elevate_FCD_Narrative.docx", desc: "Drafted first from your client sources. Sets purpose, design principles, 7-move arc, exit beliefs.", primary: true },
+                  { n: "02", name: "Narrative arc",            file: "Derived from approved Narrative",   desc: "One card per move — seller goal, branch points, tactical notes, what the customer should feel." },
+                  { n: "03", name: "Storyboard",               file: "CAO_Elevate_Storyboard_FINAL.docx", desc: "Slide-by-slide cards: title, message, visual intent, stats, sources. Generated from the approved Arc." },
+                  { n: "04", name: "Final First Call Deck",    file: "PPTX, built last",                  desc: "The artifact a seller walks through in 45–60 min. Calibrated against the chain above, never written first." },
+                ].map(ex => (
+                  <div key={ex.n} style={{
+                    display: "flex", gap: 14, padding: "12px 16px",
+                    background: ex.primary ? "rgba(244,183,63,.04)" : "var(--paper-elev)",
+                    border: `1px solid ${ex.primary ? "var(--accent)" : "var(--line)"}`,
+                    borderRadius: "var(--r-sm)",
+                    alignItems: "flex-start",
+                  }}>
+                    <span style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: ex.primary ? 700 : 500, color: ex.primary ? "var(--accent)" : "var(--muted)", letterSpacing: ".08em", marginTop: 1, flexShrink: 0, minWidth: 22 }}>{ex.n}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13.5 }}>{ex.name}{ex.primary && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--accent)", textTransform: "uppercase" }}>First · drafted from sources</span>}</div>
+                      <div className="muted" style={{ fontSize: 11, marginTop: 3, fontFamily: "var(--mono)" }}>{ex.file}</div>
+                      <div className="muted" style={{ fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{ex.desc}</div>
+                    </div>
                   </div>
-                </div>
+                ))}
+              </div>
+              <div className="muted" style={{ fontSize: 11.5, marginTop: 12, lineHeight: 1.5 }}>
+                Forward direction: your sources → Narrative → Arc → Storyboard → Deck. Never the reverse. The exemplars hold the shape (7 moves, 5 enablers, peer-conversation framing); your client material drives the substance.
               </div>
             </div>
           </div>
