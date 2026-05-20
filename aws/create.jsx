@@ -20,9 +20,10 @@ function CreatePlay({ onCancel, onCreated }) {
     setGenError(null);
     const personaId = persona === "__custom" ? customPersona.toUpperCase().slice(0, 6) : persona;
     const playSlug = (window.SP?.playFolderName?.[personaId]) || `${personaId} Elevate`;
+    const personaFull = persona === "__custom" ? customPersona : (T24.personaCatalog.find(p => p.id === personaId)?.full || personaId);
 
     try {
-      // Phase 1: Create SharePoint folders
+      // Phase 1: Ensure SharePoint folders
       setGenStep(1);
       if (window.spEnsureFolders) {
         await spEnsureFolders(playSlug).catch(e => console.warn("Folder create:", e));
@@ -31,18 +32,46 @@ function CreatePlay({ onCancel, onCreated }) {
       // Phase 2: Upload source files to 01 - Source Materials
       setGenStep(2);
       const realFiles = sources.filter(s => s._file);
+      const uploadedNames = [];
       for (const s of realFiles) {
-        await spUpload(s._file, playSlug, "sources", (pct) => {
-          setUploadProgress(prev => ({ ...prev, [s.name]: pct }));
-        }).catch(e => console.warn("Upload", s.name, e));
+        try {
+          await spUpload(s._file, playSlug, "sources", (pct) => {
+            setUploadProgress(prev => ({ ...prev, [s.name]: pct }));
+          });
+          uploadedNames.push(s.name);
+        } catch (e) { console.warn("Upload", s.name, e); }
       }
 
-      // Phase 3: Notify team
+      // Phase 3: Register play in T24-Plays.json
       setGenStep(3);
-      await new Promise(r => setTimeout(r, 800));
+      let newPlay = null;
+      if (window.spCreatePlay) {
+        newPlay = await spCreatePlay({
+          persona: personaId,
+          personaFull,
+          title: title || `${personaFull} play`,
+        }).catch(e => { console.error("spCreatePlay:", e); throw e; });
+      }
 
+      // Phase 4: Drop generate-narrative marker so the cron picks it up
       setGenStep(4);
-      setTimeout(() => onCreate({ persona: personaId, title, playSlug }), 600);
+      const marker = JSON.stringify({
+        persona: personaId,
+        playSlug,
+        action: "generate-narrative",
+        title: title || `${personaFull} play`,
+        requestedAt: new Date().toISOString(),
+        status: "pending",
+        sources: uploadedNames,
+        note: "Auto-dispatched by Create flow. Draft Narrative working paper from these client sources; calibrate against source-docs exemplars (CAIO_Elevate_FCD_Narrative.docx, CAO_Elevate_Storyboard_FINAL.docx, CAO_CAIO_CIO_Real_World_Examples.docx, Deck_Strategy.md, instructions.md). Forward direction.",
+      }, null, 2);
+      const markerBlob = new File([marker], "pipeline-request.json", { type: "application/json" });
+      if (window.spUpload) {
+        await spUpload(markerBlob, playSlug, "sources").catch(e => console.warn("Marker drop:", e));
+      }
+
+      setGenStep(5);
+      setTimeout(() => { if (onCreated) onCreated(newPlay); }, 600);
     } catch (e) {
       setGenError(e.message);
       setGenerating(false);
@@ -63,10 +92,11 @@ function CreatePlay({ onCancel, onCreated }) {
       Object.values(uploadProgress).reduce((a, b) => a + b, 0) / (fileCount * 100) * 100
     );
     const phases = [
-      { label: "Creating play in SharePoint…", done: genStep > 1 },
-      { label: "Setting up Teams folders…", done: genStep > 2 },
-      { label: fileCount > 0 ? `Uploading ${fileCount} source file${fileCount === 1 ? "" : "s"}… ${genStep === 3 ? totalUploadPct + "%" : ""}` : "No files to upload", done: genStep > 3 },
-      { label: "Done — opening your play.", done: genStep >= 4 },
+      { label: "Setting up SharePoint folders…", done: genStep > 1 },
+      { label: fileCount > 0 ? `Uploading ${fileCount} source file${fileCount === 1 ? "" : "s"}… ${genStep === 2 ? totalUploadPct + "%" : ""}` : "No files to upload", done: genStep > 2 },
+      { label: "Registering play in T24-Plays.json…", done: genStep > 3 },
+      { label: "Queuing narrative draft (T24 will read your sources)…", done: genStep > 4 },
+      { label: "Done — opening your play.", done: genStep >= 5 },
     ];
     return (
       <div className="create-stage" style={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
@@ -84,7 +114,7 @@ function CreatePlay({ onCancel, onCreated }) {
               </div>
             ))}
           </div>
-          {genStep >= 4 && (
+          {genStep >= 5 && (
             <div style={{ marginTop: 24, padding: 16, background: "var(--paper-elev)", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", fontSize: 13 }}>
               <span className="muted">If the page doesn't redirect automatically — </span>
               <button className="btn btn-accent btn-sm" style={{ marginLeft: 8 }} onClick={() => {
