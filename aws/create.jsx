@@ -5,7 +5,6 @@ function CreatePlay({ onCancel, onCreated }) {
   const [persona, setPersona] = React.useState(null);
   const [customPersona, setCustomPersona] = React.useState("");
   const [title, setTitle] = React.useState("");
-  const [template, setTemplate] = React.useState("engagement");
   const [sources, setSources] = React.useState([]);   // { name, size, _file }
   const [draggingOver, setDraggingOver] = React.useState(false);
   const [generating, setGenerating] = React.useState(false);
@@ -43,7 +42,7 @@ function CreatePlay({ onCancel, onCreated }) {
       await new Promise(r => setTimeout(r, 800));
 
       setGenStep(4);
-      setTimeout(() => onCreate({ persona: personaId, title, template, playSlug }), 600);
+      setTimeout(() => onCreate({ persona: personaId, title, playSlug }), 600);
     } catch (e) {
       setGenError(e.message);
       setGenerating(false);
@@ -161,19 +160,15 @@ function CreatePlay({ onCancel, onCreated }) {
             <input className="big-input" placeholder={`Working title for the ${persona || ""} play…`} value={title} onChange={e => setTitle(e.target.value)} autoFocus />
 
             <div className="template-row">
-              <span className="eyebrow" style={{ marginBottom: 12, display: "block" }}>Pick a template — T24 will scaffold the narrative around it.</span>
-              <div className="template-options">
-                {[
-                  { id: "enterprise", name: "Enterprise Profile", desc: "Definitive portrait" },
-                  { id: "engagement", name: "Engagement Pitch", desc: "Pilot, scope, ask" },
-                  { id: "vertical", name: "Industry POV", desc: "AWS field-leadable" },
-                  { id: "executive", name: "Executive Briefing", desc: "One-meeting, declarative" },
-                ].map(t => (
-                  <button key={t.id} className={"tpl-card " + (template === t.id ? "selected" : "")} onClick={() => setTemplate(t.id)}>
-                    <div className="tpl-name">{t.name}</div>
-                    <div className="tpl-desc muted">{t.desc}</div>
-                  </button>
-                ))}
+              <span className="eyebrow" style={{ marginBottom: 12, display: "block" }}>Reference exemplar</span>
+              <div style={{ padding: "16px 18px", background: "var(--paper-elev)", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <Icon name="doc_text" size={18} className="amber" style={{ marginTop: 2 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>CXO Elevate First Call Deck</div>
+                  <div className="muted" style={{ fontSize: 12.5, marginTop: 4, lineHeight: 1.5 }}>
+                    T24 calibrates every play against the approved CAIO Elevate FCD narrative + storyboard exemplars. One canonical shape: 7 moves, 5 enablers, peer-conversation framing, CAIO/CIO/Head-of-AI proof points. Your persona, your industry, your sources — same structural skeleton.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -245,7 +240,7 @@ function CreatePlay({ onCancel, onCreated }) {
                 </span>
               </div>
               <div className="review-row"><span className="lbl">Working title</span><span className="val" style={{ fontFamily: "var(--display)", fontSize: 18, fontStyle: "italic" }}>"{title}"</span></div>
-              <div className="review-row"><span className="lbl">Template</span><span className="val">{template === "engagement" ? "Engagement Pitch" : template === "enterprise" ? "Enterprise Profile" : template === "vertical" ? "Industry POV" : "Executive Briefing"}</span></div>
+              <div className="review-row"><span className="lbl">Reference</span><span className="val">CXO Elevate FCD · 7-move arc · 5 enablers</span></div>
               <div className="review-row"><span className="lbl">Sources</span><span className="val">{sources.length} file{sources.length === 1 ? "" : "s"} ready for T24</span></div>
               <div className="review-row"><span className="lbl">Team</span><span className="val">
                 <div className="avatar-stack avatar-stack-sm">
