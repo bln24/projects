@@ -96,6 +96,7 @@ function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const reviewCount = review.length;
   const deckReady = allPlays.filter(p => p.stageIndex === 3 && p.statusKind === "review").length;
+  const stuckPlays = allPlays.filter(p => (p.statusKind === "stuck" || p.statusKind === "error") && !p.done);
 
   if (loading) return (
     <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 320 }}>
@@ -108,6 +109,41 @@ function Dashboard({ onOpenProject, onNewProject, onPlaysLoaded }) {
 
   return (
     <div className="dash-page">
+      {stuckPlays.length > 0 && (
+        <div role="alert" style={{
+          background: "rgba(255,107,94,.08)",
+          border: "1px solid rgba(255,107,94,.32)",
+          borderRadius: "var(--r-sm)",
+          padding: "14px 18px",
+          margin: "0 0 18px 0",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+        }}>
+          <Icon name="alert" size={18} style={{ color: "var(--danger)", flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 14, color: "var(--danger)" }}>
+              {stuckPlays.length} {stuckPlays.length === 1 ? "play needs" : "plays need"} attention
+            </div>
+            <div className="muted" style={{ fontSize: 12.5, marginTop: 3 }}>
+              {stuckPlays.map((p, i) => (
+                <React.Fragment key={p.id}>
+                  {i > 0 && " · "}
+                  <a
+                    onClick={() => onOpenProject && onOpenProject(p.id)}
+                    style={{ cursor: "pointer", color: "var(--ink-soft)", borderBottom: "1px dotted var(--muted)" }}
+                  >
+                    {p.persona} {p.title} — {p.status || "stuck"}
+                  </a>
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="muted" style={{ fontSize: 11.5, marginTop: 6 }}>
+              Click into the play and use the <strong>Re-run</strong> button in the header to re-queue the draft.
+            </div>
+          </div>
+        </div>
+      )}
       <section className="dash-hero">
         <div className="eyebrow">{dayName}, {dateStr}</div>
         <h1 className="dash-greeting">
