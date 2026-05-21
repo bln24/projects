@@ -1224,6 +1224,10 @@ function RevisionHistory({ revisions, open, onToggle }) {
     if (r.action === "approved_final") return "Approved · Delivered to AWS";
     if (r.action === "send_back") return `Sent back · ${STAGE_DEFS[r.fromStageIndex]?.name || r.stageName} → ${STAGE_DEFS[r.toStageIndex]?.name || "Previous"}`;
     if (r.action === "revisions_requested") return `Revisions requested · ${r.stageName}`;
+    if (r.action === "retry") return `Re-queued ${r.stageName} draft · waiting on next cron poll`;
+    if (r.action === "pipeline_dispatched") return `Pipeline picked up ${r.stageName} request · agent running`;
+    if (r.action === "pipeline_completed") return `Pipeline completed ${r.stageName} · output uploaded`;
+    if (r.action === "pipeline_stuck") return `Pipeline stuck — agent timed out · click Re-run`;
     return r.action;
   }
 
