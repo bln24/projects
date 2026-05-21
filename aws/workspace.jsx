@@ -1050,14 +1050,14 @@ function Workspace({ project, onBack, onNav, onRefresh }) {
           <StatusPill statusKind={project.statusKind} label={project.status} />
           {regenAction && (
             <button
-              className="btn btn-ghost btn-sm"
+              className={"btn btn-sm " + (project.statusKind === "stuck" || project.statusKind === "error" ? "btn-accent" : "btn-ghost")}
               onClick={handleRetry}
               disabled={advancing}
-              title={`Re-run the ${stage.name} pipeline draft for this play. Marker is dropped to SharePoint; next cron poll picks it up within ~15 min.`}
-              style={{ fontSize: 12 }}
+              title={`Re-run the ${stage.name} pipeline draft. A fresh marker drops to SharePoint; next cron poll picks it up within ~15 min. Use this if the play is stuck or you want a v2 draft.`}
+              style={{ fontSize: 12, fontWeight: (project.statusKind === "stuck" || project.statusKind === "error") ? 600 : 500 }}
             >
               <Icon name="play" size={12} />
-              Re-run {stage.name}
+              {(project.statusKind === "stuck" || project.statusKind === "error") ? `Recover · Re-run ${stage.name}` : `Re-run ${stage.name}`}
             </button>
           )}
           <TeamStrip team={project.team} />
