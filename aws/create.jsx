@@ -72,7 +72,15 @@ function CreatePlay({ onCancel, onCreated }) {
       }, null, 2);
       const markerBlob = new File([marker], "pipeline-request.json", { type: "application/json" });
       if (window.spUpload) {
-        await spUpload(markerBlob, playSlug, "sources").catch(e => console.warn("Marker drop:", e));
+        // Marker drop is load-bearing — without it, the cron has nothing to dispatch
+        // and the play sits at "Awaiting first draft" forever. Throw on failure so the
+        // create UI's error banner surfaces it instead of swallowing into the console.
+        try {
+          await spUpload(markerBlob, playSlug, "sources");
+        } catch (e) {
+          console.error("Marker drop failed:", e);
+          throw new Error("Couldn't queue the narrative draft (marker upload failed). The play is created and your sources are uploaded — click Retry to re-queue, or open the workspace and use Re-run Narrative.");
+        }
       }
 
       setGenStep(5);
