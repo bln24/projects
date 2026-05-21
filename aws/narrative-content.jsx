@@ -341,15 +341,171 @@ const STORYBOARD = {
   ],
 };
 
+// ── CIO Narrative ────────────────────────────────────────────────────────
+// Generated 2026-05-21 by cxo-elevate-pipeline-poller from CIO Elevate source files.
+// Source files: 2026 CIO Elevate Strategy Doc.docx, CIO_Elevate_Narrative_Arc (1).docx,
+// meeting notes.md, meeting notes 2.md, meeting notes 3.md
+const CIO_NARRATIVE = {
+  eyebrow: 'CIO Elevate · Working Paper · v1',
+  title: 'The CIO Imperative: Modernize the Foundation. Lead What Comes Next.',
+  subtitle: 'Break the hardware refresh cycle. Build the infrastructure that wins the next decade.',
+  attribution: 'Generated from CIO Elevate source files · April 2026 working session · AWS RRCG Industry & Solutions',
+
+  purpose: {
+    label: 'Purpose',
+    body: [
+      'This is the narrative working paper for the CIO Elevate First Call Deck. It specifies the arc a seller walks through in a single 45–60 minute conversation with a Chief Information Officer on a first call.',
+      'The deck does four things at once: demonstrates that AWS understands the CIO seat, installs the vocabulary the rest of the conversation depends on, diagnoses where the customer actually is rather than assuming, and shows that AWS with a named partner ecosystem can meet modernization needs across the full spectrum.',
+      'The hardware refresh thread runs through the entire arc as the central tension: every dollar poured into replacing aging on-premises servers is a dollar not invested in AI, talent, or competitive differentiation. Migration to AWS is the decisive action that breaks this cycle permanently.',
+    ],
+  },
+
+  principles: {
+    label: 'Design principles',
+    items: [
+      {
+        name: 'Diagnostic, not pitch.',
+        body: 'The CIO could be anywhere on the modernization spectrum when the seller walks in. The deck diagnoses live and adjusts pacing in real time. The fulcrum is the maturity map slide — the seller reads the room there and chooses how the rest of the call unfolds.',
+      },
+      {
+        name: 'The hardware economics anchor everything.',
+        body: 'The refresh cycle is not a technology argument. It is a capital allocation argument. Per the April 2026 working session: replacement is now cheaper than refresh/renew AND enables agentic workloads. That single equation is the deal thesis.',
+      },
+      {
+        name: 'The CIO is the hero, not the target.',
+        body: 'This is not a pitch at a technology manager. It is a conversation with the leader making capital allocation decisions that will define competitive position for the next decade.',
+      },
+      {
+        name: 'The burning platform is real, not manufactured.',
+        body: 'Three converging forces create genuine urgency: hardware costs rising due to AI chip demand, Broadcom/VMware licensing 4–7x prior pricing, Oracle and SQL Server contract pressure. The deck names them directly and positions migration as the only response that solves both the cost problem and the AI mandate simultaneously.',
+      },
+      {
+        name: 'Peer-agnostic by design.',
+        body: 'The CIO is the foundation-builder for whichever C-suite peers matter most. Peer conversations are named by outcome — CapEx reallocation, AI enablement, risk reduction, business agility — with named C-suite peers as illustrative tags the seller customizes per customer.',
+      },
+    ],
+  },
+
+  arc: {
+    label: 'CIO FCD Narrative',
+    intro: 'The seller walks the CIO through seven moves over 45–60 minutes. Each move earns the right to the next. Pacing adjusts at Move 2 based on where the CIO is on the refresh calendar.',
+    moves: [
+      {
+        n: 1,
+        title: 'Open on the hardware trap and the AI mandate',
+        time: '≈5 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Names the CIO\u2019s reality directly. The opening acknowledges the specific budget conversation every enterprise CIO is already having: a hardware refresh event is coming, it will cost $500K\u2013$50M depending on data center footprint, and at the same time the board is asking when AI will show up in the business. These two demands are structurally in conflict on a fixed IT budget.' },
+          { label: 'Three converging forces', body: 'Hardware costs are rising (AI chip demand). Broadcom/VMware licensing increased 4\u20137x prior pricing. Agentic workloads cannot run on legacy on-premises infrastructure — on-prem latency is too high, legacy architecture cannot support real-time agentic data flows regardless of refresh spend.' },
+          { label: 'The CIO paradox', body: 'Wesley\u2019s framing from the April 2026 strategy session: CIOs are conservative with spending but are being forced to spend on hardware refreshes even as the case for that spend collapses. Refresh/renew only buys time. It does not advance business objectives.' },
+          { label: 'What the customer should feel', body: '\u201cThey understand what is actually happening in my budget right now. And they are not pretending the AI ask is separate from the cost problem.\u201d', italic: true },
+        ],
+      },
+      {
+        n: 2,
+        title: 'Install the vocabulary: replacement, not refresh',
+        time: '≈5 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Walks the CIO from the \u201crefresh\u201d mental model to the \u201creplacement\u201d mental model. Two-column comparison: Left — what hardware refresh actually delivers (same architecture, same constraints, deferred decision, capital committed with no new capability). Right — what migration delivers (CapEx to OpEx, architecture fit for agentic workloads, AI readiness baked in, vendor lock-in eliminated).' },
+          { label: 'The replacement argument', body: 'From the April 2026 strategy session: \u201cReplacement — migration plus modernization — is now cheaper than refresh/renew AND enables agentic workloads.\u201d That equation is the deck\u2019s commercial thesis.' },
+          { label: 'Three terms to install', body: '\u201cFit for purpose\u201d — the target state infrastructure. \u201cCompelling event\u201d — the specific refresh or renewal that creates the migration window. \u201cCapital reallocation\u201d — not cost-cutting; every refresh avoided is capital that funds AI and competitive differentiation.' },
+          { label: 'Branch point', body: 'If the CIO is already in migration mode with a compelling event in mind: fast path — compress maturity model, spend time on roadmap and ecosystem. If the CIO is in \u201cplanning next refresh\u201d mode: slow path — anchor on the Hardware Refresh Avoidance Analysis as the concrete output.', commentRef: 2 },
+          { label: 'What the customer should feel', body: '\u201cI have a new frame for a decision I thought was already made. And it changes the numbers.\u201d', italic: true },
+        ],
+      },
+      {
+        n: 3,
+        title: 'Locate them on the modernization map',
+        time: '≈5\u201310 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Walks the four-phase transformation model — Migrate & Stabilize, Secure & Govern, Modernize & Enable, Innovate & Lead. Both infrastructure and business-outcome columns visible on one slide. Asks: where are you right now?' },
+          { label: 'Phase 1 — Migrate & Stabilize', body: 'The financial case. Migration timed to the refresh calendar. CapEx redirected from hardware to cloud. Target: eliminate at least one refresh event from the planning calendar in 90 days.' },
+          { label: 'Phase 2 — Secure & Govern', body: 'Zero-trust, automated compliance, identity governance. AWS patches and hardens infrastructure continuously — the CIO inherits enterprise-grade security automatically.' },
+          { label: 'Phase 3 — Modernize & Enable', body: 'Application modernization, database migration to managed services, data platform transformation. 52% of organizations rate their GenAI data foundation as inadequate (AWS/HBR 2025 CDO Report) — Phase 3 is where that changes.' },
+          { label: 'Phase 4 — Innovate & Lead', body: 'Agentic AI at scale. Real-time personalization, intelligent automation, and GenAI capabilities structurally impossible on on-premises hardware. The CIO who migrates in 2025 presents AI-driven business outcomes to the board in 2026.' },
+          { label: 'Reframe', body: '85% of companies still operate on legacy infrastructure. Only 10\u201315% of enterprise applications are currently in the cloud (Evanta 2025). You are not behind on ambition — you are behind on infrastructure.', highlight: true },
+        ],
+      },
+      {
+        n: 4,
+        title: 'Name the CIO seat: capital allocator, foundation-builder, transformation leader',
+        time: '≈5 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Repositions the CIO from technology manager to strategic protagonist. This is not an IT decision. It is a capital allocation decision, a competitive strategy decision, and a vendor risk decision.' },
+          { label: 'The reframe', body: 'Wesley\u2019s framing: \u201cThe CIO\u2019s role as capital allocator — this is the conversation AWS should be having.\u201d What business capabilities does this budget enable or foreclose?' },
+          { label: 'Peer conversations — named by outcome', body: 'CapEx reallocation (CFO, Chief Procurement Officer — TCO over 3 and 5 years). AI enablement (CEO, CDO, Chief AI Officer — what becomes possible cloud-native). Risk and compliance (CISO, Chief Risk Officer — security posture, audit readiness). Business agility (COO, CMO — what the business can do when infrastructure no longer constrains it). Named C-suite peers are illustrative; seller customizes per customer.' },
+          { label: 'What the customer should feel', body: '\u201cI am not managing IT. I am making the decisions that determine whether this company can compete in the next decade.\u201d', italic: true },
+        ],
+      },
+      {
+        n: 5,
+        title: 'Surface the five blockers',
+        time: '≈10 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Presents five infrastructure blockers as the real constraints on modernization and AI readiness. Designed for ranking — the seller asks the CIO to name the one that hurts most. Whichever they name is what the rest of the call orbits.' },
+          { label: 'Blocker 1 — The Hardware Refresh Trap', body: 'Only 10\u201315% of enterprise apps in the cloud. 60\u201370% of IT budgets consumed by maintaining existing infrastructure. Every refresh event is a compounding constraint. Signal: $103.5B cloud migration addressable market by 2030.' },
+          { label: 'Blocker 2 — The Licensing Ambush', body: 'VMware/Broadcom 4\u20137x prior pricing. Oracle Exadata, SQL Server, major ISV contract compression. The CIO who waits for the renewal date cedes negotiating leverage entirely. AWS Fast Start: Oracle Exadata Migration through unified GTM with Oracle Alliance team.' },
+          { label: 'Blocker 3 — The AI Readiness Ceiling', body: '73% of AI initiatives stall because of data silos and aging architecture. 52% of organizations rate their GenAI data foundation as inadequate. Agentic workloads require cloud-native architecture — on-premises latency is too high. GenAI is already shortening CPG product development cycles from 18 months to 6 months for CIOs who have made the investment.' },
+          { label: 'Blocker 4 — The Security and Governance Debt', body: 'Cybersecurity: #1 CIO priority for four consecutive years (Evanta 2025). Ransomware threatens 70% of retail/hospitality CISOs (RH-ISAC 2025). Legacy hardware security patches thin out in years 4\u20135 of a cycle, precisely when cost pressure peaks.' },
+          { label: 'Blocker 5 — The Application Sprawl and Technical Debt', body: 'Hundreds of unmapped applications. Legacy core systems (mainframe, ERP, CRM) that teams are most reluctant to touch. Agentic AI requires connected, clean data foundations — legacy systems hold that data in silos. AWS Transform uses AI to assess and migrate infrastructure.' },
+          { label: 'What the customer should do', body: 'Pick one. Seller prompt: \u201cWhich of these is creating the most pressure right now?\u201d The named blocker becomes the organizing logic for Move 6.' },
+        ],
+      },
+      {
+        n: 6,
+        title: 'Prove it: peer CIOs who broke the cycle',
+        time: '≈10 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Whatever blocker the CIO named in Move 5, this move shows a peer CIO who solved it — with the specific decision made, the vendor/platform used, and the outcome. Real people at real companies.' },
+          { label: 'Blocker 1 & 3 — Marco Argenti, CIO, Goldman Sachs', body: '\u201cWe used to look at models as a chat that would provide questions and answers. Now a year later, we look at models as essentially entities or agents that can perform tasks on your behalf.\u201d Goldman embedded Anthropic engineers directly into technology teams to co-build autonomous agents for financial processes. Argenti\u2019s measured approach: choosing not to declare ROI prematurely. Cross-ref: CAO_CAIO_CIO_Real_World_Examples.docx §1.' },
+          { label: 'Blocker 2 & 5 — Lori Beer, Global CIO, JPMorgan Chase', body: '\u201cAgent-to-agent interactions are very different than traditional system-to-system interactions.\u201d $18B technology budget. JPMC was one of only three firms to publicly disclose architecture details for agentic workflows. Foundation-first sequence is org-charted — Teresa Heitsenrether (CDAO, Operating Committee) owns data strategy and governance before agent rollout. Cross-ref: CAO_CAIO_CIO_Real_World_Examples.docx §2.' },
+          { label: 'Blocker 4 — Suresh Kumar, Global CTO/CDO, Walmart', body: 'Chose to \u201cgo beyond individual tools and build a unified, company-wide framework.\u201d Four super-agents: Sparky (customer-facing), Marty (sellers/advertisers), developer agent, associate agent. One platform, four audiences — the deliberate anti-sprawl answer at Fortune 1 scale. Cross-ref: CAO_CAIO_CIO_Real_World_Examples.docx §5.' },
+          { label: 'Canonical buying sequence — GoDaddy on Bedrock', body: 'Foundation: zero data retention, PII detection, single API proxy. Scaling: 2,000 developers on GoCode, 50% sprint reduction. Growth: Airo.ai launched as revenue-generating agentic product. 100+ models behind one API. Phase 1 \u2192 Phase 4 executed cleanly.' },
+          { label: 'What the customer should feel', body: '\u201cMy peers have this problem. And they have solved it. And I can see the exact decisions they made.\u201d', italic: true },
+        ],
+      },
+      {
+        n: 7,
+        title: 'Show the path and close with two questions',
+        time: '≈5\u201310 min',
+        blocks: [
+          { label: 'What the seller does', body: 'Shows the AWS partner ecosystem and the four-phase roadmap as one coherent path — not a menu of options. Closes with two questions that force a concrete next step and expand the conversation beyond the CIO.' },
+          { label: 'AWS CIO Elevate ecosystem', body: 'Migration and Modernization: Accenture, Deloitte, Infosys, TCS, Publicis Sapient. Funding: T2K Win Room, MAP Lite/MAP Large, Partner SCA Funding. AWS Transform as the first concrete deliverable. Note (April 2026 session): CTA is a meeting/conversation first, not an immediate assessment.' },
+          { label: 'Option A — Hardware Refresh Avoidance Analysis', body: 'Free. For when the upcoming refresh event is the named constraint. CFO-ready TCO model: CapEx projected in next 24 months, timeline alignment, net avoided cost, TCO comparison over 3 and 5 years. Output the CIO brings to their next board conversation.' },
+          { label: 'Option B — 90-Day Migration Sprint', body: 'One specific, bounded workload tied to an imminent refresh event. Goal: measurable TCO reduction, eliminate at least one refresh event from the planning calendar, establish the architectural foundation for AI phases.' },
+          { label: 'Option C — EBC Working Session', body: 'Two-hour Executive Briefing Center session with AWS and partner SMEs. For CIOs who need to build internal buy-in first. Output: prioritized roadmap, named partner team, executive sponsor map.' },
+          { label: 'The two questions', body: '1. Which next step? — A, B, or C. 2. Who else is in the next room? — the C-suite peer or LoB leader who owns the named blocker from Move 5. If the CIO brings the right peer, the deal expands.' },
+          { label: 'What the customer should feel', body: '\u201cThere is a concrete next step on the calendar within seven days, with the right people in the room.\u201d', italic: true },
+        ],
+      },
+    ],
+
+    beliefs: {
+      label: 'What the CIO should walk away believing',
+      items: [
+        { n: '01', name: 'Capital allocation role', stat: 'AWS understands the CIO seat as a capital allocation role, not a technology management role.' },
+        { n: '02', name: 'Hardware refresh is the constraint', stat: 'The hardware refresh cycle is the strategic constraint. Breaking the cycle is the decisive move.' },
+        { n: '03', name: 'Replacement is cheaper AND better', stat: 'Three forces have converged: hardware cost inflation, licensing ambiguity, agentic workload requirements. Replacement is now cheaper than refresh/renew AND the only path to AI.' },
+        { n: '04', name: 'Five blockers are the diagnostic', stat: 'The five blockers are the right diagnostic to run their own modernization program against.' },
+        { n: '05', name: 'Sequenced answer', stat: 'AWS has a four-phase answer — Migrate & Stabilize, Secure & Govern, Modernize & Enable, Innovate & Lead — and a partner ecosystem that covers every phase.' },
+        { n: '06', name: 'Credible proof point', stat: 'GoDaddy executed Foundation → Scaling → Growth cleanly. The path from Phase 1 to Phase 4 is documented, not theoretical.' },
+        { n: '07', name: 'Ecosystem, not alone', stat: 'AWS shows up with GSI partners, migration specialists, and AWS-native infrastructure. Not a single-vendor pitch.' },
+        { n: '08', name: 'Concrete next step in 7 days', stat: 'There is a concrete next step on the calendar within seven days — starting with a Hardware Refresh Avoidance Analysis or a 90-day sprint.' },
+      ],
+      kicker: 'These are the exit criteria. The test for whether the CIO Elevate first call did its job.',
+    },
+  },
+};
+
 // ── Persona registry ──────────────────────────────────────────────────────
 // Add new CXO personas here. The webapp reads this to auto-show built-in
 // documents for any persona that has content — no code changes needed
 // to add a new persona — just add it to PERSONA_REGISTRY.
 const PERSONA_REGISTRY = {
   CAIO: { narrative: NARRATIVE, storyboard: STORYBOARD },
+  CIO:  { narrative: CIO_NARRATIVE },
   // CMO:  { narrative: CMO_NARRATIVE, storyboard: CMO_STORYBOARD },
   // COO:  { narrative: COO_NARRATIVE, storyboard: COO_STORYBOARD },
-  // CIO:  { narrative: CIO_NARRATIVE, storyboard: CIO_STORYBOARD },
   // CFO:  { narrative: CFO_NARRATIVE, storyboard: CFO_STORYBOARD },
   // CTO:  { narrative: CTO_NARRATIVE, storyboard: CTO_STORYBOARD },
 };
