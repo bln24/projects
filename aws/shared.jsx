@@ -346,7 +346,13 @@ function PagePlaceholder({ title, subtitle, eyebrow }) {
 window.PagePlaceholder = PagePlaceholder;
 
 function StatusPill({ statusKind, label }) {
-  const kindClass = statusKind === "live" ? "pill-success" : statusKind === "review" ? "pill-amber" : statusKind === "idle" ? "pill-muted" : "";
+  const kindClass =
+    statusKind === "live"       ? "pill-success" :
+    statusKind === "review"     ? "pill-amber"   :
+    statusKind === "idle"       ? "pill-muted"   :
+    statusKind === "generating" ? "pill-amber"   :
+    statusKind === "approved"   ? "pill-success" :
+    (statusKind === "stuck" || statusKind === "error") ? "pill-danger" : "";
   return <span className={"pill pill-dot " + kindClass}>{label}</span>;
 }
 window.StatusPill = StatusPill;

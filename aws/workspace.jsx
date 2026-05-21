@@ -989,6 +989,44 @@ function Workspace({ project, onBack, onNav, onRefresh }) {
     return next ? `Approve → ${next.name}` : "Approve";
   })();
 
+  // Stage-to-regen-action map for the "Re-run this stage" button.
+  // Each stage knows which generate-* action populates it.
+  const STAGE_REGEN_ACTION = ["generate-narrative", "generate-arc", "generate-storyboard", "generate-deck"];
+  const regenAction = STAGE_REGEN_ACTION[stageIdx];
+
+  const handleRetry = async () => {
+    if (advancing) return;
+    if (!regenAction) return;
+    setAdvancing(true);
+    try {
+      await writePipelineRequest(regenAction);
+      if (window.spAdvanceStage) {
+        await spAdvanceStage(project.spItemId, stageIdx, {
+          status: `Re-running ${stage.name} draft · pipeline queued`,
+          statusKind: "generating",
+          lastActivity: `Manual retry · ${regenAction}`,
+        });
+      }
+      appendRevision({
+        id: `rev-${Date.now()}`,
+        at: new Date().toISOString(),
+        action: "retry",
+        fromStageIndex: stageIdx,
+        toStageIndex: stageIdx,
+        stageName: stage.name,
+        status: "Re-triggered",
+        notes: `Pipeline retry queued: ${regenAction}. Next cron tick will dispatch (within 15 min).`,
+      });
+      if (onRefresh) onRefresh({ ...project, statusKind: "generating", status: `Re-running ${stage.name} draft · pipeline queued` });
+      setToast(`Re-running ${stage.name} draft… next cron poll picks it up within ~15 min.`);
+    } catch (e) {
+      console.error("Retry failed:", e);
+      setToast("Retry failed: " + (e.message || "Unknown error"));
+    } finally {
+      setAdvancing(false);
+    }
+  };
+
   const sendBackLabel = (() => {
     const prev = STAGE_DEFS[stageIdx - 1];
     return prev ? `Send back to ${prev.name}` : "Send back";
@@ -1010,6 +1048,18 @@ function Workspace({ project, onBack, onNav, onRefresh }) {
         </div>
         <div className="ws-head-meta">
           <StatusPill statusKind={project.statusKind} label={project.status} />
+          {regenAction && (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={handleRetry}
+              disabled={advancing}
+              title={`Re-run the ${stage.name} pipeline draft for this play. Marker is dropped to SharePoint; next cron poll picks it up within ~15 min.`}
+              style={{ fontSize: 12 }}
+            >
+              <Icon name="play" size={12} />
+              Re-run {stage.name}
+            </button>
+          )}
           <TeamStrip team={project.team} />
           <button
             className={"btn btn-ghost btn-sm ws-rail-toggle" + (rightRailOpen ? " active" : "")}
