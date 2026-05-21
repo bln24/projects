@@ -1048,18 +1048,28 @@ function Workspace({ project, onBack, onNav, onRefresh }) {
         </div>
         <div className="ws-head-meta">
           <StatusPill statusKind={project.statusKind} label={project.status} />
-          {regenAction && (
-            <button
-              className={"btn btn-sm " + (project.statusKind === "stuck" || project.statusKind === "error" ? "btn-accent" : "btn-ghost")}
-              onClick={handleRetry}
-              disabled={advancing}
-              title={`Re-run the ${stage.name} pipeline draft. A fresh marker drops to SharePoint; next cron poll picks it up within ~15 min. Use this if the play is stuck or you want a v2 draft.`}
-              style={{ fontSize: 12, fontWeight: (project.statusKind === "stuck" || project.statusKind === "error") ? 600 : 500 }}
-            >
-              <Icon name="play" size={12} />
-              {(project.statusKind === "stuck" || project.statusKind === "error") ? `Recover · Re-run ${stage.name}` : `Re-run ${stage.name}`}
-            </button>
-          )}
+          {regenAction && (() => {
+            const isStuck      = project.statusKind === "stuck" || project.statusKind === "error";
+            const isGenerating = project.statusKind === "generating";
+            const label = isGenerating ? `Drafting ${stage.name}…`
+                        : isStuck      ? `Recover · Re-run ${stage.name}`
+                        :                `Re-run ${stage.name}`;
+            const tooltip = isGenerating
+              ? `A pipeline run for ${stage.name} is already in flight. Wait for it to finish (you'll see the status pill flip to 'Awaiting review' on the next poll) before re-queuing.`
+              : `Re-run the ${stage.name} pipeline draft. A fresh marker drops to SharePoint; next cron poll picks it up within ~15 min.`;
+            return (
+              <button
+                className={"btn btn-sm " + (isStuck ? "btn-accent" : "btn-ghost")}
+                onClick={handleRetry}
+                disabled={advancing || isGenerating}
+                title={tooltip}
+                style={{ fontSize: 12, fontWeight: isStuck ? 600 : 500 }}
+              >
+                <Icon name={isGenerating ? "dot" : "play"} size={12} />
+                {label}
+              </button>
+            );
+          })()}
           <TeamStrip team={project.team} />
           <button
             className={"btn btn-ghost btn-sm ws-rail-toggle" + (rightRailOpen ? " active" : "")}
